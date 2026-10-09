@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - My Profile</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
+
+    <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-user-tie text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">Staff Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="emp_index.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Dashboard</span>
+                </a>
+                <a href="emp_attendance.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Attendance</span>
+                </a>
+                <a href="emp_leaves.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Apply for Leave</span>
+                </a>
+                <a href="emp_payroll.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Payslips</span>
+                </a>
+                <a href="/employee/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/employee/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Account Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs ring-4 ring-blue-500/5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">ESS Portal Active</p>
+                        <p class="text-[10px] text-gray-500">Department: Software Engineering</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-[#222222]">Employee Profile Details <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg ml-2"><i class="fa-solid fa-laptop-code mr-1"></i> Software Engineering</span></h3>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown(event)" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-blue-100 hover:text-blue-700 transition-all relative cursor-pointer" title="Notifications">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-4 z-50 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                            <h4 class="font-bold text-[#222222] text-sm">Notifications</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">1 New</span>
+                        </div>
+                        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                            <div class="p-3 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-blue-900"><i class="fa-solid fa-user-gear mr-1.5"></i> Profile Verified</span>
+                                    <span class="text-[10px] text-gray-400">Verified</span>
+                                </div>
+                                <p class="text-gray-600 font-medium">Your employee records are synchronized with HR databases.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Employee User</h4>
+                            <p class="text-xs text-blue-600 font-medium">Software Engineering</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                    </div>
+
+                    <!-- Profile Dropdown Panel -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
+                        <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <div>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Employee User</p>
+                                <p class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
+                            </div>
+                        </div>
+                        <a href="emp-index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
+                            <span>My Dashboard</span>
+                        </a>
+                        <a href="emp-profile.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-50 text-blue-700 font-semibold transition-colors">
+                            <i class="fa-solid fa-user-gear w-4 text-center"></i>
+                            <span>My Profile Details</span>
+                        </a>
+                        <a href="emp-settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-gear w-4 text-center text-gray-400"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <div class="border-t border-gray-100 pt-1.5 mt-1.5">
+                            <button onclick="logoutUser()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- PROFILE HERO BANNER -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-3xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl">
+                    <i class="fa-solid fa-id-badge"></i>
+                </div>
+                <div class="flex items-center gap-5 z-10">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces" class="w-20 h-20 rounded-full object-cover ring-4 ring-white/30 shadow-xl">
+                    <div class="space-y-1">
+                        <h2 id="heroName" class="text-2xl font-black">Employee User</h2>
+                        <p class="text-xs text-blue-100 flex items-center gap-2">
+                            <span><i class="fa-solid fa-code mr-1"></i> Software Engineer</span>
+                            <span>•</span>
+                            <span><i class="fa-solid fa-building mr-1"></i> Click Or Media</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="z-10">
+                    <span class="px-4 py-2 bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md inline-flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-[10px]"></i> Verified Employee ID: #COM-2026-042
+                    </span>
+                </div>
+            </div>
+
+            <!-- PROFILE DETAILS GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Personal & Contact Info -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-5 lg:col-span-2">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <h3 class="text-base font-bold text-[#222222]"><i class="fa-solid fa-address-card text-blue-600 mr-2"></i> Personal & Contact Information</h3>
+                        <button onclick="openEditModal()" class="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl text-xs transition-all cursor-pointer">
+                            <i class="fa-solid fa-pen mr-1"></i> Edit Info
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Full Name</span>
+                            <span id="detailName" class="font-bold text-gray-800 text-sm">Employee User</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Work Email Address</span>
+                            <span id="detailEmail" class="font-bold text-gray-800 text-sm">tanya@clickormedia.co.in</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Phone Number</span>
+                            <span id="detailPhone" class="font-bold text-gray-800 text-sm">+91 98765 43210</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Date of Birth</span>
+                            <span class="font-bold text-gray-800 text-sm">September 8, 2003</span>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <span class="text-gray-400 block font-semibold">Residential Address</span>
+                            <span id="detailAddress" class="font-bold text-gray-800 text-sm">Main Office Campus Quarters, Sector 4, Jammu & Kashmir</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employment & Bank Info -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-5 lg:col-span-1">
+                    <h3 class="text-base font-bold text-[#222222] border-b border-gray-100 pb-4"><i class="fa-solid fa-briefcase text-blue-600 mr-2"></i> Employment Details</h3>
+
+                    <div class="space-y-4 text-xs">
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Department</span>
+                            <span class="font-bold text-gray-800">Software Engineering</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Employment Type</span>
+                            <span class="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg inline-block mt-0.5">Full-Time Permanent</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Date of Joining</span>
+                            <span class="font-bold text-gray-800">January 15, 2025</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Direct Deposit Account</span>
+                            <span class="font-bold text-gray-800">HDFC Bank (A/C ending in 4892)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] w-full max-w-lg p-6 space-y-4 text-xs">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 class="text-sm font-bold text-[#222222]">Edit Profile Information</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveProfileDetails(event)" class="space-y-4">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" id="editPhone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Residential Address</label>
+                    <textarea id="editAddress" rows="3" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none resize-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl shadow-md transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script for Profile Management & Dropdowns -->
+    <script>
+        window.onload = function() {
+            if (localStorage.getItem('hr_logged_in') !== 'true') {
+                window.location.href = "login.html";
+                return;
+            }
+
+            let user = localStorage.getItem('hr_user') || 'Employee User';
+            document.getElementById('empProfileName').innerText = user;
+            document.getElementById('empDropdownName').innerText = user;
+            document.getElementById('heroName').innerText = user;
+            document.getElementById('detailName').innerText = user;
+
+            let savedPhone = localStorage.getItem('emp_phone');
+            let savedAddress = localStorage.getItem('emp_address');
+
+            if (savedPhone) document.getElementById('detailPhone').innerText = savedPhone;
+            if (savedAddress) document.getElementById('detailAddress').innerText = savedAddress;
+        };
+
+        function openEditModal() {
+            document.getElementById('editPhone').value = document.getElementById('detailPhone').innerText;
+            document.getElementById('editAddress').value = document.getElementById('detailAddress').innerText;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function saveProfileDetails(event) {
+            event.preventDefault();
+            let newPhone = document.getElementById('editPhone').value;
+            let newAddress = document.getElementById('editAddress').value;
+
+            localStorage.setItem('emp_phone', newPhone);
+            localStorage.setItem('emp_address', newAddress);
+
+            document.getElementById('detailPhone').innerText = newPhone;
+            document.getElementById('detailAddress').innerText = newAddress;
+
+            alert("Profile information updated successfully!");
+            closeEditModal();
+        }
+
+        function toggleNotificationDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            profileDropdown.classList.add('hidden');
+            notifDropdown.classList.toggle('hidden');
+        }
+
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            notifDropdown.classList.add('hidden');
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns(event) {
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
+        }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+                localStorage.removeItem('hr_logged_in');
+                localStorage.removeItem('hr_user');
+                window.location.href = "login.html";
+            }
+        }
+    </script>
+</body>
+</html>

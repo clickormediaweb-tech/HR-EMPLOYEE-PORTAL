@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - Account Settings</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
+
+    <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-user-tie text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">Staff Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/employee/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Dashboard</span>
+                </a>
+                <a href="/employee/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Attendance</span>
+                </a>
+                <a href="/employee/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Apply for Leave</span>
+                </a>
+                <a href="/employee/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Payslips</span>
+                </a>
+                <a href="/employee/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/employee/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/25 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-gear w-5 text-center"></i>
+                    <span>Account Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs ring-4 ring-blue-500/5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">ESS Portal Active</p>
+                        <p class="text-[10px] text-gray-500">Department: Software Engineering</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- FLOATING TOAST NOTIFICATION FOR AUTO-SAVE -->
+        <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+            <span id="toastMessage">Preference updated successfully</span>
+        </div>
+
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-[#222222]">Account Settings <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg ml-2"><i class="fa-solid fa-laptop-code mr-1"></i> Software Engineering</span></h3>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown(event)" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-blue-100 hover:text-blue-700 transition-all relative cursor-pointer" title="Notifications">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-4 z-50 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                            <h4 class="font-bold text-[#222222] text-sm">Notifications</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">1 New</span>
+                        </div>
+                        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                            <div class="p-3 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-blue-900"><i class="fa-solid fa-shield-halved mr-1.5"></i> Security Log</span>
+                                    <span class="text-[10px] text-gray-400">Today</span>
+                                </div>
+                                <p class="text-gray-600 font-medium">Password encryption policy is fully active on your account.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
+                            <p class="text-xs text-blue-600 font-medium">Software Engineering</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                    </div>
+
+                    <!-- Profile Dropdown Panel -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
+                        <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <div>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
+                                <p class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
+                            </div>
+                        </div>
+                        <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
+                            <span>My Dashboard</span>
+                        </a>
+                        <a href="/employee/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-50 text-blue-700 font-semibold transition-colors">
+                            <i class="fa-solid fa-gear w-4 text-center"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <div class="border-t border-gray-100 pt-1.5 mt-1.5">
+                            <button onclick="logoutUser()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Profile Information Card -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-5 lg:col-span-1">
+                    <div class="flex items-center gap-4 border-b border-gray-100 pb-5">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-16 h-16 rounded-full object-cover ring-4 ring-blue-100 shadow-md">
+                        <div>
+                            <h4 id="profileCardName" class="font-black text-[#222222] text-base">Pranchal Rajpal</h4>
+                            <p class="text-xs text-blue-600 font-bold">Software Engineer</p>
+                            <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active Session</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Registered Email</span>
+                            <span id="profileCardEmail" class="font-bold text-gray-800">pranchal@clickormedia.co.in</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Department</span>
+                            <span class="font-bold text-gray-800">Software Engineering</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block font-semibold">Office Location</span>
+                            <span class="font-bold text-gray-800">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Forms Grid -->
+                <div class="space-y-6 lg:col-span-2">
+                    
+                    <!-- Secure Password Change Section -->
+                    <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-base font-bold text-[#222222]"><i class="fa-solid fa-lock text-blue-600 mr-2"></i> Security & Password Management</h3>
+                            <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-xl">Encrypted</span>
+                        </div>
+
+                        <!-- Status Alert Banner -->
+                        <div id="passwordAlert" class="hidden p-3.5 rounded-2xl text-xs font-semibold"></div>
+
+                        <form onsubmit="updatePassword(event)" class="space-y-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">Current Password (Registered)</label>
+                                <div class="relative">
+                                    <input type="password" id="currentPass" readonly class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl font-medium text-gray-500 cursor-not-allowed pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility('currentPass', this)" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span class="text-[10px] text-gray-400 mt-1 block">Your current active session password.</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-gray-700 mb-1">New Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="newPass" placeholder="At least 6 characters" required oninput="checkPasswordStrength(this.value)" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none focus:border-blue-500 pr-10">
+                                        <button type="button" onclick="togglePasswordVisibility('newPass', this)" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-1.5 flex items-center gap-2">
+                                        <div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                            <div id="strengthBar" class="w-0 h-full bg-rose-500 transition-all duration-300"></div>
+                                        </div>
+                                        <span id="strengthText" class="text-[10px] text-gray-400 font-bold">Too Weak</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block font-bold text-gray-700 mb-1">Confirm New Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="confirmPass" placeholder="Re-enter new password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none focus:border-blue-500 pr-10">
+                                        <button type="button" onclick="togglePasswordVisibility('confirmPass', this)" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl shadow-md transition-all cursor-pointer inline-flex items-center gap-2">
+                                    <i class="fa-solid fa-shield-check"></i> Update Security Credentials
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Notification Preferences with Auto-Save Toggles -->
+                    <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-base font-bold text-[#222222]"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> Notification Preferences</h3>
+                            <span class="text-[10px] font-bold text-gray-400 italic">Changes save automatically</span>
+                        </div>
+
+                        <div class="space-y-3 text-xs">
+                            <label class="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-blue-50/50 transition-colors">
+                                <span class="font-bold text-gray-700">Email Alerts for Attendance & Punch-ins</span>
+                                <input type="checkbox" id="prefEmail" onchange="autoSavePreference('Email alerts updated')" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+                            </label>
+                            <label class="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-blue-50/50 transition-colors">
+                                <span class="font-bold text-gray-700">Push Notifications for Leave Approvals</span>
+                                <input type="checkbox" id="prefPush" onchange="autoSavePreference('Push notifications updated')" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+                            </label>
+                            <label class="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-blue-50/50 transition-colors">
+                                <span class="font-bold text-gray-700">Monthly Payslip Ready Reminders</span>
+                                <input type="checkbox" id="prefPayslip" onchange="autoSavePreference('Payslip reminders updated')" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script for Data Isolation & Password Management -->
+    <script>
+        window.onload = function() {
+            // Agar user logged in nahi hai, tabhi login par bhejo (development ya test ke liye aap login status set rakhein)
+            if (localStorage.getItem('hr_logged_in') !== 'true') {
+                localStorage.setItem('hr_logged_in', 'true'); // Auto session bypass for seamless testing
+            }
+
+            let user = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
+            document.getElementById('empProfileName').innerText = user;
+            document.getElementById('empDropdownName').innerText = user;
+            document.getElementById('profileCardName').innerText = user;
+            document.getElementById('profileCardEmail').innerText = `${user.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`;
+
+            // Load saved password dynamically into current password field
+            let savedPass = localStorage.getItem('emp_active_password') || 'admin123';
+            document.getElementById('currentPass').value = savedPass;
+
+            // Load saved preferences if any
+            if (localStorage.getItem('notif_email') !== null) {
+                document.getElementById('prefEmail').checked = localStorage.getItem('notif_email') === 'true';
+            }
+            if (localStorage.getItem('notif_push') !== null) {
+                document.getElementById('prefPush').checked = localStorage.getItem('notif_push') === 'true';
+            }
+            if (localStorage.getItem('notif_payslip') !== null) {
+                document.getElementById('prefPayslip').checked = localStorage.getItem('notif_payslip') === 'true';
+            }
+        };
+
+        // Toggle Password Visibility
+        function togglePasswordVisibility(fieldId, btn) {
+            let inputField = document.getElementById(fieldId);
+            let icon = btn.querySelector('i');
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                icon.className = "fa-solid fa-eye-slash";
+            } else {
+                inputField.type = "password";
+                icon.className = "fa-solid fa-eye";
+            }
+        }
+
+        // Check Password Strength Bar
+        function checkPasswordStrength(val) {
+            let bar = document.getElementById('strengthBar');
+            let text = document.getElementById('strengthText');
+            if (val.length === 0) {
+                bar.style.width = '0%';
+                bar.className = 'w-0 h-full bg-rose-500 transition-all duration-300';
+                text.innerText = 'Too Weak';
+            } else if (val.length < 6) {
+                bar.style.width = '33%';
+                bar.className = 'w-1/3 h-full bg-rose-500 transition-all duration-300';
+                text.innerText = 'Weak';
+            } else if (val.length < 10) {
+                bar.style.width = '66%';
+                bar.className = 'w-2/3 h-full bg-amber-500 transition-all duration-300';
+                text.innerText = 'Good';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'w-full h-full bg-emerald-500 transition-all duration-300';
+                text.innerText = 'Strong';
+            }
+        }
+
+        // Handle Password Update Submission
+        async function updatePassword(event) {
+            event.preventDefault();
+            let newVal = document.getElementById('newPass').value;
+            let confirmVal = document.getElementById('confirmPass').value;
+
+            console.log("Update password button clicked!"); // Check karne ke liye ki function chal raha hai
+
+            if (newVal.length < 6) {
+                alert("New password must be at least 6 characters long.");
+                return;
+            }
+
+            if (newVal !== confirmVal) {
+                alert("New passwords do not match.");
+                return;
+            }
+
+            try {
+                let response = await fetch('/api/employee/update-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newPassword: newVal })
+                });
+                let result = await response.json();
+
+                if (result.success) {
+                    alert("Password successfully updated in database!");
+                    window.location.reload();
+                } else {
+                    alert(result.message || "Error updating password.");
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                alert("Server connection error.");
+            }
+        }
+
+        function showAlert(message, type) {
+            let alertBox = document.getElementById('passwordAlert');
+            alertBox.classList.remove('hidden');
+            if (type === "success") {
+                alertBox.className = "p-3.5 rounded-2xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-2";
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> ${message}`;
+            } else {
+                alertBox.className = "p-3.5 rounded-2xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-2";
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-600"></i> ${message}`;
+            }
+
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Auto-Save Notification Preferences with Floating Toast Notification
+        function autoSavePreference(msg) {
+            let emailPref = document.getElementById('prefEmail').checked;
+            let pushPref = document.getElementById('prefPush').checked;
+            let payslipPref = document.getElementById('prefPayslip').checked;
+
+            localStorage.setItem('notif_email', emailPref);
+            localStorage.setItem('notif_push', pushPref);
+            localStorage.setItem('notif_payslip', payslipPref);
+
+            // Show Toast
+            let toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function toggleNotificationDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            profileDropdown.classList.add('hidden');
+            notifDropdown.classList.toggle('hidden');
+        }
+
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            notifDropdown.classList.add('hidden');
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns(event) {
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
+        }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+                localStorage.removeItem('hr_logged_in');
+                localStorage.removeItem('hr_user');
+                window.location.href = "/";
+            }
+        }
+       // Toggle Password Visibility (Fixed & Bulletproof)
+        function togglePasswordVisibility(fieldId, btn) {
+            let inputField = document.getElementById(fieldId);
+            // Button ke andar ka icon dhoondne ke liye safe selector
+            let icon = btn.querySelector('i') || btn.children[0];
+
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                if (icon) icon.className = "fa-solid fa-eye-slash";
+            } else {
+                inputField.type = "password";
+                if (icon) icon.className = "fa-solid fa-eye";
+            }
+        }
+    </script>
+</body>
+</html>

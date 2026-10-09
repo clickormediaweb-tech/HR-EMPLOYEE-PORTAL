@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Login</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl border border-[#EAEAEA] space-y-6">
+        <!-- Logo Header -->
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 mx-auto text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h1 class="text-2xl font-black text-[#222222]">HR Portal Login</h1>
+            <p class="text-xs text-gray-500 font-medium">CLICKORMEDIA PRIVATE LIMITED</p>
+        </div>
+
+        <!-- Login Form -->
+        <form onsubmit="handleLogin(event)" class="space-y-4 text-xs">
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">Work Email</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                        <i class="fa-regular fa-envelope"></i>
+                    </span>
+                    <input type="email" id="loginEmail" required placeholder="tanya@clickormedia.co.in" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl pl-10 pr-4 py-3 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/20 transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl pl-10 pr-4 py-3 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/20 transition-all">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-500">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="rounded border-gray-300 text-amber-500 focus:ring-amber-400">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" onclick="alert('Please contact System Admin to reset password.'); return false;" class="font-bold text-amber-600 hover:underline">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-[#FFD134] text-[#222222] font-extrabold text-sm shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transition-all cursor-pointer">
+                Sign In to Dashboard
+            </button>
+        </form>
+
+        <div class="bg-amber-50 border border-amber-200/60 p-3.5 rounded-2xl text-[11px] text-amber-900 space-y-1">
+            <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Quick Test Credentials:</p>
+            <p>Email: <span class="font-semibold select-all">tanya@clickormedia.co.in</span></p>
+            <p>Password: <span class="font-semibold select-all">Naya Active Password</span></p>
+        </div>
+    </div>
+
+    <script>
+        async function handleLogin(e) {
+            e.preventDefault();
+            let email = document.getElementById('loginEmail').value.trim();
+            let password = document.getElementById('loginPassword').value.trim();
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+               if (response.ok && data.success) {
+                    localStorage.setItem('hr_logged_in', 'true');
+                    localStorage.setItem('hr_user', email.split('@')[0]);
+                    window.location.href = data.redirectUrl;
+                } else {
+                    alert(data.message || "Invalid credentials! Purana password ab kaam nahi karega.");
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                alert("Something went wrong. Please check your server connection.");
+            }
+        }
+    </script>
+</body>
+</html>

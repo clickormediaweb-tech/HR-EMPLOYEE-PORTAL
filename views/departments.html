@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Departments</title>
+    <!-- Tailwind CSS CDN for rapid styling consistency -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/hr/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-users w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Employee</span>
+                </a>
+                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-bar w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="/hr/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Leaves</span>
+                </a>
+                <a href="/hr/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/hr/analytics" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="/hr/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Payroll</span>
+                </a>
+                <a href="/hr/departments" class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-building w-5 text-center"></i>
+                        <span>Departments</span>
+                    </div>
+                    <span id="sidebarDeptCount" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 animate-pulse">2 Active</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm cursor-pointer hover:border-amber-300 transition-all" onclick="alert('System Status: All nodes operational.')">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
+                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="relative w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="deptSearch" placeholder="Search departments or leads..." onkeyup="filterDepartments()" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                <button onclick="alert('You have 3 unread messages.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <i class="fa-regular fa-envelope text-sm"></i>
+                </button>
+                <button onclick="alert('No new notifications.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative cursor-pointer">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                </button>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown Simulator -->
+                <div class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                    <div class="text-right">
+                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                        <p class="text-xs text-gray-500">HR Manager</p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- PAGE TITLE & ADD DEPARTMENT ACTION -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
+                <div>
+                    <h2 class="text-2xl font-black text-[#222222]">Departments & Units</h2>
+                    <p class="text-xs text-gray-500 mt-1">Manage organizational structure, department leads, headcounts, and operational budgets.</p>
+                </div>
+                <button onclick="openAddDeptModal()" class="px-5 py-2.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transform hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer w-fit">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Add New Department</span>
+                </button>
+            </div>
+
+            <!-- DEPARTMENTS GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="deptGrid">
+                <!-- Populated via JS -->
+            </div>
+
+        </main>
+    </div>
+
+    <!-- VIEW DEPARTMENT DETAILS MODAL -->
+    <div id="deptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modalDeptName" class="text-xl font-black text-[#222222]">Department Name</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div class="bg-gray-50 p-4 rounded-2xl border border-[#EAEAEA] space-y-2">
+                    <div class="flex justify-between"><span class="text-gray-500">Department Lead:</span> <span id="modalDeptLead" class="font-bold text-[#222222]"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Active Staff Headcount:</span> <span id="modalDeptStaff" class="font-bold text-[#222222]"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Monthly Payroll Allocation:</span> <span id="modalDeptBudget" class="font-bold text-emerald-700"></span></div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-700 uppercase tracking-wider mb-2">Assigned Team Members</h4>
+                    <div class="border border-[#EAEAEA] rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase">
+                                <tr>
+                                    <th class="p-2.5">Staff Name</th>
+                                    <th class="p-2.5">Email</th>
+                                    <th class="p-2.5">Role</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-xs" id="modalMemberList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-[#EAEAEA] flex items-center justify-between">
+                <button onclick="deleteActiveDepartment()" class="px-4 py-2 font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all cursor-pointer text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                    <span>Remove Department</span>
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeModals()" class="px-4 py-2 font-bold text-gray-600 bg-gray-100 rounded-xl cursor-pointer text-xs">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD DEPARTMENT MODAL -->
+    <div id="addDeptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-[#222222]">Create New Department</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleDeptSubmit(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Department Name</label>
+                    <input type="text" id="newDeptName" required placeholder="e.g. Quality Assurance" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Department Lead</label>
+                    <input type="text" id="newDeptLead" required placeholder="e.g. Rahul Sharma" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Initial Staff Count</label>
+                    <input type="number" id="newDeptStaff" required placeholder="e.g. 5" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Monthly Budget (₹)</label>
+                    <input type="text" id="newDeptBudget" required placeholder="e.g. ₹1,50,000" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="mt-6 pt-4 border-t border-[#EAEAEA] flex justify-end gap-2">
+                    <button type="button" onclick="closeModals()" class="px-4 py-2 font-bold text-gray-600 bg-gray-100 rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2 font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] cursor-pointer">Save Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script for interactive departments & persistence -->
+    <script>
+        let departments = [];
+        let activeDeptId = null;
+
+        window.onload = function() {
+            fetchDepartments();
+        };
+
+        async function fetchDepartments() {
+            try {
+                const response = await fetch('/api/departments');
+                const data = await response.json();
+                if (data.success) {
+                    departments = data.departments;
+                    renderDepartments();
+                }
+            } catch (err) {
+                console.error('Error fetching departments:', err);
+            }
+        }
+
+        function renderDepartments() {
+            let grid = document.getElementById('deptGrid');
+            grid.innerHTML = "";
+
+            let searchInput = document.getElementById('deptSearch').value.toLowerCase();
+
+            let filtered = departments.filter(dept => 
+                dept.name.toLowerCase().includes(searchInput) || dept.lead.toLowerCase().includes(searchInput)
+            );
+
+            document.getElementById('sidebarDeptCount').innerText = `${departments.length} Active`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 text-xs">No departments found.</div>`;
+                return;
+            }
+
+            filtered.forEach(dept => {
+                grid.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl ${dept.color} flex items-center justify-center font-bold text-xl">
+                                    <i class="fa-solid ${dept.icon}"></i>
+                                </div>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">${dept.staff} Members</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-[#222222]">${dept.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1">Lead: <span class="font-bold text-gray-700">${dept.lead}</span></p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-[#EAEAEA] flex items-center justify-between">
+                            <span class="text-xs font-black text-emerald-700">${dept.budget} <span class="text-[10px] text-gray-400 font-normal">/mo</span></span>
+                            <button onclick="openDeptModal(${dept.id})" class="px-3 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer">View Team</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterDepartments() {
+            renderDepartments();
+        }
+
+        function openDeptModal(id) {
+            activeDeptId = id;
+            let dept = departments.find(d => d.id === id);
+            document.getElementById('modalDeptName').innerText = dept.name;
+            document.getElementById('modalDeptLead').innerText = dept.lead;
+            document.getElementById('modalDeptStaff').innerText = `${dept.staff} Active Staff`;
+            document.getElementById('modalDeptBudget').innerText = dept.budget;
+
+            let memberList = document.getElementById('modalMemberList');
+            memberList.innerHTML = "";
+
+            if (!dept.members || dept.members.length === 0) {
+                memberList.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">No staff members assigned.</td></tr>`;
+            } else {
+                dept.members.forEach(m => {
+                    memberList.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-2.5 font-bold text-gray-800">${m.name}</td>
+                            <td class="p-2.5 text-gray-500">${m.email}</td>
+                            <td class="p-2.5 text-gray-600 font-medium">${m.role}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('deptModal').classList.remove('hidden');
+        }
+
+        function openAddDeptModal() {
+            document.getElementById('addDeptModal').classList.remove('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('deptModal').classList.add('hidden');
+            document.getElementById('addDeptModal').classList.add('hidden');
+            activeDeptId = null;
+        }
+
+        async function deleteActiveDepartment() {
+            let dept = departments.find(d => d.id === activeDeptId);
+            if(confirm(`Are you sure you want to remove the "${dept.name}" department?`)) {
+                try {
+                    const response = await fetch('/api/departments/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: activeDeptId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        closeModals();
+                        fetchDepartments();
+                        alert("Department successfully removed from organization structure.");
+                    }
+                } catch (err) {
+                    console.error('Error deleting department:', err);
+                }
+            }
+        }
+
+        async function handleDeptSubmit(event) {
+            event.preventDefault();
+            let name = document.getElementById('newDeptName').value;
+            let lead = document.getElementById('newDeptLead').value;
+            let staff = document.getElementById('newDeptStaff').value;
+            let budget = document.getElementById('newDeptBudget').value;
+
+            try {
+                const response = await fetch('/api/departments/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, lead, staff, budget })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    closeModals();
+                    fetchDepartments();
+                    alert("New department successfully created and added!");
+                }
+            } catch (err) {
+                console.error('Error creating department:', err);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,775 @@
+{
+  "users": [
+    {
+      "_id": "1",
+      "name": "Admin",
+      "email": "admin@clickormedia.co.in",
+      "password": "admin123",
+      "role": "admin",
+      "department": "HR & Finance",
+      "designation": "HR Manager",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "_id": "2",
+      "name": "Pranchal Rajpal",
+      "email": "pranchal@clickormedia.co.in",
+      "password": "123456",
+      "role": "employee",
+      "department": "Engineering",
+      "designation": "Frontend Developer",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "_id": "3",
+      "name": "Anshdeep",
+      "email": "anshdeep@clickormedia.co.in",
+      "password": "123456",
+      "role": "employee",
+      "department": "Engineering",
+      "designation": "Software Engineer",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "_id": "4",
+      "name": "Sukhi",
+      "email": "sukhi@clickormedia.co.in",
+      "password": "123456",
+      "role": "employee",
+      "department": "Design",
+      "designation": "UI/UX Designer",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "_id": "5",
+      "name": "Robin",
+      "email": "robin@clickormedia.co.in",
+      "password": "123456",
+      "role": "former",
+      "department": "Marketing",
+      "designation": "Marketing Specialist",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "_id": "1791447128062",
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "password": "Tanya1211",
+      "role": "employee",
+      "department": "Design",
+      "designation": "UI/UX Designer",
+      "phone": "9729548337",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    }
+  ],
+  "attendance": [
+    {
+      "name": "Pranchal Rajpal",
+      "email": "pranchal@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-09",
+      "checkInTime": "04:46 PM",
+      "checkInLoc": "National Colony, Bathinda",
+      "checkOutTime": "04:46 PM",
+      "checkOutLoc": "National Colony, Bathinda",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Sukhi",
+      "email": "sukhi@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-09",
+      "checkInTime": "04:24 PM",
+      "checkInLoc": "National Colony, Bathinda",
+      "checkOutTime": "04:27 PM",
+      "checkOutLoc": "National Colony, Bathinda",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Anshdeep",
+      "email": "anshdeep@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-09",
+      "checkInTime": "04:17 PM",
+      "checkInLoc": "",
+      "checkOutTime": "04:23 PM",
+      "checkOutLoc": "Office Headquarters",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-09",
+      "checkInTime": "04:13 PM",
+      "checkInLoc": "National Colony, Bathinda",
+      "checkOutTime": "04:16 PM",
+      "checkOutLoc": "National Colony, Bathinda",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-06",
+      "checkInTime": "10:38 AM",
+      "checkInLoc": "National Colony, Bathinda",
+      "checkOutTime": "10:38 AM",
+      "checkOutLoc": "National Colony, Bathinda",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "dept": "Software Engineering",
+      "role": "Software Engineer",
+      "date": "2026-10-05",
+      "checkInTime": "05:57 PM",
+      "checkInLoc": "National Colony, Bathinda",
+      "checkOutTime": "05:57 PM",
+      "checkOutLoc": "National Colony, Bathinda",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "dept": "HR & Finance",
+      "role": "HR Manager",
+      "checkInTime": "08:55 AM",
+      "checkInLoc": "Head Office (Terminal A)",
+      "checkOutTime": "06:00 PM",
+      "checkOutLoc": "Head Office (Terminal A)",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Pranchal Rajpal",
+      "email": "pranchal@clickormedia.co.in",
+      "dept": "Engineering",
+      "role": "Frontend Developer",
+      "checkInTime": "09:00 AM",
+      "checkInLoc": "Remote / WFH (GPS Verified)",
+      "checkOutTime": "06:30 PM",
+      "checkOutLoc": "Remote / WFH (GPS Verified)",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Anshdeep",
+      "email": "anshdeep@clickormedia.co.in",
+      "dept": "Engineering",
+      "role": "Software Engineer",
+      "checkInTime": "09:10 AM",
+      "checkInLoc": "Head Office (Terminal B)",
+      "checkOutTime": "06:00 PM",
+      "checkOutLoc": "Head Office (Terminal B)",
+      "status": "On Time",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "name": "Sukhi",
+      "email": "sukhi@clickormedia.co.in",
+      "dept": "Design",
+      "role": "UI/UX Designer",
+      "checkInTime": "09:45 AM",
+      "checkInLoc": "Branch Office (Jammu)",
+      "checkOutTime": "06:15 PM",
+      "checkOutLoc": "Branch Office (Jammu)",
+      "status": "Late",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces"
+    }
+  ],
+  "settings": {
+    "companyName": "CLICKORMEDIA",
+    "cin": "",
+    "hrEmail": "hr@clickormedia.com",
+    "location": "1st Floor, opp. Care Hospital, Bhatti Rd, Bathinda, Punjab, 151001",
+    "paidLeaves": 12,
+    "casualLeaves": 12,
+    "sickLeaves": 10,
+    "pfContribution": "",
+    "cutoffDate": "25th of every month"
+  },
+  "leaves": [
+    {
+      "id": 1791545750180,
+      "name": "sukhi",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Half-Day Leave",
+      "duration": "2026-10-09 (Half-Day)",
+      "reason": "work",
+      "status": "REJECTED",
+      "updatedAt": "05:06 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545700452,
+      "name": "anshdeep",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Unpaid Leave",
+      "duration": "2026-10-27 to 2026-10-29",
+      "reason": "sick",
+      "status": "REJECTED",
+      "updatedAt": "05:05 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545643111,
+      "name": "tanya",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-13 to 2026-10-16",
+      "reason": "personal",
+      "status": "REJECTED",
+      "updatedAt": "05:04 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545547914,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-09 to 2026-10-12",
+      "reason": "personal",
+      "status": "APPROVED",
+      "updatedAt": "05:02 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791283892831,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-11 to 2026-10-12",
+      "reason": "---------",
+      "status": "REJECTED",
+      "updatedAt": "04:21 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791283396171,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-20 to 2026-10-26",
+      "reason": "-",
+      "status": "APPROVED",
+      "updatedAt": "04:13 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791282757689,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-29 to 2026-11-01",
+      "reason": "trip",
+      "status": "APPROVED",
+      "updatedAt": "04:02 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791281663455,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-21 to 2026-10-22",
+      "reason": "-",
+      "status": "REJECTED",
+      "updatedAt": "03:44 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791281018796,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-21 to 2026-10-24",
+      "reason": "personal\n",
+      "status": "REJECTED",
+      "updatedAt": "03:34 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791279976454,
+      "name": "pranchal",
+      "email": "tanya@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-25 to 2026-10-31",
+      "reason": "------",
+      "status": "REJECTED",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791279458026,
+      "name": "pranchal",
+      "email": "tanya@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-27 to 2026-10-28",
+      "reason": "-",
+      "status": "APPROVED",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1,
+      "name": "Pranchal Rajpal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Annual Leave",
+      "duration": "Oct 02 - Oct 05 (4 Days)",
+      "reason": "Personal work & family trip",
+      "status": "REJECTED",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 2,
+      "name": "Anshdeep",
+      "email": "anshdeep@clickormedia.co.in",
+      "type": "Sick Leave",
+      "duration": "Sep 28 (1 Day)",
+      "reason": "Viral Fever",
+      "status": "REJECTED",
+      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 3,
+      "name": "Sukhi",
+      "email": "sukhi@clickormedia.co.in",
+      "type": "Casual Leave",
+      "duration": "Oct 10 (1 Day)",
+      "reason": "Personal Errands",
+      "status": "APPROVED",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 4,
+      "name": "Robin",
+      "email": "robin@clickormedia.co.in",
+      "type": "Annual Leave",
+      "duration": "Nov 12 - Nov 15 (4 Days)",
+      "reason": "Out of Station",
+      "status": "APPROVED",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 5,
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "type": "Sick Leave",
+      "duration": "Sep 29 (1 Day)",
+      "reason": "Medical Appointment",
+      "status": "REJECTED",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    }
+  ],
+  "myLeaves": [
+    {
+      "id": 1791545750180,
+      "name": "sukhi",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Half-Day Leave",
+      "duration": "2026-10-09 (Half-Day)",
+      "reason": "work",
+      "status": "REJECTED",
+      "updatedAt": "05:06 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545700452,
+      "name": "anshdeep",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Unpaid Leave",
+      "duration": "2026-10-27 to 2026-10-29",
+      "reason": "sick",
+      "status": "REJECTED",
+      "updatedAt": "05:05 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545643111,
+      "name": "tanya",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-13 to 2026-10-16",
+      "reason": "personal",
+      "status": "REJECTED",
+      "updatedAt": "05:04 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791545547914,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-09 to 2026-10-12",
+      "reason": "personal",
+      "status": "APPROVED",
+      "updatedAt": "05:02 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791283892831,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-11 to 2026-10-12",
+      "reason": "---------",
+      "status": "REJECTED",
+      "updatedAt": "04:21 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791283396171,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-20 to 2026-10-26",
+      "reason": "-",
+      "status": "APPROVED",
+      "updatedAt": "04:13 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791282757689,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-29 to 2026-11-01",
+      "reason": "trip",
+      "status": "APPROVED",
+      "updatedAt": "04:02 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791281663455,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-21 to 2026-10-22",
+      "reason": "-",
+      "status": "REJECTED",
+      "updatedAt": "03:44 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791281018796,
+      "name": "pranchal",
+      "email": "pranchal@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-21 to 2026-10-24",
+      "reason": "personal\n",
+      "status": "REJECTED",
+      "updatedAt": "03:34 PM",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791279976454,
+      "name": "pranchal",
+      "email": "tanya@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-25 to 2026-10-31",
+      "reason": "------",
+      "status": "REJECTED",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791279458026,
+      "name": "pranchal",
+      "email": "tanya@clickormedia.co.in",
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-27 to 2026-10-28",
+      "reason": "-",
+      "status": "APPROVED",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 1791277713897,
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-06 to 2026-10-07",
+      "reason": "sickk",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1791276149277,
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-07 to 2026-10-08",
+      "reason": "sick",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1791273905840,
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-29 to 2026-10-26",
+      "reason": "personal",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1791273899241,
+      "type": "Sick / Medical Leave",
+      "duration": "2026-10-29 to 2026-10-26",
+      "reason": "personal",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1791273007354,
+      "type": "Half-Day Leave",
+      "duration": "2026-10-06 (Half-Day)",
+      "reason": "personal",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1791272681381,
+      "type": "Paid Casual Leave",
+      "duration": "2026-10-22 to 2026-10-27",
+      "reason": "personal",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1790768236541,
+      "type": "Sick Leave",
+      "duration": "2026-10-01 to 2026-10-02",
+      "reason": "i'm sick",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1790767482698,
+      "type": "Sick Leave",
+      "duration": "2026-10-02 to 2026-09-29",
+      "reason": "-",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1790766977097,
+      "type": "Sick Leave",
+      "duration": "2026-09-24 to 2026-09-15",
+      "reason": "-",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 1,
+      "type": "Annual Leave",
+      "duration": "Oct 15 - Oct 18 (4 Days)",
+      "reason": "Personal Vacation",
+      "status": "PENDING DIRECTOR REVIEW"
+    },
+    {
+      "id": 2,
+      "type": "Sick Leave",
+      "duration": "Sep 10 (1 Day)",
+      "reason": "Dental Checkup",
+      "status": "APPROVED"
+    }
+  ],
+  "holidays": [
+    {
+      "date": "2026-03-04",
+      "day": "Wednesday",
+      "name": "Holi",
+      "category": "Festival"
+    },
+    {
+      "date": "2026-03-31",
+      "day": "Tuesday",
+      "name": "Id-ul-Fitr",
+      "category": "Festival"
+    },
+    {
+      "date": "2026-04-14",
+      "day": "Tuesday",
+      "name": "Ambedkar Jayanti",
+      "category": "Optional Leave"
+    },
+    {
+      "date": "2026-05-01",
+      "day": "Friday",
+      "name": "ClickOrMedia Annual Tech Meet",
+      "category": "Company Event"
+    },
+    {
+      "date": "2026-08-15",
+      "day": "Saturday",
+      "name": "Independence Day",
+      "category": "National Holiday"
+    },
+    {
+      "date": "2026-08-28",
+      "day": "Friday",
+      "name": "Raksha Bandhan",
+      "category": "Optional Leave"
+    },
+    {
+      "date": "2026-09-04",
+      "day": "Friday",
+      "name": "Janmashtami",
+      "category": "Festival"
+    },
+    {
+      "date": "2026-10-02",
+      "day": "Friday",
+      "name": "Mahatma Gandhi Jayanti",
+      "category": "National Holiday"
+    },
+    {
+      "date": "2026-10-20",
+      "day": "Tuesday",
+      "name": "Dussehra",
+      "category": "Festival"
+    },
+    {
+      "date": "2026-11-08",
+      "day": "Sunday",
+      "name": "Diwali",
+      "category": "Festival"
+    },
+    {
+      "date": "2026-12-25",
+      "day": "Friday",
+      "name": "Christmas Day",
+      "category": "Festival"
+    }
+  ],
+  "payroll": [
+    {
+      "id": 1,
+      "name": "Tanya Dua",
+      "email": "tanya@clickormedia.co.in",
+      "dept": "HR & Finance",
+      "baseNum": 16000,
+      "leaveBalance": 5,
+      "halfDays": 0,
+      "status": "PAID",
+      "leaveLogs": [
+        {
+          "date": "Sep 29, 2026",
+          "day": "Tuesday",
+          "type": "Paid Leave",
+          "reason": "Medical Appointment"
+        }
+      ],
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 2,
+      "name": "Pranchal Rajpal",
+      "email": "pranchal@clickormedia.co.in",
+      "dept": "Engineering",
+      "baseNum": 23000,
+      "leaveBalance": 12,
+      "halfDays": 0,
+      "status": "PAID",
+      "leaveLogs": [
+        {
+          "date": "2026-10-01",
+          "day": "Thursday",
+          "type": "Half-Day Absence",
+          "reason": "-"
+        }
+      ],
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 3,
+      "name": "Anshdeep",
+      "email": "anshdeep@clickormedia.co.in",
+      "dept": "Engineering",
+      "baseNum": 16000,
+      "leaveBalance": 11,
+      "halfDays": 0,
+      "status": "PAID",
+      "leaveLogs": [
+        {
+          "date": "Sep 28, 2026",
+          "day": "Monday",
+          "type": "Paid Leave",
+          "reason": "Viral Fever"
+        }
+      ],
+      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 4,
+      "name": "Sukhi",
+      "email": "sukhi@clickormedia.co.in",
+      "dept": "Operations",
+      "baseNum": 25000,
+      "leaveBalance": 0,
+      "halfDays": 1,
+      "status": "PENDING",
+      "leaveLogs": [
+        {
+          "date": "Sep 18, 2026",
+          "day": "Friday",
+          "type": "Paid Leave",
+          "reason": "Personal Work"
+        }
+      ],
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+      "id": 5,
+      "name": "Robin",
+      "email": "robin@clickormedia.co.in",
+      "dept": "Marketing",
+      "baseNum": 80000,
+      "leaveBalance": 5,
+      "halfDays": 0,
+      "status": "PAID",
+      "leaveLogs": [],
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces"
+    }
+  ],
+  "departments": [
+    {
+      "id": 1,
+      "name": "Creative Team",
+      "lead": "Tanya Dua",
+      "staff": 3,
+      "budget": "₹57,000",
+      "icon": "fa-pen-nib",
+      "color": "bg-purple-50 text-purple-600",
+      "members": [
+        {
+          "name": "Tanya Dua",
+          "email": "tanya@clickormedia.co.in",
+          "role": "HR Manager"
+        },
+        {
+          "name": "Anshdeep",
+          "email": "anshdeep@clickormedia.co.in",
+          "role": "Frontend Developer"
+        },
+        {
+          "name": "Sukhi",
+          "email": "sukhi@clickormedia.co.in",
+          "role": "Operations Specialist"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "IT Team",
+      "lead": "Pranchal Rajpal",
+      "staff": 1,
+      "budget": "₹23,000",
+      "icon": "fa-code",
+      "color": "bg-blue-50 text-blue-600",
+      "members": [
+        {
+          "name": "Pranchal Rajpal",
+          "email": "pranchal@clickormedia.co.in",
+          "role": "Software Engineer"
+        }
+      ]
+    }
+  ]
+}

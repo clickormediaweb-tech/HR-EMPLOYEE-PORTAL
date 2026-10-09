@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - My Payslips & Expenses</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
+
+    <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-user-tie text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">Staff Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/employee/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Dashboard</span>
+                </a>
+                <a href="/employee/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Attendance</span>
+                </a>
+                <a href="/employee/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Apply for Leave</span>
+                </a>
+                <a href="/employee/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/25 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+                    <span>My Payslips</span>
+                </a>
+                <a href="/employee/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/employee/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Account Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs ring-4 ring-blue-500/5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">ESS Portal Active</p>
+                        <p class="text-[10px] text-gray-500">Department: Software Engineering</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-[#222222]">My Payslips & Expenses <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg ml-2"><i class="fa-solid fa-laptop-code mr-1"></i> Software Engineering</span></h3>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown(event)" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-blue-100 hover:text-blue-700 transition-all relative cursor-pointer" title="Notifications">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-4 z-50 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                            <h4 class="font-bold text-[#222222] text-sm">Notifications</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">1 New</span>
+                        </div>
+                        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                            <div class="p-3 bg-emerald-50/50 border border-emerald-100 rounded-2xl space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-emerald-800"><i class="fa-solid fa-wallet mr-1.5"></i> Salary Credited</span>
+                                    <span class="text-[10px] text-gray-400">Sep 1</span>
+                                </div>
+                                <p class="text-gray-600 font-medium">August salary of ₹90,500 has been credited to your bank account.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
+                            <p class="text-xs text-blue-600 font-medium">Software Engineering</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                    </div>
+
+                    <!-- Profile Dropdown Panel -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
+                        <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <div>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
+                                <p class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
+                            </div>
+                        </div>
+                        <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
+                            <span>My Dashboard</span>
+                        </a>
+                        <a href="/employee/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-gear w-4 text-center text-gray-400"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <div class="border-t border-gray-100 pt-1.5 mt-1.5">
+                            <button onclick="logoutUser()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- SALARY & EXPENSE REIMBURSEMENT OVERVIEW CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Base Monthly CTC</p>
+                        <h3 class="text-3xl font-black text-[#222222] mt-1" id="baseCtcDisplay">₹16,000</h3>
+                        <p class="text-[11px] text-blue-600 mt-1 font-semibold"><i class="fa-solid fa-shield-halved"></i> Fixed Structure</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending Expenses Added</p>
+                        <h3 id="totalExpenseDisplay" class="text-3xl font-black text-amber-600 mt-1">₹0</h3>
+                        <p class="text-[11px] text-gray-400 mt-1">Queued for next salary addition</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Direct Deposit Bank</p>
+                        <h3 class="text-xl font-black text-[#222222] mt-1 truncate max-w-[180px]">HDFC Bank (...4892)</h3>
+                        <p class="text-[11px] text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-lock"></i> Verified Account</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPENSE SUBMISSION & PAYSLIP HISTORY SECTION -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+                
+                <!-- Add Expense Claim Form -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-4 xl:col-span-1">
+                    <h3 class="text-base font-bold text-[#222222]"><i class="fa-solid fa-receipt text-amber-600 mr-2"></i> Add Company Expense</h3>
+                    <p class="text-xs text-gray-400">Spent money for company work? Submit here to add it to your next salary payout.</p>
+                    
+                    <form onsubmit="submitExpenseForm(event)" class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Expense Title / Category</label>
+                            <input type="text" id="expenseTitle" placeholder="e.g., Client Travel, Software API" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Amount Spent (₹)</label>
+                            <input type="number" id="expenseAmount" placeholder="e.g., 2500" min="1" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Description / Notes</label>
+                            <textarea id="expenseNotes" rows="2" placeholder="Brief details..." required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none resize-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-[#FFD134] hover:bg-[#fbc512] text-[#222222] font-black rounded-xl shadow-md transition-all cursor-pointer">
+                            Add & Include in Salary
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Payslip History Section -->
+                <div class="bg-white rounded-3xl border border-[#EAEAEA] shadow-sm xl:col-span-2 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-[#222222]">Monthly Salary Disbursement History</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Download official PDF payslips or view itemized breakdowns.</p>
+                        </div>
+                        <span class="text-[11px] font-bold bg-blue-50 text-blue-600 px-3 py-1 rounded-xl">Live Synced</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50/70 text-gray-400 font-bold uppercase tracking-wider border-b border-gray-100">
+                                    <th class="py-4 px-6 w-1/5">Month / Year</th>
+                                    <th class="py-4 px-6 w-1/6">Gross</th>
+                                    <th class="py-4 px-6 w-1/6">Deductions</th>
+                                    <th class="py-4 px-6 w-1/6">Net Payout</th>
+                                    <th class="py-4 px-6 w-1/6 text-center">Status</th>
+                                    <th class="py-4 px-6 w-1/4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-[#222222] font-medium align-middle" id="payslipTableBody">
+                                <!-- Populated dynamically from backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Dynamic Payslip Modal / Printable View (Scrollable & Correct Address) -->
+<div id="payslipModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[#EAEAEA] transform transition-all">
+        <!-- Modal Header -->
+        <div class="px-8 py-5 bg-gray-50 border-b border-gray-100 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[#222222] text-base">Official Salary Payslip</h3>
+                    <p class="text-xs text-blue-600 font-semibold">CLICKORMEDIA PRIVATE LIMITED</p>
+                </div>
+            </div>
+            <button onclick="closePayslipModal()" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Modal Body -->
+        <div class="p-8 space-y-6 text-xs text-gray-700 bg-white overflow-y-auto flex-1">
+            <div id="printablePayslipArea" class="space-y-6">
+                <div class="flex justify-between border-b border-gray-200 pb-4">
+                    <div>
+                        <p class="font-bold text-sm text-[#222222]">ClickOrMedia Private Limited</p>
+                        <p class="text-gray-500">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-blue-600" id="payslipMonthDisplay">Month: October 2026</p>
+                        <p class="text-gray-400">Generated: Live Portal</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div>
+                        <p class="text-gray-400 font-bold uppercase">Employee Name</p>
+                        <p class="font-bold text-sm text-[#222222]" id="modalEmpName">Pranchal Rajpal</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 font-bold uppercase">Department</p>
+                        <p class="font-bold text-sm text-[#222222]">Software Engineering</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 font-bold uppercase">Bank Account</p>
+                        <p class="font-medium text-gray-800">HDFC Bank (...4892)</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 font-bold uppercase">Payment Status</p>
+                        <p class="font-bold text-emerald-600">PAID</p>
+                    </div>
+                </div>
+
+                <!-- Earnings & Deductions Table -->
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 font-bold uppercase text-[10px]">
+                            <th class="py-2.5 px-4 text-left">Earnings</th>
+                            <th class="py-2.5 px-4 text-right">Amount (₹)</th>
+                            <th class="py-2.5 px-4 text-left">Deductions</th>
+                            <th class="py-2.5 px-4 text-right">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 font-medium">
+                        <tr>
+                            <td class="py-3 px-4">Basic Salary / CTC</td>
+                            <td class="py-3 px-4 text-right font-bold" id="modalBasicSalary">₹16,000</td>
+                            <td class="py-3 px-4">Provident Fund (PF)</td>
+                            <td class="py-3 px-4 text-right text-rose-600">-₹1,200</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4">House Rent Allowance (HRA)</td>
+                            <td class="py-3 px-4 text-right font-bold">₹0</td>
+                            <td class="py-3 px-4">Professional Tax</td>
+                            <td class="py-3 px-4 text-right text-rose-600">-₹300</td>
+                        </tr>
+                        <tr class="bg-gray-50 font-bold text-[#222222]">
+                            <td class="py-3 px-4">Total Earnings</td>
+                            <td class="py-3 px-4 text-right" id="modalTotalEarnings">₹16,000</td>
+                            <td class="py-3 px-4">Total Deductions</td>
+                            <td class="py-3 px-4 text-right text-rose-600">-₹1,500</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="p-4 bg-blue-50/60 rounded-2xl border border-blue-100 flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-blue-900 text-sm">Net Payable Salary</p>
+                        <p class="text-[10px] text-blue-600">Calculated after standard tax and deductions</p>
+                    </div>
+                    <h3 class="text-2xl font-black text-emerald-600" id="modalNetPayout">₹21,500</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer Actions (Fixed at bottom) -->
+        <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3 shrink-0">
+            <button onclick="closePayslipModal()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 font-bold rounded-xl text-gray-700 transition-colors cursor-pointer">
+                Close
+            </button>
+            <button onclick="printOrDownloadPayslip()" class="px-6 py-2.5 bg-[#FFD134] hover:bg-[#fbc512] font-black rounded-xl text-[#222222] shadow-md transition-all cursor-pointer inline-flex items-center gap-2">
+                <i class="fa-solid fa-print"></i> Print / Save as PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Script for Backend Payroll Sync & Expense Claims -->
+    <script>
+        let loggedInUser = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
+        let totalExpenses = 0;
+
+        window.onload = function() {
+            document.getElementById('empProfileName').innerText = loggedInUser;
+            document.getElementById('empDropdownName').innerText = loggedInUser;
+
+            let savedExpenses = localStorage.getItem('emp_total_expenses');
+            if (savedExpenses) {
+                totalExpenses = parseInt(savedExpenses);
+                document.getElementById('totalExpenseDisplay').innerText = `₹${totalExpenses.toLocaleString()}`;
+            }
+
+            fetchEmployeePayroll();
+        };
+
+        function fetchEmployeePayroll() {
+    fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.payroll) {
+                let record = data.payroll;
+                let baseSalary = record.baseNum || 16000; // Database se 23,000 uthayega
+                
+                // Base CTC display update karein
+                document.getElementById('baseCtcDisplay').innerText = `₹${baseSalary.toLocaleString('en-IN')}`;
+
+                let netPayout = baseSalary - 1500; // Example deduction
+
+                let tableBody = document.getElementById('payslipTableBody');
+                tableBody.innerHTML = `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
+                        <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${baseSalary.toLocaleString('en-IN')}</td>
+                        <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹1,500</td>
+                        <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${netPayout.toLocaleString('en-IN')}</td>
+                        <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">${record.status || 'PAID'}</span></td>
+                        <td class="py-4 px-6 text-right whitespace-nowrap">
+                            <button onclick="alert('Downloading official PDF payslip...')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Download Payslip
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(err => console.error("Error fetching payroll data:", err));
+}
+        function submitExpenseForm(event) {
+            event.preventDefault();
+            let title = document.getElementById('expenseTitle').value;
+            let amount = parseInt(document.getElementById('expenseAmount').value);
+            let notes = document.getElementById('expenseNotes').value;
+
+            totalExpenses += amount;
+            localStorage.setItem('emp_total_expenses', totalExpenses);
+
+            document.getElementById('totalExpenseDisplay').innerText = `₹${totalExpenses.toLocaleString()}`;
+
+            alert(`Expense claim of ₹${amount.toLocaleString()} for "${title}" successfully submitted and added to your upcoming salary calculation!`);
+            event.target.reset();
+        }
+
+        function toggleNotificationDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            profileDropdown.classList.add('hidden');
+            notifDropdown.classList.toggle('hidden');
+        }
+
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            notifDropdown.classList.add('hidden');
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns(event) {
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
+        }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+                localStorage.removeItem('hr_logged_in');
+                localStorage.removeItem('hr_user');
+                window.location.href = "/";
+            }
+        }
+
+        let currentBaseSalary = 23000;
+
+// Update fetchEmployeePayroll function taaki button par dynamic click bind ho sake
+function fetchEmployeePayroll() {
+    fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.payroll) {
+                let record = data.payroll;
+                currentBaseSalary = record.baseNum || 23000;
+                document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+
+                let netPayout = currentBaseSalary - 1500;
+
+                let tableBody = document.getElementById('payslipTableBody');
+                tableBody.innerHTML = `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
+                        <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                        <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹1,500</td>
+                        <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${netPayout.toLocaleString('en-IN')}</td>
+                        <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PAID'}</span></td>
+                        <td class="py-4 px-6 text-right whitespace-nowrap">
+                            <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-lines"></i> View & Download PDF
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(err => console.error("Error fetching payroll data:", err));
+}
+
+function openPayslipModal(monthYear) {
+    document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
+    document.getElementById('modalEmpName').innerText = loggedInUser;
+    document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+    document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+    
+    let net = currentBaseSalary - 1500;
+    document.getElementById('modalNetPayout').innerText = `₹${net.toLocaleString('en-IN')}`;
+
+    document.getElementById('payslipModal').classList.remove('hidden');
+}
+
+function closePayslipModal() {
+    document.getElementById('payslipModal').classList.add('hidden');
+}
+
+function printOrDownloadPayslip() {
+    let printWindow = window.open('', '', 'height=700,width=900');
+    
+    let slipHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Official Salary Payslip - October 2026</title>
+            <style>
+                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 30px; background: #fff; }
+                .payslip-container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+                .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+                .company-name { font-size: 20px; font-weight: bold; color: #1e3a8a; margin: 0 0 5px 0; }
+                .company-address { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
+                .meta-info { text-align: right; font-size: 13px; }
+                .meta-info span { font-weight: bold; color: #2563eb; }
+                .grid-box { display: table; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-bottom: 25px; }
+                .grid-row { display: table-row; }
+                .grid-cell { display: table-cell; width: 50%; padding: 8px 12px; font-size: 13px; }
+                .label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; display: block; margin-bottom: 2px; }
+                .value { font-size: 14px; font-weight: bold; color: #0f172a; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+                th, td { border: 1px solid #e2e8f0; padding: 12px 15px; font-size: 13px; text-align: left; }
+                th { background: #f1f5f9; color: #475569; text-transform: uppercase; font-size: 11px; }
+                .text-right { text-align: right; }
+                .text-rose { color: #e11d48; }
+                .total-row { font-weight: bold; background: #f8fafc; }
+                .net-salary-box { display: flex; justify-content: space-between; align-items: center; background: #eff6ff; border: 1px solid #bfdbfe; padding: 20px; border-radius: 8px; }
+                .net-title { font-size: 15px; font-weight: bold; color: #1e3a8a; margin: 0; }
+                .net-amount { font-size: 24px; font-weight: 900; color: #059669; margin: 0; }
+                .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; pt-3; }
+            </style>
+            <style>
+    @page {
+        size: auto;
+        margin: 0mm; /* Browser default header/footer headers hatane ke liye */
+    }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; background: #fff; }
+    /* Baaki CSS same rahegi */
+</style>
+        </head>
+        <body>
+            <div class="payslip-container">
+                <div class="header">
+                    <div>
+                        <h2 class="company-name">ClickOrMedia Private Limited</h2>
+                        <p class="company-address">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</p>
+                    </div>
+                    <div class="meta-info">
+                        <p>Month: <span>October 2026</span></p>
+                        <p style="color: #64748b; font-size: 11px;">Status: Official Document</p>
+                    </div>
+                </div>
+
+                <div class="grid-box">
+                    <div class="grid-row">
+                        <div class="grid-cell">
+                            <span class="label">Employee Name</span>
+                            <span class="value">${loggedInUser}</span>
+                        </div>
+                        <div class="grid-cell">
+                            <span class="label">Department</span>
+                            <span class="value">Software Engineering</span>
+                        </div>
+                    </div>
+                    <div class="grid-row" style="padding-top: 10px;">
+                        <div class="grid-cell">
+                            <span class="label">Bank Account</span>
+                            <span class="value">HDFC Bank (...4892)</span>
+                        </div>
+                        <div class="grid-cell">
+                            <span class="label">Payment Status</span>
+                            <span class="value" style="color: #059669;">PAID</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Earnings</th>
+                            <th class="text-right">Amount (₹)</th>
+                            <th>Deductions</th>
+                            <th class="text-right">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Basic Salary / CTC</td>
+                            <td class="text-right" style="font-weight: bold;">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                            <td>Provident Fund (PF)</td>
+                            <td class="text-right text-rose">-₹1,200</td>
+                        </tr>
+                        <tr>
+                            <td>House Rent Allowance (HRA)</td>
+                            <td class="text-right" style="font-weight: bold;">₹0</td>
+                            <td>Professional Tax</td>
+                            <td class="text-right text-rose">-₹300</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Earnings</td>
+                            <td class="text-right">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                            <td>Total Deductions</td>
+                            <td class="text-right text-rose">-₹1,500</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="net-salary-box">
+                    <div>
+                        <h4 class="net-title">Net Payable Salary</h4>
+                        <p style="font-size: 11px; color: #3b82f6; margin: 2px 0 0 0;">Calculated after standard tax and deductions</p>
+                    </div>
+                    <h2 class="net-amount">₹${(currentBaseSalary - 1500).toLocaleString('en-IN')}</h2>
+                </div>
+
+                <div class="footer">
+                    <p>This is a computer-generated official payslip from ClickOrMedia ESS Portal and does not require a physical signature.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+   printWindow.document.write(slipHtml);
+    printWindow.document.close();
+    
+    setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close(); // Print hone ke baad blank window apne aap close ho jayegi
+    }, 500);
+}
+    </script>
+</body>
+</html>

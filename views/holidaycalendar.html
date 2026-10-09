@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Holiday Calendar</title>
+    <!-- Tailwind CSS CDN for rapid styling consistency -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/hr/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-users w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Employee</span>
+                </a>
+                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-bar w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="/hr/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Leaves</span>
+                </a>
+                <a href="/hr/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="analytics.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="payroll.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Payroll</span>
+                </a>
+                <a href="departments.html" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-building w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                        <span>Departments</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 animate-pulse">6 Active</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
+                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="relative w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="holidaySearch" placeholder="Search holidays or festivals..." onkeyup="renderHolidayList()" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                <button onclick="alert('You have 3 unread messages.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <i class="fa-regular fa-envelope text-sm"></i>
+                </button>
+                <button onclick="alert('No new notifications.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative cursor-pointer">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                </button>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile -->
+                <div onclick="alert('Logged in as Tanya Dua (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                    <div class="text-right">
+                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                        <p class="text-xs text-gray-500">HR Manager</p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- PAGE TITLE & ACTIONS -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
+                <div>
+                    <h2 class="text-2xl font-black text-[#222222]">Company Holiday Calendar</h2>
+                    <p class="text-xs text-gray-500 mt-1">Manage official company holidays, public festivals, and optional leaves for 2026.</p>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <select id="yearSelect" onchange="alert('Switched view to year ' + this.value)" class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">
+                        <option value="2026" selected>2026 Calendar</option>
+                        <option value="2027">2027 Calendar</option>
+                    </select>
+
+                    <button onclick="openAddHolidayModal()" class="px-4 py-2.5 rounded-xl bg-[#222222] text-white font-bold text-xs shadow-md hover:bg-black transition-all cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-[#FFD134]"></i>
+                        <span>Add Holiday</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HOLIDAY METRICS / SUMMARY -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Holidays</p>
+                        <h3 id="totalHolidaysCount" class="text-3xl font-extrabold text-[#222222] mt-1">0</h3>
+                        <span class="text-xs font-bold text-emerald-600 mt-2 inline-block">For year 2026</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">National Holidays</p>
+                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1">3</h3>
+                        <span class="text-xs font-bold text-blue-600 mt-2 inline-block">Mandatory off</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl">
+                        <i class="fa-solid fa-flag"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Festivals / Regional</p>
+                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1">6</h3>
+                        <span class="text-xs font-bold text-purple-600 mt-2 inline-block">Cultural celebrations</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xl">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Optional / Restricted</p>
+                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1">3</h3>
+                        <span class="text-xs font-bold text-emerald-600 mt-2 inline-block">Choose any</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOLIDAY LIST TABLE -->
+            <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold text-[#222222]">Scheduled Holidays List</span>
+                        <span id="filteredHolidayCount" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">0 Total</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select id="categoryFilter" onchange="renderHolidayList()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-[#FFD134] cursor-pointer">
+                            <option value="">All Categories</option>
+                            <option value="National Holiday">National Holiday</option>
+                            <option value="Festival">Festival</option>
+                            <option value="Optional Leave">Optional Leave</option>
+                            <option value="Company Event">Company Event</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-[#F3F4F6] text-gray-600 text-xs uppercase tracking-wider rounded-xl">
+                                <th class="py-3 px-4 font-semibold rounded-l-xl">Date</th>
+                                <th class="py-3 px-4 font-semibold">Day</th>
+                                <th class="py-3 px-4 font-semibold">Holiday Name</th>
+                                <th class="py-3 px-4 font-semibold">Category</th>
+                                <th class="py-3 px-4 font-semibold rounded-r-xl text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#EAEAEA] text-sm" id="holidayTableBody">
+                            <!-- Populated via Backend Fetch -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ADD HOLIDAY MODAL -->
+    <div id="addHolidayModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-[#222222]">Add New Holiday</h3>
+                <button onclick="closeAddHolidayModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleHolidaySubmit(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Holiday Name</label>
+                    <input type="text" id="newHolidayName" required placeholder="e.g. Diwalis Celebration" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Date</label>
+                        <input type="date" id="newHolidayDate" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134] cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Category</label>
+                        <select id="newHolidayCategory" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                            <option value="National Holiday">National Holiday</option>
+                            <option value="Festival">Festival</option>
+                            <option value="Optional Leave">Optional Leave</option>
+                            <option value="Company Event">Company Event</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
+                    <button type="button" onclick="closeAddHolidayModal()" class="px-5 py-2.5 font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] shadow-md transition-all cursor-pointer">Save Holiday</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script for Holiday Data & Persistence -->
+    <script>
+        let holidayList = [];
+
+        async function fetchHolidays() {
+            try {
+                const response = await fetch('/api/holidays');
+                const data = await response.json();
+                if (data.success) {
+                    holidayList = data.holidays;
+                    renderHolidayList();
+                }
+            } catch (err) {
+                console.error('Error fetching holidays:', err);
+            }
+        }
+
+        function renderHolidayList() {
+            let tbody = document.getElementById('holidayTableBody');
+            tbody.innerHTML = "";
+
+            let searchInput = document.getElementById('holidaySearch').value.toLowerCase();
+            let categoryFilter = document.getElementById('categoryFilter').value;
+
+            let filtered = holidayList.filter(h => {
+                let matchesSearch = h.name.toLowerCase().includes(searchInput) || h.date.includes(searchInput);
+                let matchesCat = categoryFilter === "" || h.category === categoryFilter;
+                return matchesSearch && matchesCat;
+            });
+
+            document.getElementById('filteredHolidayCount').innerText = `${filtered.length} Total`;
+            document.getElementById('totalHolidaysCount').innerText = holidayList.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400 text-xs">No matching holidays found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((h) => {
+                let badgeClass = "";
+                if (h.category === "National Holiday") {
+                    badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+                } else if (h.category === "Festival") {
+                    badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
+                } else if (h.category === "Optional Leave") {
+                    badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                } else {
+                    badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+                }
+
+                let origIndex = holidayList.indexOf(h);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                        <td class="py-3.5 px-4 font-bold text-[#222222]">${h.date}</td>
+                        <td class="py-3.5 px-4 text-gray-600">${h.day}</td>
+                        <td class="py-3.5 px-4 font-bold text-[#222222]">${h.name}</td>
+                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold border rounded-lg shadow-sm ${badgeClass}">${h.category}</span></td>
+                        <td class="py-3.5 px-4 text-right">
+                            <button onclick="deleteHoliday(${origIndex})" class="px-3.5 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all cursor-pointer">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openAddHolidayModal() {
+            document.getElementById('addHolidayModal').classList.remove('hidden');
+        }
+
+        function closeAddHolidayModal() {
+            document.getElementById('addHolidayModal').classList.add('hidden');
+        }
+
+        async function handleHolidaySubmit(event) {
+            event.preventDefault();
+            let name = document.getElementById('newHolidayName').value;
+            let date = document.getElementById('newHolidayDate').value;
+            let category = document.getElementById('newHolidayCategory').value;
+
+            let dObj = new Date(date);
+            let dayName = dObj.toLocaleDateString('en-US', { weekday: 'long' });
+
+            try {
+                const response = await fetch('/api/holidays/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date, day: dayName, name, category })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    closeAddHolidayModal();
+                    fetchHolidays();
+                    alert(`Holiday "${name}" successfully added to the calendar!`);
+                }
+            } catch (err) {
+                console.error('Error adding holiday:', err);
+            }
+        }
+
+        async function deleteHoliday(index) {
+            if (confirm(`Are you sure you want to delete ${holidayList[index].name}?`)) {
+                try {
+                    const response = await fetch(`/api/holidays/${index}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        fetchHolidays();
+                    }
+                } catch (err) {
+                    console.error('Error deleting holiday:', err);
+                }
+            }
+        }
+
+        window.onload = function() {
+            fetchHolidays();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Settings</title>
+    <!-- Tailwind CSS CDN for rapid styling consistency -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/hr/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-users w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Employee</span>
+                </a>
+                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-bar w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="/hr/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Leaves</span>
+                </a>
+                <a href="/hr/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/hr/analytics" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="/hr/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Payroll</span>
+                </a>
+                <a href="/hr/departments" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-building w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                        <span>Departments</span>
+                    </div>
+                </a>
+                <a href="/hr/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-gear w-5 text-center"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm cursor-pointer hover:border-amber-300 transition-all" onclick="alert('System Status: All nodes operational.')">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
+                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="relative w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" placeholder="Search portal settings..." class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                <button onclick="alert('You have 3 unread messages.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <i class="fa-regular fa-envelope text-sm"></i>
+                </button>
+                <button onclick="alert('No new notifications.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative cursor-pointer">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                </button>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown Simulator -->
+                <div class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                    <div class="text-right">
+                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                        <p class="text-xs text-gray-500">HR Manager</p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- PAGE TITLE -->
+            <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-black text-[#222222]">Portal Configuration & Rules</h2>
+                    <p class="text-xs text-gray-500 mt-1">Configure organizational policies, leave allowances, payroll statutory rules, and administrative access.</p>
+                </div>
+                <button onclick="saveSettings(event)" class="px-5 py-2.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transition-all cursor-pointer">
+                    Save Changes
+                </button>
+            </div>
+
+            <!-- MODERN SPLIT LAYOUT (Sidebar Menu + Active Panel) -->
+            <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
+                
+                <!-- Left Vertical Menu Cards -->
+                <div class="bg-white p-3 rounded-2xl border border-[#EAEAEA] shadow-sm space-y-1.5">
+                    <button onclick="switchTab('org', this)" id="btnOrg" class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-xs shadow-sm transition-all cursor-pointer">
+                        <i class="fa-solid fa-building w-4 text-center"></i>
+                        <span>Organization Profile</span>
+                    </button>
+                    <button onclick="switchTab('leave', this)" id="btnLeave" class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-[#222222] font-semibold text-xs transition-all cursor-pointer">
+                        <i class="fa-solid fa-umbrella-beach w-4 text-center"></i>
+                        <span>Leave Policy Rules</span>
+                    </button>
+                    <button onclick="switchTab('statutory', this)" id="btnStatutory" class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-[#222222] font-semibold text-xs transition-all cursor-pointer">
+                        <i class="fa-solid fa-file-invoice-dollar w-4 text-center"></i>
+                        <span>Payroll & Statutory</span>
+                    </button>
+                    <button onclick="switchTab('audit', this)" id="btnAudit" class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-[#222222] font-semibold text-xs transition-all cursor-pointer">
+                        <i class="fa-solid fa-shield-halved w-4 text-center"></i>
+                        <span>Security & Audit Logs</span>
+                    </button>
+                </div>
+
+                <!-- Right Active Panel -->
+                <div class="bg-white p-8 rounded-2xl border border-[#EAEAEA] shadow-sm min-h-[420px]">
+                    
+                    <!-- Tab 1: Organization Profile -->
+                    <div id="tabOrg" class="space-y-6">
+                        <div class="border-b border-[#EAEAEA] pb-4">
+                            <h3 class="text-lg font-black text-[#222222]">Corporate Entity Details</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Manage official enterprise registration and support contact info.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Registered Company Name</label>
+                                <input type="text" id="settingCompanyName" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Corporate CIN / Registration Number</label>
+                                <input type="text" id="settingCin" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Official HR Support Email</label>
+                                <input type="email" id="settingHrEmail" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Primary Office Location</label>
+                                <input type="text" id="settingLocation" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Leave Policy Rules -->
+                    <div id="tabLeave" class="hidden space-y-6">
+                        <div class="border-b border-[#EAEAEA] pb-4">
+                            <h3 class="text-lg font-black text-[#222222]">Annual Leave & Time-Off Quotas</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Define automatic annual credit quotas for staff members.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Paid Annual Leaves</label>
+                                <input type="number" id="settingPaidLeaves" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Casual Leaves</label>
+                                <input type="number" id="settingCasualLeaves" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Sick Leaves</label>
+                                <input type="number" id="settingSickLeaves" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                        </div>
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-center gap-3">
+                            <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
+                            <span>Unused annual leaves permit up to 5 days carry-over into the next calendar financial quarter.</span>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Payroll & Statutory -->
+                    <div id="tabStatutory" class="hidden space-y-6">
+                        <div class="border-b border-[#EAEAEA] pb-4">
+                            <h3 class="text-lg font-black text-[#222222]">Statutory Deductions & Payroll Rules</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Configure PF percentages and monthly disbursement schedules.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Provident Fund (PF) Employee Contribution</label>
+                                <input type="text" id="settingPf" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-2">Monthly Payroll Cut-off Date</label>
+                                <select id="settingCutoff" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
+                                    <option value="25th of every month">25th of every month</option>
+                                    <option value="Last day of every month">Last day of every month</option>
+                                    <option value="1st of succeeding month">1st of succeeding month</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Security & Audit Logs -->
+                    <div id="tabAudit" class="hidden space-y-6">
+                        <div class="border-b border-[#EAEAEA] pb-4">
+                            <h3 class="text-lg font-black text-[#222222]">Administrative Audit Trail</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Secure chronological log of sensitive actions performed in portal.</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-[#F3F4F6] text-gray-600 uppercase tracking-wider">
+                                        <th class="py-3 px-4 font-semibold rounded-l-xl">Action Performed</th>
+                                        <th class="py-3 px-4 font-semibold">User</th>
+                                        <th class="py-3 px-4 font-semibold">Timestamp</th>
+                                        <th class="py-3 px-4 font-semibold rounded-r-xl">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#EAEAEA]">
+                                    <tr>
+                                        <td class="py-3 px-4 font-bold text-[#222222]">Batch Payroll Disbursed (September 2026)</td>
+                                        <td class="py-3 px-4 text-gray-600">Tanya Dua (HR)</td>
+                                        <td class="py-3 px-4 text-gray-500">Sep 28, 2026 - 10:30 AM</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-0.5 font-bold text-emerald-700 bg-emerald-50 rounded">Success</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 font-bold text-[#222222]">New Employee Added (Dhiraj Sareen)</td>
+                                        <td class="py-3 px-4 text-gray-600">Tanya Dua (HR)</td>
+                                        <td class="py-3 px-4 text-gray-500">Sep 25, 2026 - 02:15 PM</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-0.5 font-bold text-emerald-700 bg-emerald-50 rounded">Success</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script for interactive settings & backend synchronization -->
+    <script>
+        window.onload = function() {
+            fetchSettings();
+        };
+
+        async function fetchSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                const data = await response.json();
+                if (data.success && data.settings) {
+                    let s = data.settings;
+                    document.getElementById('settingCompanyName').value = s.companyName || '';
+                    document.getElementById('settingCin').value = s.cin || '';
+                    document.getElementById('settingHrEmail').value = s.hrEmail || '';
+                    document.getElementById('settingLocation').value = s.location || '';
+                    document.getElementById('settingPaidLeaves').value = s.paidLeaves || 18;
+                    document.getElementById('settingCasualLeaves').value = s.casualLeaves || 12;
+                    document.getElementById('settingSickLeaves').value = s.sickLeaves || 10;
+                    document.getElementById('settingPf').value = s.pfContribution || '';
+                    document.getElementById('settingCutoff').value = s.cutoffDate || '25th of every month';
+                }
+            } catch (err) {
+                console.error('Error fetching settings:', err);
+            }
+        }
+
+        async function saveSettings(event) {
+            event.preventDefault();
+            let payload = {
+                companyName: document.getElementById('settingCompanyName').value,
+                cin: document.getElementById('settingCin').value,
+                hrEmail: document.getElementById('settingHrEmail').value,
+                location: document.getElementById('settingLocation').value,
+                paidLeaves: document.getElementById('settingPaidLeaves').value,
+                casualLeaves: document.getElementById('settingCasualLeaves').value,
+                sickLeaves: document.getElementById('settingSickLeaves').value,
+                pfContribution: document.getElementById('settingPf').value,
+                cutoffDate: document.getElementById('settingCutoff').value
+            };
+
+            try {
+                const response = await fetch('/api/settings/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert("All configuration changes successfully saved and persisted!");
+                }
+            } catch (err) {
+                console.error('Error saving settings:', err);
+                alert("Failed to save settings.");
+            }
+        }
+
+        function switchTab(tabId, btnElement) {
+            // Hide all tabs
+            document.getElementById('tabOrg').classList.add('hidden');
+            document.getElementById('tabLeave').classList.add('hidden');
+            document.getElementById('tabStatutory').classList.add('hidden');
+            document.getElementById('tabAudit').classList.add('hidden');
+
+            // Reset buttons
+            let buttons = ['btnOrg', 'btnLeave', 'btnStatutory', 'btnAudit'];
+            buttons.forEach(id => {
+                let el = document.getElementById(id);
+                el.className = "w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-[#222222] font-semibold text-xs transition-all cursor-pointer";
+            });
+
+            // Show selected tab & highlight button
+            document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1)).classList.remove('hidden');
+            btnElement.className = "w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-xs shadow-sm transition-all cursor-pointer";
+        }
+    </script>
+</body>
+</html>

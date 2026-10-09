@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - Leave Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
+
+    <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-user-tie text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">Staff Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/employee/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Dashboard</span>
+                </a>
+                <a href="/employee/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Attendance</span>
+                </a>
+                <a href="/employee/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/25 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    <span>Apply for Leave</span>
+                </a>
+                <a href="/employee/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Payslips</span>
+                </a>
+               <a href="/employee/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/employee/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Account Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs ring-4 ring-blue-500/5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">ESS Portal Active</p>
+                        <p class="text-[10px] text-gray-500">Department: Software Engineering</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+       
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-[#222222]">Leave Management <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg ml-2"><i class="fa-solid fa-laptop-code mr-1"></i> Software Engineering</span></h3>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+               
+                <!-- Notification Bell with Dynamic Badge & Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown(event)" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-blue-100 hover:text-blue-700 transition-all relative cursor-pointer" title="Notifications">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span id="notifBadge" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white hidden animate-ping"></span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-4 z-50 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                            <h4 class="font-bold text-[#222222] text-sm">Notifications</h4>
+                            <span id="notifCountText" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">0 New</span>
+                        </div>
+                        <div id="notificationListContainer" class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                            <p class="text-gray-400 text-center py-4">No new notifications.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
+                            <p class="text-xs text-blue-600 font-medium">Software Engineering</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                    </div>
+
+                    <!-- Profile Dropdown Panel -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
+                        <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <div>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
+                                <p class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
+                            </div>
+                        </div>
+                        <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
+                            <span>My Dashboard</span>
+                        </a>
+                        <a href="/employee/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
+                            <i class="fa-solid fa-gear w-4 text-center text-gray-400"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <div class="border-t border-gray-100 pt-1.5 mt-1.5">
+                            <button onclick="logoutUser()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+           
+            <!-- LEAVE BALANCE CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Available Paid Leaves</p>
+                        <h3 class="text-3xl font-black text-blue-600 mt-1" id="leaveBalanceCount">4 Days</h3>
+                        <p class="text-[11px] text-emerald-600 mt-1 font-semibold"><i class="fa-solid fa-circle-check"></i> Live balance</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leaves Used (YTD)</p>
+                        <h3 class="text-3xl font-black text-[#222222] mt-1" id="leavesUsedCount">0 Days</h3>
+                        <p class="text-[11px] text-gray-400 mt-1">For year 2026</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-calendar-minus"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rollover Balance</p>
+                        <h3 class="text-3xl font-black text-emerald-600 mt-1">2 Days</h3>
+                        <p class="text-[11px] text-gray-400 mt-1">Carried forward from 2025</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APPLY LEAVE & RECENT REQUESTS SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               
+                <!-- Leave Application Form -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-4 lg:col-span-1">
+                    <h3 class="text-base font-bold text-[#222222]"><i class="fa-solid fa-paper-plane text-blue-600 mr-2"></i> Apply for Leave</h3>
+                    <form onsubmit="submitLeaveForm(event)" class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Leave Type</label>
+                            <select id="leaveType" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 focus:outline-none">
+                                <option value="Paid Casual Leave">Paid Casual Leave</option>
+                                <option value="Sick / Medical Leave">Sick / Medical Leave</option>
+                                <option value="Unpaid Leave">Unpaid Leave</option>
+                                <option value="Half-Day Leave">Half-Day Leave</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">Start Date</label>
+                                <input type="date" id="startDate" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">End Date</label>
+                                <input type="date" id="endDate" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Reason for Leave</label>
+                            <textarea id="leaveReason" rows="3" placeholder="Provide brief explanation..." required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 focus:outline-none resize-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-[#FFD134] hover:bg-[#fbc512] text-[#222222] font-black rounded-xl shadow-md transition-all cursor-pointer">
+                            Submit Request to Portal
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Leave Request History Table -->
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm space-y-4 lg:col-span-2">
+                    <h3 class="text-base font-bold text-[#222222]">My Leave History</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50/70 text-gray-400 font-bold uppercase tracking-wider border-b border-gray-100">
+                                    <th class="py-3 px-4">Leave Type</th>
+                                    <th class="py-3 px-4">Dates</th>
+                                    <th class="py-3 px-4">Reason</th>
+                                    <th class="py-3 px-4 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-[#222222] font-medium" id="leaveHistoryTable">
+                                <!-- Populated dynamically from backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Real-Time Floating Toast Notification Container -->
+    <div id="realTimeToastContainer" class="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
+    <script>
+        let loggedInUser = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
+        let lastSeenStatuses = {};
+
+        window.onload = function() {
+            document.getElementById('empProfileName').innerText = loggedInUser;
+            document.getElementById('empDropdownName').innerText = loggedInUser;
+            fetchEmployeeLeaves();
+
+            // Auto poll every 2 seconds for instantaneous real-time notification & status update
+            setInterval(fetchEmployeeLeaves, 2000);
+        };
+
+        function fetchEmployeeLeaves() {
+            fetch('/api/leaves')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        let allLeaves = data.leaves || [];
+                       
+                        // Strict Filtering: Only show leaves for this specific employee
+                        let myLeaves = allLeaves.filter(l =>
+                            l.name && l.name.toLowerCase() === loggedInUser.toLowerCase()
+                        );
+
+                        // Check for real-time status changes to trigger popup toasts
+                        checkForRealTimeAlerts(myLeaves);
+
+                        // Update Metrics Cards
+                        let totalUsed = myLeaves.filter(l => l.status === "APPROVED").length;
+                        document.getElementById('leavesUsedCount').innerText = `${totalUsed} Days`;
+                        let totalAvailable = Math.max(0, 4 - totalUsed);
+                        document.getElementById('leaveBalanceCount').innerText = `${totalAvailable} Days`;
+
+                        // Real-Time Notification Dropdown Updates
+                        let notifBadge = document.getElementById('notifBadge');
+                        let notifCountText = document.getElementById('notifCountText');
+                        let notificationsContainer = document.getElementById('notificationListContainer');
+
+                        let processedLeaves = myLeaves.filter(l => l.status === "APPROVED" || l.status === "REJECTED");
+
+                        if (processedLeaves.length > 0) {
+                            notifBadge.classList.remove('hidden');
+                            notifCountText.innerText = `${processedLeaves.length} New`;
+                            notificationsContainer.innerHTML = "";
+
+                            processedLeaves.forEach(proc => {
+                                let isApproved = proc.status === "APPROVED";
+                                let badgeColor = isApproved ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-rose-700 bg-rose-50 border-rose-100";
+                                let iconClass = isApproved ? "fa-circle-check text-emerald-600" : "fa-circle-xmark text-rose-600";
+                                let timeStr = proc.updatedAt || "Just now";
+
+                                notificationsContainer.innerHTML += `
+                                    <div class="p-3 border rounded-2xl space-y-1 ${badgeColor}">
+                                        <div class="flex items-center justify-between font-bold">
+                                            <span><i class="fa-solid ${iconClass} mr-1.5"></i> Leave ${proc.status}</span>
+                                            <span class="text-[10px] text-gray-500">${timeStr}</span>
+                                        </div>
+                                        <p class="text-gray-700 font-medium">Your request for <strong>${proc.type}</strong> (${proc.duration}) has been <strong>${proc.status.toLowerCase()}</strong> by HR.</p>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            notifBadge.classList.add('hidden');
+                            notifCountText.innerText = `0 New`;
+                            notificationsContainer.innerHTML = `<p class="text-gray-400 text-center py-4">No new notifications.</p>`;
+                        }
+
+                        // Render History Table
+                        let tableBody = document.getElementById('leaveHistoryTable');
+                        tableBody.innerHTML = "";
+
+                        if (myLeaves.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-400">No leave history found.</td></tr>`;
+                            return;
+                        }
+
+                        myLeaves.forEach(leave => {
+                            let statusClass = "bg-amber-50 text-amber-700 border-amber-200";
+                            let statusText = leave.status || "PENDING";
+                            if (statusText === "APPROVED") {
+                                statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                            } else if (statusText === "REJECTED") {
+                                statusClass = "bg-rose-50 text-rose-700 border-rose-200";
+                            }
+
+                            tableBody.innerHTML += `
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3.5 px-4 font-bold">${leave.type || 'Paid Leave'}</td>
+                                    <td class="py-3.5 px-4 text-gray-600">${leave.duration || 'N/A'}</td>
+                                    <td class="py-3.5 px-4 text-gray-500 truncate max-w-[150px]">${leave.reason || 'N/A'}</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 ${statusClass} font-bold rounded-lg border text-[10px]">${statusText}</span></td>
+                                </tr>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => console.error("Error fetching employee leaves:", err));
+        }
+
+        function checkForRealTimeAlerts(myLeaves) {
+            myLeaves.forEach(leave => {
+                let leaveId = leave.id;
+                let currentStatus = leave.status || "PENDING";
+
+                if (lastSeenStatuses[leaveId] && lastSeenStatuses[leaveId] !== currentStatus && (currentStatus === "APPROVED" || currentStatus === "REJECTED")) {
+                    showToastNotification(leave.type, currentStatus);
+                }
+                lastSeenStatuses[leaveId] = currentStatus;
+            });
+        }
+
+        function showToastNotification(leaveType, status) {
+            let toastContainer = document.getElementById('realTimeToastContainer');
+            let isApproved = status === "APPROVED";
+           
+            let bgColor = isApproved ? "bg-emerald-600 text-white" : "bg-rose-600 text-white";
+            let icon = isApproved ? "fa-circle-check" : "fa-circle-xmark";
+
+            let toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl ${bgColor} transform transition-all duration-500 translate-y-5 opacity-0`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg"></i>
+                <div>
+                    <h5 class="font-bold text-xs">Leave Request ${status}!</h5>
+                    <p class="text-[11px] opacity-90">Your application for ${leaveType} has been ${status.toLowerCase()} by HR.</p>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-5', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }
+
+        function submitLeaveForm(event) {
+            event.preventDefault();
+            let type = document.getElementById('leaveType').value;
+            let start = document.getElementById('startDate').value;
+            let end = document.getElementById('endDate').value;
+            let reason = document.getElementById('leaveReason').value;
+
+            let durationStr = start === end ? `${start} (Full Day)` : `${start} to ${end}`;
+            if (type === 'Half-Day Leave') {
+                durationStr = `${start} (Half-Day)`;
+            }
+
+            fetch('/api/leaves/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: type,
+                    duration: durationStr,
+                    reason: reason,
+                    name: loggedInUser
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Leave request submitted successfully to the HR Portal!");
+                    event.target.reset();
+                    fetchEmployeeLeaves();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => console.error("Error:", err));
+        }
+
+        function toggleNotificationDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            profileDropdown.classList.add('hidden');
+            notifDropdown.classList.toggle('hidden');
+        }
+
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            notifDropdown.classList.add('hidden');
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns(event) {
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
+        }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+                localStorage.removeItem('hr_logged_in');
+                localStorage.removeItem('hr_user');
+                window.location.href = "/";
+            }
+        }
+    </script>
+</body>
+</html>

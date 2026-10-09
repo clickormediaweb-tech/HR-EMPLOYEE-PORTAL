@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal Dashboard</title>
+    <!-- Tailwind CSS CDN for rapid styling consistency -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Employee Structure Donut Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="index.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-house w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-users w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Employee</span>
+                </a>
+                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-bar w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Leaves</span>
+                </a>
+                <a href="holidaycalendar.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="analytics.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="/hr/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Payroll</span>
+                </a>
+                <a href="departments.html" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-building w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                        <span>Departments</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 animate-pulse">6 Active</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
+                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/85 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="relative w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" placeholder="Search employees, reports, metrics..." class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5 relative">
+                
+                <!-- MAIL DROPDOWN CONTAINER -->
+                <div class="relative">
+                    <button id="mailBtn" onclick="toggleDropdown(event, 'mailDropdown')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 focus:outline-none">
+                        <i class="fa-regular fa-envelope text-sm"></i>
+                    </button>
+                    <!-- Mail Menu Content -->
+                    <div id="mailDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-3 z-50 animate-in fade-in duration-200">
+                        <div class="px-4 pb-2.5 border-b border-[#EAEAEA] flex items-center justify-between">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-600">Messages</h4>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">3 New</span>
+                        </div>
+                        <div class="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                            <a href="#" class="flex items-start gap-3 px-4 py-3 hover:bg-amber-50/50 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=faces" class="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" alt="Ritika">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-[#222222] truncate">Ritika</h5>
+                                        <span class="text-[10px] text-gray-400">10m ago</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate mt-0.5">Submitted documents for verification...</p>
+                                </div>
+                            </a>
+                            <a href="#" class="flex items-start gap-3 px-4 py-3 hover:bg-amber-50/50 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces" class="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" alt="Payal">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-[#222222] truncate">Payal</h5>
+                                        <span class="text-[10px] text-gray-400">1h ago</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate mt-0.5">Regarding the upcoming payroll cycle updates.</p>
+                                </div>
+                            </a>
+                            <a href="#" class="flex items-start gap-3 px-4 py-3 hover:bg-amber-50/50 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" class="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" alt="Dhiraj">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-[#222222] truncate">Dhiraj Sareen</h5>
+                                        <span class="text-[10px] text-gray-400">Yesterday</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate mt-0.5">Updated UI wireframes for the employee module.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="px-4 pt-2.5 border-t border-[#EAEAEA] text-center">
+                            <a href="#" class="text-xs font-bold text-amber-600 hover:text-amber-700">View All Messages</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOTIFICATIONS DROPDOWN CONTAINER -->
+                <div class="relative">
+                    <button id="notifBtn" onclick="toggleDropdown(event, 'notifDropdown')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative focus:outline-none">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                    </button>
+                    <!-- Notification Menu Content -->
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-3 z-50 animate-in fade-in duration-200">
+                        <div class="px-4 pb-2.5 border-b border-[#EAEAEA] flex items-center justify-between">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-600">Notifications</h4>
+                            <span class="text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">2 Unread</span>
+                        </div>
+                        <div class="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                            <div class="px-4 py-3 hover:bg-amber-50/50 transition-colors flex gap-3 items-start">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-user-plus text-xs"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-bold text-[#222222]">New Application Received</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Ritika applied for Software Engineer position.</p>
+                                    <span class="text-[10px] text-gray-400 mt-1 block">15 mins ago</span>
+                                </div>
+                            </div>
+                            <div class="px-4 py-3 hover:bg-amber-50/50 transition-colors flex gap-3 items-start">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-calendar-check text-xs"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-bold text-[#222222]">Interview Reminder</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Interview with Ritika starts in 30 minutes.</p>
+                                    <span class="text-[10px] text-gray-400 mt-1 block">35 mins ago</span>
+                                </div>
+                            </div>
+                            <div class="px-4 py-3 hover:bg-amber-50/50 transition-colors flex gap-3 items-start">
+                                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-bold text-[#222222]">Payroll Processed</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Monthly salary disbursement successful.</p>
+                                    <span class="text-[10px] text-gray-400 mt-1 block">Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pt-2.5 border-t border-[#EAEAEA] text-center">
+                            <a href="#" class="text-xs font-bold text-amber-600 hover:text-amber-700">Mark all as read</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- USER PROFILE DROPDOWN CONTAINER -->
+                <div class="relative">
+                    <div onclick="toggleDropdown(event, 'profileDropdown')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                            <p class="text-xs text-gray-500">HR Manager</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                    </div>
+
+                    <!-- Profile Menu Content -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-2 z-50 animate-in fade-in duration-200">
+                        <div class="px-4 py-3 border-b border-[#EAEAEA]">
+                            <p class="text-xs font-bold text-[#222222]">Tanya Dua</p>
+                            <p class="text-[11px] text-gray-500 truncate">tanya.dua@clickormedia.co.in</p>
+                        </div>
+                        <div class="py-1">
+                            <button onclick="openModal('profileModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 hover:text-[#222222] transition-colors">
+                                <i class="fa-solid fa-user-gear w-4 text-gray-400"></i>
+                                <span>My Profile</span>
+                            </button>
+                            <button onclick="openModal('settingsModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 hover:text-[#222222] transition-colors">
+                                <i class="fa-solid fa-gear w-4 text-gray-400"></i>
+                                <span>Account Settings</span>
+                            </button>
+                            <button onclick="openModal('securityModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 hover:text-[#222222] transition-colors">
+                                <i class="fa-solid fa-shield-halved w-4 text-gray-400"></i>
+                                <span>Privacy & Security</span>
+                            </button>
+                        </div>
+                        <div class="pt-1 border-t border-[#EAEAEA]">
+                            <!-- FIXED LOGOUT BUTTON -->
+                            <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+    <i class="fa-solid fa-right-from-bracket w-4 text-rose-500"></i>
+    <span>Log Out</span>
+</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- DASHBOARD SCROLLABLE BODY -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- 3. TOP STATISTICS CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Employee</p>
+<h3 id="totalEmpCount" class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-500 transition-colors">--</h3>                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FFF9DB] to-[#fff3c4] text-[#D4A017] flex items-center justify-center shadow-sm transform group-hover:rotate-12 transition-transform duration-300">
+                            <i class="fa-solid fa-users text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-4 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        <span>+10 this month</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">New Hiring</p>
+                            <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-500 transition-colors">1</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FFF9DB] to-[#fff3c4] text-[#D4A017] flex items-center justify-center shadow-sm transform group-hover:rotate-12 transition-transform duration-300">
+                            <i class="fa-solid fa-user-plus text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-4 text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg w-fit">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                        <span>-2.3% this month</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Employee Satisfaction</p>
+                            <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-500 transition-colors">94.2%</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FFF9DB] to-[#fff3c4] text-[#D4A017] flex items-center justify-center shadow-sm transform group-hover:rotate-12 transition-transform duration-300">
+                            <i class="fa-regular fa-face-smile text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-4 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        <span>+4.5% this month</span>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Payroll Cost</p>
+                            <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-500 transition-colors">₹13.03 Cr</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FFF9DB] to-[#fff3c4] text-[#D4A017] flex items-center justify-center shadow-sm transform group-hover:rotate-12 transition-transform duration-300">
+                            <i class="fa-solid fa-credit-card text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-4 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        <span>+1.5% this month</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN GRID SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-[2.1fr_1fr] gap-6 items-start">
+                
+                <!-- LEFT COLUMN: Attendance, Performance, & Quick Activity/Actions -->
+                <div class="space-y-6">
+                    
+                    <!-- 4. ATTENDANCE SECTION -->
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between">
+                        <div class="flex-1 pr-6 border-r border-[#EAEAEA]">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-sm font-semibold text-gray-600">Today’s Attendance</span>
+                            </div>
+                            <div class="text-4xl font-extrabold text-[#222222]">100%</div>
+                        </div>
+                        <div class="flex-1 px-6 border-r border-[#EAEAEA] text-center">
+                            <span class="text-sm font-semibold text-gray-600">Late</span>
+                            <div class="text-4xl font-extrabold text-[#222222] mt-1">1</div>
+                        </div>
+                        <div class="flex-1 pl-6 text-center">
+                            <span class="text-sm font-semibold text-gray-600">Absent</span>
+                            <div class="text-4xl font-extrabold text-[#222222] mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <!-- 5. EMPLOYEE PERFORMANCE TABLE -->
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-[#222222]">Employee Performance</h3>
+                            <a href="/hr/employees" class="px-4 py-2 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] hover:border-[#FFD134] transition-all duration-200">View All</a>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-[#F3F4F6] text-gray-600 text-xs uppercase tracking-wider rounded-xl">
+                                        <th class="py-3 px-4 font-semibold rounded-l-xl">Avatar</th>
+                                        <th class="py-3 px-4 font-semibold">Name</th>
+                                        <th class="py-3 px-4 font-semibold">Designation</th>
+                                        <th class="py-3 px-4 font-semibold rounded-r-xl">Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#EAEAEA] text-sm">
+                                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                                        <td class="py-3.5 px-4"><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="Tanya Dua"></td>
+                                        <td class="py-3.5 px-4 font-bold text-[#222222]">Tanya Dua</td>
+                                        <td class="py-3.5 px-4 text-gray-600">UI Designer</td>
+                                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">GOOD</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                                        <td class="py-3.5 px-4"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="Pranchal Rajpal"></td>
+                                        <td class="py-3.5 px-4 font-bold text-[#222222]">Pranchal Rajpal</td>
+                                        <td class="py-3.5 px-4 text-gray-600">Software Developer</td>
+                                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">EXCELLENT</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                                        <td class="py-3.5 px-4"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="Anshdeep"></td>
+                                        <td class="py-3.5 px-4 font-bold text-[#222222]">Anshdeep</td>
+                                        <td class="py-3.5 px-4 text-gray-600">HR Assistant</td>
+                                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">EXCELLENT</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                                        <td class="py-3.5 px-4"><img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="Sukhi"></td>
+                                        <td class="py-3.5 px-4 font-bold text-[#222222]">Sukhi</td>
+                                        <td class="py-3.5 px-4 text-gray-600">Marketing Manager</td>
+                                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">AVERAGE</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                                        <td class="py-3.5 px-4"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="Robin"></td>
+                                        <td class="py-3.5 px-4 font-bold text-[#222222]">Robin</td>
+                                        <td class="py-3.5 px-4 text-gray-600">Content Lead</td>
+                                        <td class="py-3.5 px-4"><span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">GOOD</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- NEW SECTION: Recent System Logs & Quick Metrics -->
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-[#222222]">Recent System Activity</h3>
+                            <span class="text-xs text-gray-400 font-medium">Live Feed</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3.5 rounded-xl bg-gray-50 border border-[#EAEAEA] flex flex-col justify-between">
+                                <div class="flex items-center gap-2 text-amber-600 font-bold mb-1">
+                                    <i class="fa-solid fa-user-shield"></i>
+                                    <span>Security Check</span>
+                                </div>
+                                <p class="text-gray-500">SSL and CDN certificates updated successfully via Hostinger.</p>
+                                <span class="text-[10px] text-gray-400 mt-3 block">2 hours ago</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-gray-50 border border-[#EAEAEA] flex flex-col justify-between">
+                                <div class="flex items-center gap-2 text-blue-600 font-bold mb-1">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span>Payroll Sync</span>
+                                </div>
+                                <p class="text-gray-500">Monthly allowances and tax deductions computed for all active staff.</p>
+                                <span class="text-[10px] text-gray-400 mt-3 block">5 hours ago</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-gray-50 border border-[#EAEAEA] flex flex-col justify-between">
+                                <div class="flex items-center gap-2 text-emerald-600 font-bold mb-1">
+                                    <i class="fa-solid fa-bullhorn"></i>
+                                    <span>Notice Board</span>
+                                </div>
+                                <p class="text-gray-500">New holiday calendar updates published for the upcoming quarter.</p>
+                                <span class="text-[10px] text-gray-400 mt-3 block">1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Upcoming Interviews & Employee Structure -->
+                <div class="space-y-6">
+                    
+                    <!-- 6. UPCOMING INTERVIEWS -->
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-lg font-bold text-[#222222]">Upcoming Interviews</h3>
+                            <button class="px-3.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all">View All</button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <!-- Interview Item 1 -->
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50/70 border border-[#EAEAEA]/80 hover:bg-amber-50/30 hover:border-amber-200 transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm shrink-0" alt="Ritika">
+                                    <div class="min-w-0">
+                                        <h5 class="text-sm font-bold text-[#222222] truncate">Ritika</h5>
+                                        <p class="text-xs text-gray-500 font-medium truncate">Software Engineer</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-bold text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-lg shrink-0 ml-2">10:00 AM</span>
+                            </div>
+
+                            <!-- Interview Item 2 -->
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50/70 border border-[#EAEAEA]/80 hover:bg-amber-50/30 hover:border-amber-200 transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm shrink-0" alt="Payal">
+                                    <div class="min-w-0">
+                                        <h5 class="text-sm font-bold text-[#222222] truncate">Payal</h5>
+                                        <p class="text-xs text-gray-500 font-medium truncate">Finance Executive</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-bold text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-lg shrink-0 ml-2">11:30 AM</span>
+                            </div>
+
+                            <!-- Interview Item 3 -->
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50/70 border border-[#EAEAEA]/80 hover:bg-amber-50/30 hover:border-amber-200 transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm shrink-0" alt="Harisman">
+                                    <div class="min-w-0">
+                                        <h5 class="text-sm font-bold text-[#222222] truncate">Harisman</h5>
+                                        <p class="text-xs text-gray-500 font-medium truncate">Sr. Developer</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-bold text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-lg shrink-0 ml-2">12:30 PM</span>
+                            </div>
+
+                            <!-- Interview Item 4 -->
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50/70 border border-[#EAEAEA]/80 hover:bg-amber-50/30 hover:border-amber-200 transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=80&h=80&fit=crop&crop=faces" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm shrink-0" alt="Shivansh">
+                                    <div class="min-w-0">
+                                        <h5 class="text-sm font-bold text-[#222222] truncate">Shivansh</h5>
+                                        <p class="text-xs text-gray-500 font-medium truncate">UI/UX Designer</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-bold text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-lg shrink-0 ml-2">01:15 PM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. EMPLOYEE STRUCTURE CHART -->
+                    <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+                        <h3 class="text-lg font-bold text-[#222222] mb-4">Employee Structure</h3>
+                        
+                        <div class="relative w-48 h-48 mx-auto my-2 flex items-center justify-center transform hover:scale-105 transition-transform duration-500">
+                            <canvas id="employeeStructureChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                                <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total</span>
+                                <span class="text-2xl font-black text-[#222222]">250</span>
+                            </div>
+                        </div>
+
+                        <!-- Legend Items -->
+                        <div class="space-y-2.5 mt-4">
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-[#EAEAEA] hover:border-blue-300 transition-all">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 shadow-sm"></span>
+                                    <span class="text-xs font-bold text-[#222222]">Full-Time <span class="text-gray-400 block font-normal text-[10px]">150 Employees</span></span>
+                                </div>
+                                <span class="text-xs font-extrabold text-[#222222]">60%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-[#EAEAEA] hover:border-emerald-300 transition-all">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 shadow-sm"></span>
+                                    <span class="text-xs font-bold text-[#222222]">Contract <span class="text-gray-400 block font-normal text-[10px]">62 Employees</span></span>
+                                </div>
+                                <span class="text-xs font-extrabold text-[#222222]">25%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-[#EAEAEA] hover:border-purple-300 transition-all">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-purple-600 to-purple-400 shadow-sm"></span>
+                                    <span class="text-xs font-bold text-[#222222]">Interns <span class="text-gray-400 block font-normal text-[10px]">38 Employees</span></span>
+                                </div>
+                                <span class="text-xs font-extrabold text-[#222222]">15%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODALS CONTAINER -->
+    <div id="profileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+                <h3 class="text-base font-bold text-[#222222]">My Profile Details</h3>
+                <button onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div class="py-5 text-center">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=faces" class="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-amber-400 shadow-md mb-3" alt="Tanya Dua">
+                <h4 class="text-lg font-bold text-[#222222]">Tanya Dua</h4>
+                <p class="text-xs text-amber-600 font-semibold bg-amber-50 px-2.5 py-1 rounded-full inline-block mt-1">HR Manager</p>
+            </div>
+            <div class="space-y-3 bg-gray-50 p-4 rounded-2xl border border-[#EAEAEA] text-xs">
+                <div class="flex justify-between py-1 border-b border-gray-200/60">
+                    <span class="text-gray-500">Department</span>
+                    <span class="font-bold text-[#222222]">Human Resources</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-gray-200/60">
+                    <span class="text-gray-500">Email Address</span>
+                    <span class="font-bold text-[#222222]">tanya.dua@clickormedia.co.in</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-gray-200/60">
+                    <span class="text-gray-500">Phone Number</span>
+                    <span class="font-bold text-[#222222]">+91 98765 43210</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-gray-500">Employee ID</span>
+                    <span class="font-bold text-[#222222]">COM-HR-104</span>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModal('profileModal')" class="px-5 py-2.5 text-xs font-bold bg-[#FFD134] text-[#222222] rounded-xl hover:bg-amber-400 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Settings Modal -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+                <h3 class="text-base font-bold text-[#222222]">Account Settings</h3>
+                <button onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <form id="settingsForm" onsubmit="event.preventDefault(); showPinVerification();" class="space-y-4 py-4 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Display Name</label>
+                    <input type="text" value="Tanya Dua" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-3.5 py-2.5 text-xs text-[#222222] focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Work Email</label>
+                    <input type="email" value="tanya.dua@clickormedia.co.in" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-3.5 py-2.5 text-xs text-[#222222] focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">New Password</label>
+                    <input type="password" id="newPasswordInput" placeholder="••••••••••••" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-3.5 py-2.5 text-xs text-[#222222] focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <span class="font-bold text-gray-700">Email Notifications</span>
+                    <input type="checkbox" checked class="w-4 h-4 accent-amber-500 rounded">
+                </div>
+                <div id="pinSection" class="hidden pt-3 border-t border-dashed border-gray-300">
+                    <label class="block font-bold text-amber-800 mb-1"><i class="fa-solid fa-lock mr-1"></i> Enter 4-Digit Security PIN</label>
+                    <input type="password" id="securityPinInput" maxlength="4" placeholder="••••" class="w-full bg-amber-50/50 border border-amber-300 rounded-xl px-3.5 py-2.5 text-xs text-[#222222] tracking-widest text-center font-bold">
+                    <p class="text-[10px] text-gray-500 mt-1">Hint: Use <span class="font-bold text-gray-700">1234</span></p>
+                </div>
+                <div class="mt-6 flex justify-end gap-2 pt-2 border-t border-[#EAEAEA]">
+                    <button type="button" onclick="closeModal('settingsModal')" class="px-4 py-2.5 font-bold bg-gray-100 text-gray-700 rounded-xl">Cancel</button>
+                    <button type="submit" id="saveSettingsBtn" class="px-5 py-2.5 font-bold bg-[#FFD134] text-[#222222] rounded-xl">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Privacy & Security Modal -->
+    <div id="securityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+                <h3 class="text-base font-bold text-[#222222]">Privacy & Security</h3>
+                <button onclick="closeModal('securityModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div class="py-4 space-y-4 text-xs">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-[#EAEAEA]">
+                    <div>
+                        <p class="font-bold text-[#222222]">Two-Factor Authentication (2FA)</p>
+                        <p class="text-[10px] text-gray-500">Secure your account with OTP verification</p>
+                    </div>
+                    <input type="checkbox" checked class="w-4 h-4 accent-amber-500 rounded">
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-[#EAEAEA]">
+                    <div>
+                        <p class="font-bold text-[#222222]">Active Session Control</p>
+                        <p class="text-[10px] text-gray-500">Logged in from current browser session</p>
+                    </div>
+                    <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Active</span>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button onclick="closeModal('securityModal')" class="px-5 py-2.5 text-xs font-bold bg-[#FFD134] text-[#222222] rounded-xl">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function toggleDropdown(event, dropdownId) {
+            event.stopPropagation();
+            ['mailDropdown', 'notifDropdown', 'profileDropdown'].forEach(id => {
+                const el = document.getElementById(id);
+                if (id === dropdownId) el.classList.toggle('hidden');
+                else el.classList.add('hidden');
+            });
+        }
+
+        window.addEventListener('click', function() {
+            ['mailDropdown', 'notifDropdown', 'profileDropdown'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById('profileDropdown').classList.add('hidden');
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            if (modalId === 'settingsModal') resetSettingsForm();
+        }
+
+        function showPinVerification() {
+            const passwordInput = document.getElementById('newPasswordInput').value;
+            const pinSection = document.getElementById('pinSection');
+            const saveBtn = document.getElementById('saveSettingsBtn');
+
+            if (passwordInput.trim() !== '') {
+                if (pinSection.classList.contains('hidden')) {
+                    pinSection.classList.remove('hidden');
+                    saveBtn.innerText = 'Verify & Save';
+                    return;
+                }
+                if (document.getElementById('securityPinInput').value === '1234') {
+                    alert('Security PIN verified successfully!');
+                    closeModal('settingsModal');
+                } else {
+                    alert('Incorrect PIN! Use 1234.');
+                }
+            } else {
+                alert('Settings saved successfully!');
+                closeModal('settingsModal');
+            }
+        }
+
+        function resetSettingsForm() {
+            document.getElementById('settingsForm').reset();
+            document.getElementById('pinSection').classList.add('hidden');
+            document.getElementById('saveSettingsBtn').innerText = 'Save Changes';
+        }
+        
+
+async function logoutUser() {
+    try {
+        // 1. Backend session destroy karne ke liye API call karein
+        await fetch('/api/auth/logout', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (err) {
+        console.error('Logout error:', err);
+    }
+    
+    // 2. Browser ka local storage clear karein
+    localStorage.clear();
+    
+    // 3. Seedha login page ('/') par redirect kar dein
+    window.location.replace('/');
+}
+
+        // Chart Initialization Script
+        const canvasCtx = document.getElementById('employeeStructureChart').getContext('2d');
+
+        const gradFull = canvasCtx.createLinearGradient(0, 0, 0, 200);
+        gradFull.addColorStop(0, '#60A5FA'); gradFull.addColorStop(1, '#2563EB');
+
+        const gradContract = canvasCtx.createLinearGradient(0, 0, 0, 200);
+        gradContract.addColorStop(0, '#34D399'); gradContract.addColorStop(1, '#059669');
+
+        const gradInterns = canvasCtx.createLinearGradient(0, 0, 0, 200);
+        gradInterns.addColorStop(0, '#C084FC'); gradInterns.addColorStop(1, '#7C3AED');
+
+        const shadowPlugin = {
+            id: 'doughnutShadow',
+            beforeDraw(chart) {
+                const { ctx } = chart;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetY = 6;
+            },
+            afterDraw(chart) { chart.ctx.restore(); }
+        };
+
+        new Chart(canvasCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Full-Time', 'Contract', 'Interns'],
+                datasets: [{
+                    data: [60, 25, 15],
+                    backgroundColor: [gradFull, gradContract, gradInterns],
+                    borderWidth: 0, spacing: 8, borderRadius: 8, cutout: '76%'
+                }]
+            },
+            plugins: [shadowPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#222222',
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.label || ''}: ${context.parsed || 0}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+    fetch('/api/hr/stats')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('totalEmpCount').innerText = data.totalEmployees;
+            }
+        })
+        .catch(err => console.error('Error fetching stats:', err));
+</script>
+</body>
+</html>

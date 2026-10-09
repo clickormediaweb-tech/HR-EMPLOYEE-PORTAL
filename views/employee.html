@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Employees</title>
+    <!-- Tailwind CSS CDN for rapid styling consistency -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD134',
+                        primaryHover: '#fbc512',
+                        darkText: '#222222',
+                        lightBorder: '#EAEAEA',
+                        appBg: '#F4F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #222222;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #EAEAEA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
+            <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
+                <a href="/hr/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>Employee</span>
+                </a>
+                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-bar w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="/hr/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Leaves</span>
+                </a>
+                <a href="/hr/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Holiday Calendar</span>
+                </a>
+                <a href="/hr/analytics" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="/hr/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Payroll</span>
+                </a>
+                <a href="/hr/departments" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-building w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                        <span>Departments</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 animate-pulse">6 Active</span>
+                </a>
+                <a href="/hr/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm cursor-pointer hover:border-amber-300 transition-all" onclick="alert('System Status: All nodes operational.')">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
+                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- 2. TOP HEADER -->
+        <header class="bg-white/85 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
+            <div class="relative w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="headerSearch" placeholder="Search employee directory..." onkeyup="filterEmployees()" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-5">
+                <button onclick="alert('You have 3 unread messages.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <i class="fa-regular fa-envelope text-sm"></i>
+                </button>
+                <button onclick="alert('No new notifications.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative cursor-pointer">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                </button>
+
+                <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
+
+                <!-- User Profile Dropdown Simulator -->
+                <div onclick="alert('Logged in as Tanya Dua (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                    <div class="text-right">
+                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                        <p class="text-xs text-gray-500">HR Manager</p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-8 space-y-6">
+            
+            <!-- PAGE TITLE & ADD EMPLOYEE ACTION -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
+                <div>
+                    <h2 class="text-2xl font-black text-[#222222]">Employee Directory</h2>
+                    <p class="text-xs text-gray-500 mt-1">Manage all organization staff members, roles, and employment records.</p>
+                </div>
+                <button onclick="openAddModal()" class="px-5 py-2.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transform hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer w-fit">
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                    <span>Add New Employee</span>
+                </button>
+            </div>
+
+            <!-- TAB SWITCHER: Active Staff vs. Former Staff -->
+            <div class="flex items-center gap-2 border-b border-[#EAEAEA] pb-4">
+                <button onclick="switchTab('active')" id="activeTabBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#FFD134] text-[#222222] shadow-sm transition-all cursor-pointer">
+                    Active Staff (<span id="activeTabCount"><%= employees.length %></span>)
+                </button>
+                <button onclick="switchTab('former')" id="formerTabBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-[#EAEAEA] hover:bg-gray-50 transition-all cursor-pointer">
+                    Former Staff / Ex-Employees (<span id="formerTabCount"><%= exEmployees.length %></span>)
+                </button>
+            </div>
+
+            <!-- EMPLOYEE DIRECTORY TABLE -->
+            <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <span id="tableTitle" class="text-sm font-bold text-[#222222]">All Active Staff</span>
+                        <span id="totalCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600"><%= employees.length %> Total</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select id="deptFilter" onchange="filterEmployees()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-[#FFD134] cursor-pointer">
+                            <option value="">All Departments</option>
+                            <option value="Design">Design</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="HR & Finance">HR & Finance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="employeeTable">
+                        <thead>
+                            <tr id="tableHeaderRow" class="bg-[#F3F4F6] text-gray-600 text-xs uppercase tracking-wider rounded-xl">
+                                <th class="py-3 px-4 font-semibold rounded-l-xl">Employee</th>
+                                <th class="py-3 px-4 font-semibold">Department</th>
+                                <th class="py-3 px-4 font-semibold">Designation</th>
+                                <th class="py-3 px-4 font-semibold">Status</th>
+                                <th class="py-3 px-4 font-semibold rounded-r-xl text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#EAEAEA] text-sm" id="employeeTableBody">
+                            <!-- Active Staff Render -->
+                            <% employees.forEach((emp, index) => { %>
+                                <tr class="hover:bg-amber-50/40 transition-all duration-200 employee-row active-row" data-name="<%= emp.name %>" data-email="<%= emp.email %>" data-dept="<%= emp.department %>" data-role="<%= emp.designation %>">
+                                    <td class="py-3.5 px-4 flex items-center gap-3">
+                                        <img src="<%= emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces' %>" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="<%= emp.name %>">
+                                        <div>
+                                            <h5 class="font-bold text-[#222222]"><%= emp.name %></h5>
+                                            <p class="text-xs text-gray-500"><%= emp.email %></p>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-gray-600 font-medium"><%= emp.department %></td>
+                                    <td class="py-3.5 px-4 text-gray-600"><%= emp.designation %></td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">ACTIVE</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right relative">
+                                        <button onclick="toggleActionMenu(event, 'menu_active_<%= index %>')" class="w-8 h-8 rounded-lg bg-gray-50 border border-[#EAEAEA] text-gray-600 hover:bg-[#FFD134] hover:border-[#FFD134] transition-all cursor-pointer"><i class="fa-solid fa-ellipsis-vertical text-xs"></i></button>
+                                        <div id="menu_active_<%= index %>" class="hidden absolute right-4 top-12 w-44 bg-white border border-[#EAEAEA] rounded-xl shadow-lg z-10 py-1 text-left">
+                                            <button onclick="openViewModal('<%= emp.name %>', '<%= emp.email %>', '<%= emp.department %>', '<%= emp.designation %>', 'ACTIVE', '', '')" class="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 text-left cursor-pointer">View Complete Vault</button>
+                                            <button onclick="openEditModal('<%= emp._id %>', '<%= emp.name %>', '<%= emp.email %>', '<%= emp.designation %>')" class="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 text-left cursor-pointer">Edit Details</button>
+                                            <button onclick="promptRemoveEmployee('<%= emp.email %>', '<%= emp.name %>')" class="w-full px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 text-left cursor-pointer">Remove Employee</button>                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+
+                            <!-- Former Staff / Ex-Employees Render -->
+                            <% exEmployees.forEach((emp, index) => { %>
+                                <tr class="hover:bg-amber-50/40 transition-all duration-200 employee-row former-row" data-name="<%= emp.name %>" data-email="<%= emp.email %>" data-dept="<%= emp.department %>" data-role="<%= emp.designation %>" style="display: none;">
+                                    <td class="py-3.5 px-4 flex items-center gap-3">
+                                        <img src="<%= emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces' %>" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" alt="<%= emp.name %>">
+                                        <div>
+                                            <h5 class="font-bold text-[#222222]"><%= emp.name %></h5>
+                                            <p class="text-xs text-gray-500"><%= emp.email %></p>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-gray-600 font-medium"><%= emp.department %></td>
+                                    <td class="py-3.5 px-4 text-gray-600"><%= emp.designation %></td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg shadow-sm">FORMER STAFF</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right relative">
+                                        <button onclick="toggleActionMenu(event, 'menu_former_<%= index %>')" class="w-8 h-8 rounded-lg bg-gray-50 border border-[#EAEAEA] text-gray-600 hover:bg-[#FFD134] hover:border-[#FFD134] transition-all cursor-pointer"><i class="fa-solid fa-ellipsis-vertical text-xs"></i></button>
+                                        <div id="menu_former_<%= index %>" class="hidden absolute right-4 top-12 w-44 bg-white border border-[#EAEAEA] rounded-xl shadow-lg z-10 py-1 text-left">
+                                            <button onclick="openViewModal('<%= emp.name %>', '<%= emp.email %>', '<%= emp.department %>', '<%= emp.designation %>', 'FORMER', '2024-01-15', '2026-09-30')" class="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 text-left cursor-pointer">View Complete Vault</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer Info -->
+                <div class="flex items-center justify-between mt-6 pt-4 border-t border-[#EAEAEA]">
+                    <span id="paginationInfo" class="text-xs text-gray-500 font-medium">Showing records</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- VIEW PROFILE MODAL (All 5 Verification Documents) -->
+    <div id="viewProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-[#EAEAEA] relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-[#222222]">Employee Profile & Verification Vault</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="flex flex-col items-center text-center space-y-3">
+                <img id="viewAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces" class="w-20 h-20 rounded-full object-cover ring-4 ring-amber-100 shadow-md" alt="">
+                <h4 id="viewName" class="text-lg font-bold text-[#222222]"></h4>
+                <p id="viewRole" class="text-xs text-amber-600 font-bold bg-amber-50 px-3 py-1 rounded-full"></p>
+            </div>
+
+            <!-- Details Block -->
+            <div class="mt-6 space-y-3 bg-gray-50 p-4 rounded-2xl border border-[#EAEAEA] text-xs">
+                <div class="flex justify-between"><span class="text-gray-500 font-medium">Work Email:</span> <span id="viewEmail" class="font-bold text-[#222222]"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500 font-medium">Department:</span> <span id="viewDept" class="font-bold text-[#222222]"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500 font-medium">Employment Status:</span> <span id="viewStatus" class="font-bold text-emerald-600"></span></div>
+                <div id="tenureRow" class="hidden justify-between pt-2 border-t border-gray-200"><span class="text-gray-500 font-medium">Work Tenure:</span> <span id="viewTenure" class="font-bold text-amber-700"></span></div>
+            </div>
+
+            <!-- SUBMITTED DOCUMENTS & MARKSHEETS SECTION -->
+            <div class="mt-6 space-y-3">
+                <h5 class="text-xs font-black text-[#222222] uppercase tracking-wider">Submitted Credentials & Bank Vault</h5>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-[#EAEAEA] text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-graduation-cap text-amber-500 text-base"></i>
+                            <div>
+                                <p class="font-bold text-[#222222]">10th & 12th Board Marksheets.pdf</p>
+                                <p class="text-[10px] text-gray-400">Academic Verification</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="alert('Previewing 10th & 12th Marksheets...')" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-[#EAEAEA] rounded-lg hover:bg-gray-100 cursor-pointer">Preview</button>
+                            <button onclick="alert('Downloading 10th & 12th Marksheets...')" class="px-2.5 py-1 text-[11px] font-bold bg-[#FFD134] text-[#222222] rounded-lg hover:bg-[#fbc512] cursor-pointer">Download</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-[#EAEAEA] text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-university text-indigo-500 text-base"></i>
+                            <div>
+                                <p class="font-bold text-[#222222]">College Degree & Semester Marksheets.pdf</p>
+                                <p class="text-[10px] text-gray-400">Higher Education Records</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="alert('Previewing College Marksheet...')" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-[#EAEAEA] rounded-lg hover:bg-gray-100 cursor-pointer">Preview</button>
+                            <button onclick="alert('Downloading College Marksheet...')" class="px-2.5 py-1 text-[11px] font-bold bg-[#FFD134] text-[#222222] rounded-lg hover:bg-[#fbc512] cursor-pointer">Download</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-[#EAEAEA] text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-file-signature text-blue-500 text-base"></i>
+                            <div>
+                                <p class="font-bold text-[#222222]">Previous_Job_Relieving_Letter.pdf</p>
+                                <p class="text-[10px] text-gray-400">Experience & Clearance Certificate</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="alert('Previewing Relieving Letter...')" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-[#EAEAEA] rounded-lg hover:bg-gray-100 cursor-pointer">Preview</button>
+                            <button onclick="alert('Downloading Relieving Letter...')" class="px-2.5 py-1 text-[11px] font-bold bg-[#FFD134] text-[#222222] rounded-lg hover:bg-[#fbc512] cursor-pointer">Download</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-[#EAEAEA] text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-file-invoice-dollar text-emerald-500 text-base"></i>
+                            <div>
+                                <p class="font-bold text-[#222222]">Last_3_Months_Pay_Slips.pdf</p>
+                                <p class="text-[10px] text-gray-400">Previous Employment Compensation Proof</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="alert('Previewing Pay Slips...')" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-[#EAEAEA] rounded-lg hover:bg-gray-100 cursor-pointer">Preview</button>
+                            <button onclick="alert('Downloading Pay Slips...')" class="px-2.5 py-1 text-[11px] font-bold bg-[#FFD134] text-[#222222] rounded-lg hover:bg-[#fbc512] cursor-pointer">Download</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-[#EAEAEA] text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-building-columns text-purple-500 text-base"></i>
+                            <div>
+                                <p class="font-bold text-[#222222]">Cancelled_Cheque_Bank_Details.pdf</p>
+                                <p class="text-[10px] text-gray-400">Direct Deposit Account Verification</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="alert('Previewing Bank Details...')" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-[#EAEAEA] rounded-lg hover:bg-gray-100 cursor-pointer">Preview</button>
+                            <button onclick="alert('Downloading Bank Details...')" class="px-2.5 py-1 text-[11px] font-bold bg-[#FFD134] text-[#222222] rounded-lg hover:bg-[#fbc512] cursor-pointer">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-[#EAEAEA] text-right">
+                <button onclick="closeModals()" class="px-5 py-2 text-xs font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] transition-all cursor-pointer">Close Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REMOVE / TENURE DIALOG MODAL -->
+    <div id="removeEmployeeModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-black text-[#222222]">Archive Employee Record</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-500 mb-4">Please specify the active employment tenure for <span id="removingEmpName" class="font-bold text-[#222222]"></span> before moving them to the ex-employee archive.</p>
+            <form onsubmit="confirmRemoveEmployee(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Joining / Start Date</label>
+                    <input type="date" id="startDateInput" required value="2024-01-15" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Last Working Day / End Date</label>
+                    <input type="date" id="endDateInput" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
+                    <button type="button" onclick="closeModals()" class="px-5 py-2.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-rose-500 rounded-xl hover:bg-rose-600 shadow-md transition-all cursor-pointer">Archive & Remove</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-[#222222]">Edit Employee Details</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleEditSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="editNameInput" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Work Email</label>
+                    <input type="email" id="editEmailInput" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Designation</label>
+                    <input type="text" id="editRoleInput" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
+                    <button type="button" onclick="closeModals()" class="px-5 py-2.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] shadow-md transition-all cursor-pointer">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD EMPLOYEE MODAL -->
+    <div id="addEmployeeModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-[#222222]">Add New Employee</h3>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleEmployeeSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="addName" required placeholder="e.g. Rahul Sharma" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Work Email</label>
+                    <input type="email" id="addEmail" required placeholder="rahul@clickormedia.co.in" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Department</label>
+                    <select id="addDept" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                        <option value="Design">Design</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="HR & Finance">HR & Finance</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Designation</label>
+                    <input type="text" id="addRole" required placeholder="e.g. Senior Frontend Dev" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Phone Number</label>
+                    <input type="text" id="addPhone" placeholder="+91 98765 43210" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
+                    <button type="button" onclick="closeModals()" class="px-5 py-2.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] shadow-md transition-all cursor-pointer">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interactive Script -->
+    <script>
+        let currentTab = 'active';
+        let activeEmpId = null;
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const activeBtn = document.getElementById('activeTabBtn');
+            const formerBtn = document.getElementById('formerTabBtn');
+            const activeRows = document.querySelectorAll('.active-row');
+            const formerRows = document.querySelectorAll('.former-row');
+
+            if (tab === 'active') {
+                activeBtn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#FFD134] text-[#222222] shadow-sm transition-all cursor-pointer";
+                formerBtn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-[#EAEAEA] hover:bg-gray-50 transition-all cursor-pointer";
+                document.getElementById('tableTitle').innerText = "All Active Staff";
+                document.getElementById('totalCountBadge').innerText = activeRows.length + " Total";
+                activeRows.forEach(r => r.style.display = "");
+                formerRows.forEach(r => r.style.display = "none");
+            } else {
+                formerBtn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#FFD134] text-[#222222] shadow-sm transition-all cursor-pointer";
+                activeBtn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-[#EAEAEA] hover:bg-gray-50 transition-all cursor-pointer";
+                document.getElementById('tableTitle').innerText = "Former Staff / Ex-Employees";
+                document.getElementById('totalCountBadge').innerText = formerRows.length + " Total";
+                activeRows.forEach(r => r.style.display = "none");
+                formerRows.forEach(r => r.style.display = "");
+            }
+        }
+
+        function filterEmployees() {
+            let input = document.getElementById('headerSearch').value.toLowerCase();
+            let deptFilter = document.getElementById('deptFilter').value.toLowerCase();
+            let rows = document.querySelectorAll(currentTab === 'active' ? '.active-row' : '.former-row');
+
+            rows.forEach(row => {
+                let name = row.getAttribute('data-name').toLowerCase();
+                let email = row.getAttribute('data-email').toLowerCase();
+                let role = row.getAttribute('data-role').toLowerCase();
+                let dept = row.getAttribute('data-dept').toLowerCase();
+
+                let matchesSearch = name.includes(input) || email.includes(input) || role.includes(input);
+                let matchesDept = deptFilter === "" || dept.includes(deptFilter);
+
+                if (matchesSearch && matchesDept) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function toggleActionMenu(event, menuId) {
+            event.stopPropagation();
+            document.querySelectorAll('[id^="menu_"]').forEach(m => {
+                if(m.id !== menuId) m.classList.add('hidden');
+            });
+            const menu = document.getElementById(menuId);
+            menu.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('[id^="menu_"]').forEach(m => m.classList.add('hidden'));
+        });
+
+        function openViewModal(name, email, dept, role, status, start, end) {
+            document.getElementById('viewName').innerText = name;
+            document.getElementById('viewRole').innerText = role;
+            document.getElementById('viewEmail').innerText = email;
+            document.getElementById('viewDept').innerText = dept;
+            document.getElementById('viewStatus').innerText = status;
+
+            if (start && end) {
+                document.getElementById('tenureRow').classList.remove('hidden');
+                document.getElementById('tenureRow').classList.add('flex');
+                document.getElementById('viewTenure').innerText = `${start} to ${end}`;
+            } else {
+                document.getElementById('tenureRow').classList.add('hidden');
+                document.getElementById('tenureRow').classList.remove('flex');
+            }
+
+            document.getElementById('viewProfileModal').classList.remove('hidden');
+        }
+
+        function openEditModal(id, name, email, role) {
+            activeEmpId = id;
+            document.getElementById('editNameInput').value = name;
+            document.getElementById('editEmailInput').value = email;
+            document.getElementById('editRoleInput').value = role;
+            document.getElementById('editProfileModal').classList.remove('hidden');
+        }
+
+        function openAddModal() {
+            document.getElementById('addEmployeeModal').classList.remove('hidden');
+        }
+
+        function promptRemoveEmployee(id, name) {
+            activeEmpId = id;
+            document.getElementById('removingEmpName').innerText = name;
+            document.getElementById('endDateInput').value = new Date().toISOString().split('T')[0];
+            document.getElementById('removeEmployeeModal').classList.remove('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('viewProfileModal').classList.add('hidden');
+            document.getElementById('editProfileModal').classList.add('hidden');
+            document.getElementById('addEmployeeModal').classList.add('hidden');
+            document.getElementById('removeEmployeeModal').classList.add('hidden');
+        }
+
+        // Backend Integration: Archive Employee
+        async function confirmRemoveEmployee(event) {
+            event.preventDefault();
+            if (!activeEmpId) return;
+
+            try {
+                const response = await fetch(`/api/employees/${activeEmpId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('Employee successfully archived into Former Staff Records!');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Error archiving employee.');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Server connection error.');
+            }
+        }
+
+       // Backend Integration: Add Employee
+        async function handleEmployeeSubmit(event) {
+            event.preventDefault();
+            let name = document.getElementById('addName').value.trim();
+            let email = document.getElementById('addEmail').value.trim();
+            let department = document.getElementById('addDept').value;
+            let designation = document.getElementById('addRole').value.trim();
+            let phone = document.getElementById('addPhone').value.trim();
+
+            try {
+                const response = await fetch('/api/employees/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, department, designation, phone })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('New employee successfully added to database!');
+                    closeModals();
+                    window.location.reload(); // Now reloads cleanly after saving to MongoDB
+                } else {
+                    alert(data.message || 'Error adding employee.');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Server connection error.');
+            }
+        }
+
+        function handleEditSubmit(event) {
+            event.preventDefault();
+            alert('Edit feature updated successfully!');
+            closeModals();
+        }
+    </script>
+</body>
+</html>
