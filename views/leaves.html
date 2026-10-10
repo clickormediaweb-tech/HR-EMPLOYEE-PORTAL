@@ -147,15 +147,21 @@
                     <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
                 </button>
 
+                 <!-- FIXED LOGOUT BUTTON -->
+                            <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+    <i class="fa-solid fa-right-from-bracket w-4 text-rose-500"></i>
+    <span>Log Out</span>
+</a>
+
                 <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
 
                 <!-- User Profile Dropdown Simulator -->
-                <div onclick="alert('Logged in as Tanya Dua (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                <div onclick="alert('Logged in as Admin (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
                     <div class="text-right">
-                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Tanya Dua</h4>
+                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
                         <p class="text-xs text-gray-500">HR Manager</p>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Tanya Dua" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
                     <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                 </div>
             </div>
@@ -279,7 +285,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="text-xl font-black text-[#222222]">Apply For My Leave</h3>
-                    <p class="text-[11px] text-gray-500">Applicant: Tanya Dua (HR Manager)</p>
+                    <p class="text-[11px] text-gray-500">Applicant: Admin (HR Manager)</p>
                 </div>
                 <button onclick="closeApplyModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
