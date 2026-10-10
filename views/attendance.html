@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Portal - Attendance</title>
+    <title>Employee Portal - My Attendance</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
@@ -43,84 +46,62 @@
             background: #EAEAEA;
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d1d5db;
-        }
-        @media print {
-            aside, header, button, .no-print {
-                display: none !important;
-            }
-            body {
-                background: white !important;
-            }
-        }
     </style>
 </head>
-<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden">
+<body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
 
-    <!-- 1. LEFT SIDEBAR -->
+    <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
     <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
         <div class="flex flex-col h-full">
+            <!-- Logo / Title -->
             <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FFD134] to-[#ffe578] flex items-center justify-center text-[#222222] shadow-md shadow-[#FFD134]/30 transform hover:rotate-6 transition-transform duration-300">
-                    <i class="fa-solid fa-layer-group text-lg"></i>
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
+                    <i class="fa-solid fa-user-tie text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">HR Portal</h1>
-                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
+                    <h1 class="text-xl font-bold text-[#222222] tracking-tight">Staff Portal</h1>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
                 </div>
             </div>
 
+            <!-- Navigation Items -->
             <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
-                <a href="/hr/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Dashboard</span>
+                <a href="/employee/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-house w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Dashboard</span>
                 </a>
-                <a href="/hr/employees" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-users w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Employee</span>
+                <a href="/employee/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/25 transition-all duration-300 transform scale-[1.02]">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+                    <span>My Attendance</span>
                 </a>
-                <a href="/hr/attendance" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/20 transition-all duration-300 transform scale-[1.02]">
-                    <i class="fa-solid fa-chart-bar w-5 text-center"></i>
-                    <span>Attendance</span>
+                <!-- Sahi route /employee/leaves set kar diya gaya hai -->
+                <a href="/employee/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Apply for Leave</span>
                 </a>
-                <a href="/hr/leaves" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Leaves</span>
+                <a href="/employee/payslips" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>My Payslips</span>
                 </a>
-                <a href="/hr/holidaycalendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-file-arrow-down w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
+                <a href="/employee/holiday-calendar" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
                     <span>Holiday Calendar</span>
                 </a>
-                <a href="/hr/analytics" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-chart-line w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Analytics</span>
-                </a>
-                <a href="/hr/payroll" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-wallet w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Payroll</span>
-                </a>
-                <a href="/hr/departments" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <div class="flex items-center gap-3.5">
-                        <i class="fa-solid fa-building w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                        <span>Departments</span>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 animate-pulse">6 Active</span>
-                </a>
-                <a href="/hr/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
-                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-[#FFD134] transition-colors"></i>
-                    <span>Settings</span>
+                <a href="/employee/settings" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[#555555] hover:bg-gray-50 hover:text-[#222222] hover:translate-x-1.5 font-medium transition-all duration-300 group">
+                    <i class="fa-solid fa-gear w-5 text-center text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                    <span>Account Settings</span>
                 </a>
             </nav>
 
-            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-amber-50/50 border border-[#EAEAEA] shadow-sm cursor-pointer hover:border-amber-300 transition-all" onclick="alert('System Status: All nodes operational.')">
+            <!-- Sidebar Footer Workspace Card -->
+            <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50/50 border border-[#EAEAEA] shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-500/5">
-                        <i class="fa-solid fa-circle-check"></i>
+                    <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs ring-4 ring-blue-500/5">
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-[#222222]">System Status: Online</p>
-                        <p class="text-[10px] text-gray-500">All systems running smoothly</p>
+                        <p class="text-xs font-bold text-[#222222]">ESS Portal Active</p>
+                        <p class="text-[10px] text-gray-500">Attendance Tracker</p>
                     </div>
                 </div>
             </div>
@@ -129,152 +110,162 @@
 
     <!-- MAIN CONTENT CONTAINER -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-       
+        
         <!-- 2. TOP HEADER -->
         <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
-            <div class="relative w-80">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                </span>
-                <input type="text" id="attendanceSearch" placeholder="Search staff attendance..." onkeyup="filterAttendance()" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-full pl-11 pr-4 py-2.5 text-sm text-[#222222] focus:outline-none focus:border-[#FFD134] focus:ring-2 focus:ring-[#FFD134]/30 transition-all duration-300 shadow-inner">
+            <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-[#222222]">My Attendance Logs </h3>
             </div>
 
+            <!-- Right Actions & User Profile -->
             <div class="flex items-center gap-5">
-                <button onclick="alert('You have 3 unread messages.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 cursor-pointer">
-                    <i class="fa-regular fa-envelope text-sm"></i>
-                </button>
-                <button onclick="alert('No new notifications.')" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-[#FFD134]/20 hover:text-[#222222] transform hover:scale-105 transition-all duration-200 relative cursor-pointer">
-                    <i class="fa-regular fa-bell text-sm"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
-                </button>
+                
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown(event)" class="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#555555] hover:bg-blue-100 hover:text-blue-700 transition-all relative cursor-pointer" title="Notifications">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-ping"></span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-4 z-50 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                            <h4 class="font-bold text-[#222222] text-sm">Notifications</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">2 New</span>
+                        </div>
+                        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                            <div class="p-3 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-blue-900"><i class="fa-solid fa-bullhorn mr-1.5"></i> Announcement</span>
+                                    <span class="text-[10px] text-gray-400">2h ago</span>
+                                </div>
+                                <p class="text-gray-600 font-medium">Office timings updated for festival week.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
 
-                <div onclick="alert('Admin (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
-                    <div class="text-right">
-                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
-                        <p class="text-xs text-gray-500">HR Manager</p>
+                <!-- User Profile Dropdown Menu -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
+                            <p class="text-xs text-gray-500">HR Manager</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+
+                    <!-- Profile Menu Content -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-2 z-50">
+                        <div class="px-4 py-3 border-b border-[#EAEAEA]">
+                            <p class="text-xs font-bold text-[#222222]">Admin</p>
+                            <p class="text-[11px] text-gray-500 truncate">admin@clickormedia.co.in</p>
+                        </div>
+                        <div class="py-1">
+                            <button onclick="openModal('profileModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-user-gear w-4 text-gray-400"></i>
+                                <span>My Profile</span>
+                            </button>
+                            <button onclick="openModal('settingsModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-gear w-4 text-gray-400"></i>
+                                <span>Account Settings</span>
+                            </button>
+                            <button onclick="openModal('securityModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-shield-halved w-4 text-gray-400"></i>
+                                <span>Privacy & Security</span>
+                            </button>
+                        </div>
+                        <div class="pt-1 border-t border-[#EAEAEA]">
+                            <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+                                <i class="fa-solid fa-right-from-bracket w-4 text-rose-500"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
         </header>
 
         <!-- PAGE CONTENT CONTAINER -->
         <main class="flex-1 overflow-y-auto p-8 space-y-6">
-           
-            <!-- LIVE OFFICE TIMINGS BANNER -->
-            <div class="bg-gradient-to-r from-amber-50 via-white to-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-business-time"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800">Active Office Shift Policy</h4>
-<p class="text-sm font-extrabold text-[#222222]" id="activeShiftDisplay">Loading shift policy...</p>                    </div>
+            
+            <!-- ATTENDANCE OVERVIEW STATS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Working Days</p>
+                    <h3 id="workingDaysCount" class="text-3xl font-black text-[#222222] mt-1 group-hover:scale-105 transition-transform origin-left">-- Days</h3>
+                    <p class="text-[11px] text-gray-400 mt-1" id="selectedMonthLabel">Current Month</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Present Days</p>
+                    <h3 class="text-3xl font-black text-emerald-600 mt-1 group-hover:scale-105 transition-transform origin-left" id="presentCount">0 Days</h3>
+                    <p class="text-[11px] text-emerald-600 mt-1 font-semibold"><i class="fa-solid fa-circle-check"></i> On time record</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leaves Taken</p>
+                    <h3 id="leavesTakenCount" class="text-3xl font-black text-blue-600 mt-1 group-hover:scale-105 transition-transform origin-left">0 Days</h3>
+                    <p class="text-[11px] text-blue-600 mt-1 font-semibold">Backend Synced</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Attendance Rate</p>
+                    <h3 class="text-3xl font-black text-indigo-600 mt-1 group-hover:scale-105 transition-transform origin-left">96.5%</h3>
+                    <p class="text-[11px] text-gray-400 mt-1">Exceeds company benchmark</p>
                 </div>
             </div>
 
-            <!-- PAGE TITLE & DATE SELECTOR -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
-                <div>
-                    <h2 class="text-2xl font-black text-[#222222]">Attendance Overview</h2>
-                    <p class="text-xs text-gray-500 mt-1">Monitor daily check-ins, separate check-in/out locations, timestamps, and punch records.</p>
-                </div>
-                <div class="flex items-center gap-3 flex-wrap">
-<input type="date" id="selectedDate" onchange="renderAttendanceTable()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">                   
-                    <button onclick="openTimingsModal()" class="px-4 py-2.5 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs shadow-sm hover:bg-amber-200 transition-all cursor-pointer flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>Update Office Timings</span>
-                    </button>
-
-                    <button onclick="openManualModal()" class="px-4 py-2.5 rounded-xl bg-[#222222] text-white font-bold text-xs shadow-md hover:bg-black transition-all cursor-pointer flex items-center gap-2">
-                        <i class="fa-solid fa-user-pen text-[#FFD134]"></i>
-                        <span>Mark Manual Attendance</span>
-                    </button>
-
-                    <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-xs shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transition-all cursor-pointer flex items-center gap-2">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Export PDF Report</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- ATTENDANCE METRICS CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div onclick="filterByCard('')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
+            <!-- ATTENDANCE HISTORY TABLE WITH FILTERS -->
+            <div class="bg-white rounded-3xl border border-[#EAEAEA] shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-gray-500">Overall Attendance</p>
-<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors" id="cardOverallPercent">100%</h3>                        <span class="text-xs font-bold text-emerald-600 mt-2 inline-block"><i class="fa-solid fa-arrow-trend-up"></i> Full team accounted</span>
+                        <h3 class="text-base font-bold text-[#222222]">Detailed Attendance Log</h3>
+                        <p class="text-xs text-gray-400">Review your daily punch-in, punch-out times, and GPS verification status.</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-user-check"></i>
-                    </div>
-                </div>
-
-                <div onclick="filterByCard('On Time')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">On Time</p>
-<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-blue-600 transition-colors" id="cardOnTimeCount">4</h3>                        <span id="onTimeCardSubtitle" class="text-xs font-bold text-emerald-600 mt-2 inline-block">Clocked in before 09:30 AM</span>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                </div>
-
-                <div onclick="filterByCard('Late')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Late Arrivals</p>
-<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors" id="cardLateCount">1</h3>                        <span class="text-xs font-bold text-amber-600 mt-2 inline-block">Requires warning check</span>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                </div>
-
-                <div onclick="filterByCard('Absent')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Absent / Leave</p>
-<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-rose-600 transition-colors" id="cardAbsentCount">0</h3>                        <span class="text-xs font-bold text-rose-600 mt-2 inline-block">Approved & unapproved</span>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-user-xmark"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DAILY ATTENDANCE LOG TABLE -->
-            <div class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-bold text-[#222222]">Today's Activity Log</span>
-                        <span id="logCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">0 Total</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <select id="statusFilter" onchange="filterAttendance()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                            <option value="">All Status</option>
-                            <option value="On Time">On Time</option>
-                            <option value="Late">Late</option>
-                            <option value="Absent">Absent</option>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <!-- Filter Status Dropdown -->
+                        <select id="statusFilter" onchange="filterTable()" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none cursor-pointer">
+                            <option value="ALL">All Statuses</option>
+                            <option value="ON TIME">On Time</option>
+                            <option value="LATE">Late In</option>
+                            <option value="ABSENT">Absent</option>
                         </select>
+                        <!-- Dynamic Month Selector (All 12 Months Added) -->
+                        <select id="monthSelector" onchange="filterTable()" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none cursor-pointer">
+                            <option value="0">January 2026</option>
+                            <option value="1">February 2026</option>
+                            <option value="2">March 2026</option>
+                            <option value="3">April 2026</option>
+                            <option value="4">May 2026</option>
+                            <option value="5">June 2026</option>
+                            <option value="6">July 2026</option>
+                            <option value="7">August 2026</option>
+                            <option value="8" selected>September 2026</option>
+                            <option value="9">October 2026</option>
+                            <option value="10">November 2026</option>
+                            <option value="11">December 2026</option>
+                        </select>
+                        <!-- Request Regularization Button -->
+                        <button onclick="alert('Regularization form opened: Submit a request if you missed punching in/out.')" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer whitespace-nowrap">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Regularize
+                        </button>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse whitespace-nowrap" id="attendanceTable">
+                    <table id="attendanceTable" class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-[#F3F4F6] text-gray-600 text-xs uppercase tracking-wider rounded-xl">
-                                <th class="py-3 px-4 font-semibold rounded-l-xl">Employee</th>
-                                <th class="py-3 px-4 font-semibold">Department</th>
-                                <th class="py-3 px-4 font-semibold">Check-In (Time & Location)</th>
-                                <th class="py-3 px-4 font-semibold">Check-Out (Time & Location)</th>
-                                <th class="py-3 px-4 font-semibold">Status</th>
-                                <th class="py-3 px-4 font-semibold rounded-r-xl text-right">Action</th>
+                            <tr class="bg-gray-50/70 text-gray-400 font-bold uppercase tracking-wider border-b border-gray-100">
+                                <th class="py-4 px-6">Date</th>
+                                <th class="py-4 px-6">Punch In</th>
+                                <th class="py-4 px-6">Punch Out</th>
+                                <th class="py-4 px-6">Total Hours</th>
+                                <th class="py-4 px-6">Verified Location</th>
+                                <th class="py-4 px-6 text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#EAEAEA] text-sm" id="attendanceTableBody">
-                            <!-- Populated via Backend Fetch -->
+                        <tbody id="attendanceTableBody" class="divide-y divide-gray-100 text-[#222222] font-medium">
+                            <!-- Populated dynamically from backend server -->
                         </tbody>
                     </table>
                 </div>
@@ -283,493 +274,149 @@
         </main>
     </div>
 
-    <!-- ATTENDANCE DETAILS MODAL -->
-    <div id="attendanceModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-[#EAEAEA] relative max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="text-xl font-black text-[#222222]">Monthly Attendance Vault</h3>
-                    <p class="text-xs text-gray-500">Audit punch-in & punch-out history by month</p>
-                </div>
-                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-2xl border border-[#EAEAEA] mb-6">
-                <div class="flex items-center gap-4">
-                    <img id="modalAvatar" src="" class="w-14 h-14 rounded-full object-cover ring-4 ring-amber-100 shadow-md" alt="">
-                    <div>
-                        <h4 id="modalName" class="text-base font-bold text-[#222222]"></h4>
-                        <p id="modalRole" class="text-xs text-amber-600 font-bold">Designation</p>
-                        <p id="modalEmail" class="text-xs text-gray-400"></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <select id="vaultMonthSelect" onchange="regenerateMonthlyVault()" class="bg-white border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                        <option value="0">January</option>
-                        <option value="1">February</option>
-                        <option value="2">March</option>
-                        <option value="3">April</option>
-                        <option value="4">May</option>
-                        <option value="5">June</option>
-                        <option value="6">July</option>
-                        <option value="7">August</option>
-                        <option value="8">September</option>
-                        <option value="9" selected>October</option>
-                        <option value="10">November</option>
-                        <option value="11">December</option>
-                    </select>
-                    <select id="vaultYearSelect" onchange="regenerateMonthlyVault()" class="bg-white border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                        <option value="2025">2025</option>
-                        <option value="2026" selected>2026</option>
-                        <option value="2027">2027</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                <h5 id="vaultTableTitle" class="text-xs font-black text-[#222222] uppercase tracking-wider">Daily Log History</h5>
-                <div class="max-h-60 overflow-y-auto border border-[#EAEAEA] rounded-xl">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-gray-100 sticky top-0 text-gray-600">
-                            <tr>
-                                <th class="p-3 font-semibold">Date</th>
-                                <th class="p-3 font-semibold">Check-In</th>
-                                <th class="p-3 font-semibold">Check-Out</th>
-                                <th class="p-3 font-semibold">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monthlyLogsTableBody" class="divide-y divide-gray-200 bg-white">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="mt-6 pt-4 border-t border-[#EAEAEA] flex items-center justify-between">
-                <button onclick="window.print()" class="px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 rounded-xl hover:bg-amber-200 transition-all cursor-pointer"><i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF Vault</button>
-                <button onclick="closeModal()" class="px-5 py-2 text-xs font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] transition-all cursor-pointer">Close Vault</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- UPDATE OFFICE TIMINGS MODAL -->
-    <div id="timingsModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAEAEA]">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-black text-[#222222]">Update Office Timings</h3>
-                <button onclick="closeTimingsModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="handleTimingsSubmit(event)" class="space-y-4 text-xs">
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Standard Shift Start Time</label>
-                    <input type="text" id="shiftStartTime" value="09:30 AM" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Standard Shift End Time</label>
-                    <input type="text" id="shiftEndTime" value="06:30 PM" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Grace Period (Minutes)</label>
-                    <input type="number" id="gracePeriod" value="15" min="0" max="60" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#FFD134]">
-                    <p class="text-[10px] text-gray-500 mt-1">Employees arriving within this grace period after start time won't be marked late.</p>
-                </div>
-                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
-                    <button type="button" onclick="closeTimingsModal()" class="px-5 py-2.5 font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] shadow-md transition-all cursor-pointer">Save Timings</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MARK MANUAL ATTENDANCE MODAL -->
-    <div id="manualAttendanceModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#EAEAEA]">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-black text-[#222222]">Mark Manual Attendance</h3>
-                <button onclick="closeManualModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="handleManualSubmit(event)" class="space-y-4 text-xs">
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Select Active Employee</label>
-                    <select id="manualEmpSelect" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Attendance Date</label>
-                    <input type="date" id="manualLogDate" value="2026-10-06" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                </div>
-               
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Check-In Time</label>
-                        <input type="text" id="manualCheckInTime" required placeholder="e.g. 09:00 AM" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Check-In Location</label>
-                        <select id="manualCheckInLoc" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                            <option value="Head Office (Terminal A)">Head Office (Terminal A)</option>
-                            <option value="Branch Office (Jammu)">Branch Office (Jammu)</option>
-                            <option value="Remote / WFH (GPS Verified)">Remote / WFH (GPS Verified)</option>
-                            <option value="Client Site">Client Site</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Check-Out Time</label>
-                        <input type="text" id="manualCheckOutTime" placeholder="e.g. 06:00 PM" value="06:00 PM" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Check-Out Location</label>
-                        <select id="manualCheckOutLoc" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                            <option value="Head Office (Terminal A)">Head Office (Terminal A)</option>
-                            <option value="Branch Office (Jammu)">Branch Office (Jammu)</option>
-                            <option value="Remote / WFH (GPS Verified)">Remote / WFH (GPS Verified)</option>
-                            <option value="Client Site">Client Site</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1">Status</label>
-                    <select id="manualStatus" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
-                        <option value="On Time">On Time</option>
-                        <option value="Late">Late</option>
-                        <option value="Absent">Absent</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#EAEAEA]">
-                    <button type="button" onclick="closeManualModal()" class="px-5 py-2.5 font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all cursor-pointer">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 font-bold text-[#222222] bg-[#FFD134] rounded-xl hover:bg-[#fbc512] shadow-md transition-all cursor-pointer">Save Attendance Record</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Script for interactive data & backend connection & strict filtering -->
+    <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
     <script>
-        let attendanceLogs = [];
-        let activeEmployees = [];
-        let selectedLogIndex = null;
+        let allEmployeeLogs = [];
+        let loggedInName = localStorage.getItem('hr_user') || 'Tanya Dua';
 
-        async function fetchAttendanceLogs() {
-            try {
-                const response = await fetch('/api/attendance');
-                const data = await response.json();
-                if (data.success) {
-                    attendanceLogs = data.attendance;
-                    renderAttendanceTable();
-                }
-            } catch (err) {
-                console.error('Error loading attendance logs:', err);
-            }
-        }
+        window.onload = function() {
+            document.getElementById('empProfileName').innerText = loggedInName;
+            document.getElementById('empDropdownName').innerText = loggedInName;
 
-        async function loadSettings() {
-            try {
-                const res = await fetch('/api/settings');
-                const data = await res.json();
-                
-                if (data.success && data.settings) {
-                    let s = data.settings;
-                    
-                    if(document.getElementById('shiftStartTime')) document.getElementById('shiftStartTime').value = s.shiftStartTime || "09:30 AM";
-                    if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = s.shiftEndTime || "06:30 PM";
-                    if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = s.gracePeriod || "15";
-                    
-                    // Yahan s.shiftStartTime aur s.shiftEndTime ka use kiya gaya hai taaki updated timings dikhein
-                    let shiftDisplay = document.getElementById('activeShiftDisplay');
-                    if(shiftDisplay) {
-                        shiftDisplay.innerHTML = `${s.shiftStartTime || "09:30 AM"} – ${s.shiftEndTime || "06:30 PM"} <span class="text-xs font-normal text-gray-500">(Grace Period: ${s.gracePeriod || "15"} mins)</span>`;
+            // 1. Fetch live attendance logs from backend server
+            fetch('/api/attendance')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.attendance) {
+                        allEmployeeLogs = data.attendance;
+                        filterTable();
                     }
-                    
-                    let subTitle = document.getElementById('onTimeCardSubtitle');
-                    if(subTitle) {
-                        subTitle.innerText = `Clocked in before ${s.shiftStartTime || "09:30 AM"}`;
+                })
+                .catch(err => console.error("Error fetching attendance records:", err));
+
+            // 2. Fetch backend stats to get dynamic backend leaves taken count
+            fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInName)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.employee) {
+                        let leavesArr = data.employee.recentLeaves || [];
+                        document.getElementById('leavesTakenCount').innerText = `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
                     }
-                }
-            } catch (err) {
-                console.error('Error loading settings:', err);
-            }
-        }
+                })
+                .catch(err => console.error("Error fetching employee stats:", err));
+        };
 
-        async function fetchActiveEmployeesForDropdown() {
-            try {
-                const res = await fetch('/api/employees/active');
-                const data = await res.json();
-                if (data.success) {
-                    activeEmployees = data.employees;
-                    let dropdown = document.getElementById('manualEmpSelect');
-                    dropdown.innerHTML = "";
-                    activeEmployees.forEach(emp => {
-                        dropdown.innerHTML += `<option value="${emp.name}|${emp.department}|${emp.designation}|${emp.email}|${emp.avatar}">${emp.name} (${emp.department})</option>`;
-                    });
-                }
-            } catch (err) {
-                console.error('Error fetching active employees:', err);
-            }
-        }
+        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
+        function filterTable() {
+            let statusFilter = document.getElementById('statusFilter').value;
+            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
+            let year = 2026;
+            let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            
+            document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
 
-        function renderAttendanceTable() {
+            // --- Automatic Working Days Calculation (Total Days - Sundays Only) ---
+            let totalDaysInMonth = new Date(year, selectedMonthIndex + 1, 0).getDate();
+            let sundayCount = 0;
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                let dateObj = new Date(year, selectedMonthIndex, day);
+                if (dateObj.getDay() === 0) { // 0 represents Sunday
+                    sundayCount++;
+                }
+            }
+            let totalWorkingDays = totalDaysInMonth - sundayCount;
+            document.getElementById('workingDaysCount').innerText = `${totalWorkingDays} Days`;
+
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-            let searchInput = document.getElementById('attendanceSearch').value.toLowerCase();
-            let statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-            let selectedDateInput = document.getElementById('selectedDate').value; // Strict Date Picker Filter
-
-            let filtered = attendanceLogs.filter(log => {
-                let matchesSearch = log.name.toLowerCase().includes(searchInput) || log.dept.toLowerCase().includes(searchInput);
-                let matchesStatus = statusFilter === "" || log.status.toLowerCase() === statusFilter;
-               
-                let logDate = log.date || '2026-10-06';
-                let matchesDate = (logDate === selectedDateInput);
-
-                return matchesSearch && matchesStatus && matchesDate;
+            // Filter by selected month and status
+            let filteredLogs = allEmployeeLogs.filter(log => {
+                if (!log.date) return false;
+                let logDate = new Date(log.date);
+                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+                let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
+                
+                return matchesMonth && matchesStatus;
             });
 
-            // --- CARDS COUNT DYNAMIC UPDATE FOR SELECTED DATE ---
-            let dateLogs = attendanceLogs.filter(log => (log.date || '2026-10-06') === selectedDateInput);
-            let totalActiveStaff = 5; // Total active employees count (aapke active staff ke hisab se)
-            let presentCount = dateLogs.length;
-            let onTimeCount = dateLogs.filter(l => l.status === "On Time").length;
-            let lateCount = dateLogs.filter(l => l.status === "Late").length;
-            let absentCount = Math.max(0, totalActiveStaff - presentCount);
-            
-            let attendancePercentage = totalActiveStaff > 0 ? Math.round((presentCount / totalActiveStaff) * 100) : 0;
+            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
-            // DOM mein cards update karein
-            // Note: HTML mein cards ke numbers ke paas id honi chahiye, niche diye gaye HTML update ko bhi check karein
-            document.getElementById('cardOverallPercent').innerText = attendancePercentage + "%";
-            document.getElementById('cardOnTimeCount').innerText = onTimeCount;
-            document.getElementById('cardLateCount').innerText = lateCount;
-            document.getElementById('cardAbsentCount').innerText = absentCount;
-            // ----------------------------------------------------
-
-            document.getElementById('logCountBadge').innerText = `${filtered.length} Total`;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance records found for ${selectedDateInput}.</td></tr>`;
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
                 return;
             }
 
-            filtered.forEach((log) => {
-                let badge = "";
-                if (log.status === "On Time") {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm whitespace-nowrap">ON TIME</span>`;
-                } else if (log.status === "Late") {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm whitespace-nowrap">LATE</span>`;
-                } else {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg shadow-sm whitespace-nowrap">ABSENT</span>`;
-                }
-
-                let origIndex = attendanceLogs.indexOf(log);
+            filteredLogs.forEach(log => {
+                let statusBadge = log.status === "On Time" || log.status === "PRESENT"
+                    ? `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`
+                    : `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-emerald-200 text-[10px]">LATE IN</span>`;
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-3">
-                                <img src="${log.avatar}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0" alt="${log.name}">
-                                <div>
-                                    <h5 class="font-bold text-[#222222]">${log.name}</h5>
-                                    <p class="text-xs text-gray-500">${log.email}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 text-gray-600 font-medium">${log.dept}</td>
-                        <td class="py-3.5 px-4 text-gray-700">
-                            <span class="font-bold block">${log.checkInTime}</span>
-                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500"></i> ${log.checkInLoc}</span>
-                        </td>
-                        <td class="py-3.5 px-4 text-gray-700">
-                            <span class="font-bold block">${log.checkOutTime}</span>
-                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500">EN</i> ${log.checkOutLoc}</span>
-                        </td>
-                        <td class="py-3.5 px-4">${badge}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <button onclick="openModal(${origIndex})" class="px-3.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer whitespace-nowrap">View Log</button>
-                        </td>
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="py-4 px-6 font-bold">${log.date}</td>
+                        <td class="py-4 px-6 text-gray-600">${log.checkInTime}</td>
+                        <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
+                      <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                        <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
+                        <td class="py-4 px-6 text-center">${statusBadge}</td>
                     </tr>
                 `;
             });
         }
 
-        function filterAttendance() {
-            renderAttendanceTable();
+        function toggleNotificationDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            profileDropdown.classList.add('hidden');
+            notifDropdown.classList.toggle('hidden');
         }
 
-        function filterByCard(status) {
-            document.getElementById('statusFilter').value = status;
-            renderAttendanceTable();
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            notifDropdown.classList.add('hidden');
+            profileDropdown.classList.toggle('hidden');
         }
 
-        function openModal(index) {
-            selectedLogIndex = index;
-            document.getElementById('vaultMonthSelect').value = "9"; // October
-            document.getElementById('vaultYearSelect').value = "2026";
-            regenerateMonthlyVault();
-            document.getElementById('attendanceModal').classList.remove('hidden');
+        function closeAllDropdowns(event) {
+            let notifDropdown = document.getElementById('notificationDropdown');
+            let profileDropdown = document.getElementById('profileDropdown');
+            if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
         }
 
-        function regenerateMonthlyVault() {
-            if (selectedLogIndex === null) return;
-            let log = attendanceLogs[selectedLogIndex];
-           
-            document.getElementById('modalAvatar').src = log.avatar;
-            document.getElementById('modalName').innerText = log.name;
-            document.getElementById('modalRole').innerText = log.role;
-            document.getElementById('modalEmail').innerText = log.email;
-
-            let monthIndex = parseInt(document.getElementById('vaultMonthSelect').value);
-            let year = parseInt(document.getElementById('vaultYearSelect').value);
-            let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-           
-            document.getElementById('vaultTableTitle').innerText = `Daily Log History (${monthNames[monthIndex]} ${year})`;
-
-            let historyBody = document.getElementById('monthlyLogsTableBody');
-            historyBody.innerHTML = "";
-
-            // --- STRICT MONTH & YEAR FILTERING FOR VAULT ---
-            let empHistory = attendanceLogs.filter(l => {
-                if (l.email.toLowerCase() !== log.email.toLowerCase()) return false;
-                if (!l.date) return false;
-               
-                let logDate = new Date(l.date);
-                return logDate.getMonth() === monthIndex && logDate.getFullYear() === year;
-            });
-
-            if (empHistory.length === 0) {
-                historyBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No punch records found for ${monthNames[monthIndex]} ${year}.</td></tr>`;
-                return;
-            }
-
-            empHistory.forEach(item => {
-                let statusSpan = item.status === "On Time"
-                    ? `<span class="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 rounded">ON TIME</span>`
-                    : `<span class="px-2 py-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 rounded">LATE</span>`;
-
-                historyBody.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-semibold text-gray-700">${item.date}</td>
-                        <td class="p-3 text-gray-600">${item.checkInTime} <span class="text-[10px] text-gray-400 block">${item.checkInLoc}</span></td>
-                        <td class="p-3 text-gray-600">${item.checkOutTime} <span class="text-[10px] text-gray-400 block">${item.checkOutLoc}</span></td>
-                        <td class="p-3">${statusSpan}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function closeModal() {
-            document.getElementById('attendanceModal').classList.add('hidden');
-        }
-
-        function openTimingsModal() {
-            document.getElementById('timingsModal').classList.remove('hidden');
-        }
-
-        function closeTimingsModal() {
-            document.getElementById('timingsModal').classList.add('hidden');
-        }
-
-        async function handleTimingsSubmit(event) {
-            event.preventDefault();
-            let shiftStartTime = document.getElementById('shiftStartTime').value;
-            let shiftEndTime = document.getElementById('shiftEndTime').value;
-            let gracePeriod = document.getElementById('gracePeriod').value;
-
-            try {
-                const response = await fetch('/api/settings/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ shiftStartTime, shiftEndTime, gracePeriod })
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    // Yahan bhi variables properly pass ho rahe hain
-                    document.getElementById('onTimeCardSubtitle').innerText = `Clocked in before ${shiftStartTime}`;
-                    document.getElementById('activeShiftDisplay').innerHTML = `${shiftStartTime} – ${shiftEndTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${gracePeriod} mins)</span>`;
-                    closeTimingsModal();
-                    alert(`Office timings successfully saved permanently!`);
-                }
-            } catch (err) {
-                alert('Server error while saving settings.');
+        function logoutUser() {
+            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+                localStorage.removeItem('hr_logged_in');
+                localStorage.removeItem('hr_user');
+                window.location.href = "/";
             }
         }
-
-        function openManualModal() {
-            fetchActiveEmployeesForDropdown();
-            document.getElementById('manualAttendanceModal').classList.remove('hidden');
-        }
-
-        function closeManualModal() {
-            document.getElementById('manualAttendanceModal').classList.add('hidden');
-        }
-
-        async function handleManualSubmit(event) {
-            event.preventDefault();
-            let empData = document.getElementById('manualEmpSelect').value.split('|');
-            let name = empData[0];
-            let dept = empData[1];
-            let role = empData[2];
-            let email = empData[3];
-            let avatar = empData[4];
-            let logDate = document.getElementById('manualLogDate').value;
-            let checkInTime = document.getElementById('manualCheckInTime').value;
-            let checkInLoc = document.getElementById('manualCheckInLoc').value;
-            let checkOutTime = document.getElementById('manualCheckOutTime').value;
-            let checkOutLoc = document.getElementById('manualCheckOutLoc').value;
-            let status = document.getElementById('manualStatus').value;
-
-            let newRecord = {
-                name: name,
-                email: email,
-                dept: dept,
-                role: role,
-                date: logDate,
-                checkInTime: checkInTime,
-                checkInLoc: checkInLoc + " (Manual)",
-                checkOutTime: checkOutTime,
-                checkOutLoc: checkOutLoc + " (Manual)",
-                status: status,
-                avatar: avatar
-            };
-
-            try {
-                const response = await fetch('/api/attendance/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newRecord)
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    closeManualModal();
-                    fetchAttendanceLogs();
-                    alert(`Manual attendance successfully recorded for ${name} on ${logDate}!`);
-                }
-            } catch (err) {
-                console.error('Error saving attendance:', err);
-                alert('Server connection error.');
-            }
-        }
-
-        window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('selectedDate');
-            if(dateInput) {
-                dateInput.value = today;
-            }
-
-            const manualDateInput = document.getElementById('manualLogDate');
-            if(manualDateInput) {
-                manualDateInput.value = today;
-            }
-
-            loadSettings();       // Pehle settings load hongi
-            fetchAttendanceLogs();// Phir logs load honge
+        function calculateDuration(inTime, outTime) {
+    if (!inTime || !outTime || outTime === '--:--') return 'Active';
+    
+    try {
+        let parseTime = (timeStr) => {
+            let [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (modifier === 'PM' && hours < 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
         };
+
+        let diffMins = parseTime(outTime) - parseTime(inTime);
+        if (diffMins < 0) diffMins += 24 * 60; // Handle overnight shifts if any
+        
+        let h = Math.floor(diffMins / 60);
+        let m = diffMins % 60;
+        return `${h}h ${m}m`;
+    } catch (e) {
+        return '0h 0m';
+    }
+}
     </script>
 </body>
 </html>
