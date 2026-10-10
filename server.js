@@ -7,8 +7,7 @@ const session = require('express-session'); // <-- Added for session management
 const app = express();
 
 const mongoose = require('mongoose');
-const MONGO_URI = "mongodb+srv://clickormediaweb_db_user:Clickormedia123@cluster0.uqgeway.mongodb.net/hr_portal?retryWrites=true&w=majority&appName=Cluster0";
-
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://clickormediaweb_db_user:Clickormedia123@cluster0.uqgeway.mongodb.net/hr_portal?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(MONGO_URI)
     .then(() => console.log("--- CONNECTED TO MONGODB ATLAS SUCCESSFULLY ---"))
     .catch(err => console.error("MongoDB connection error:", err));
