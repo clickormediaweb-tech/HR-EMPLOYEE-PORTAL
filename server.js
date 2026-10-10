@@ -24,26 +24,20 @@ const Store = mongoose.model('Store', storeSchema);
 async function readDb() {
     try {
         let record = await Store.findOne();
-        if (!record) {
-            // Default initial structure agar database empty hai
-            const defaultData = {
-                users: [],
-                attendance: [],
-                leaves: [],
-                myLeaves: [],
-                holidays: [],
-                payroll: [],
-                departments: [],
-                settings: { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" }
-            };
-            record = await Store.create({ data: defaultData });
+        console.log("--- DEBUG MONGODB RECORD FOUND: ---", record ? "YES" : "NO");
+        if (record) {
+            console.log("--- USERS COUNT IN DB: ---", record.data && record.data.users ? record.data.users.length : 0);
         }
-        return record.data;
+        if (!record || !record.data || !record.data.users || record.data.users.length === 0) {
+            console.log("⚠️ WARNING: Database is empty or users array is missing!");
+        }
+        return record ? record.data : {};
     } catch (err) {
         console.error("Error reading from MongoDB:", err);
         return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
     }
 }
+
 
 async function writeDb(data) {
     try {

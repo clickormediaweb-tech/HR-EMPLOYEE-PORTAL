@@ -1,58 +1,39 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const User = require('./models/User');
+const fs = require('fs');
+const path = require('path');
 
-const seedData = async () => {
+const MONGO_URI = "mongodb+srv://clickormediaweb_db_user:Clickormedia123@cluster0.uqgeway.mongodb.net/hr_portal?retryWrites=true&w=majority&appName=Cluster0";
+
+const storeSchema = new mongoose.Schema({
+    data: { type: Object, default: {} }
+}, { strict: false });
+
+const Store = mongoose.model('Store', storeSchema);
+
+async function seedDatabase() {
     try {
-        // Spin up an automatic temporary database
-        const mongoServer = await MongoMemoryServer.create();
-        const uri = mongoServer.getUri();
+        await mongoose.connect(MONGO_URI);
+        console.log("--- CONNECTED TO MONGODB FOR SEEDING ---");
 
-        await mongoose.connect(uri);
-        console.log('Connected to temporary local database...');
+        const dbFilePath = path.join(__dirname, 'database.json');
+        if (!fs.existsSync(dbFilePath)) {
+            console.log("Error: database.json file not found!");
+            process.exit(1);
+        }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash('123456', salt);
+        const rawData = fs.readFileSync(dbFilePath, 'utf8');
+        const jsonData = JSON.parse(rawData);
 
-        // Create HR User
-        const hrUser = new User({
-            name: 'Tanya Dua',
-            email: 'tanya.dua@clickormedia.co.in',
-            password: hashedPassword,
-            role: 'hr',
-            designation: 'HR Manager',
-            department: 'Human Resources',
-            phone: '+91 98765 43210',
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces'
-        });
+        // Purana sara data delete karke naya sahi format me dalenge
+        await Store.deleteMany({});
+        await Store.create({ data: jsonData });
 
-        // Create Employee User
-        const empUser = new User({
-            name: 'Pranchal Rajpal',
-            email: 'pranchal@clickormedia.co.in',
-            password: hashedPassword,
-            role: 'employee',
-            designation: 'Software Developer',
-            department: 'Engineering',
-            phone: '+91 91234 56789',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces'
-        });
-
-        await hrUser.save();
-        await empUser.save();
-
-        console.log('Database seeded successfully!');
-        console.log('HR Login: tanya.dua@clickormedia.co.in / 123456');
-        console.log('Employee Login: pranchal@clickormedia.co.in / 123456');
-        
-        await mongoose.disconnect();
-        await mongoServer.stop();
-        process.exit();
+        console.log("--- SUCCESS: database.json data successfully uploaded to MongoDB! ---");
+        process.exit(0);
     } catch (err) {
-        console.error('Error seeding data:', err);
+        console.error("Seeding error:", err);
         process.exit(1);
     }
-};
+}
 
-seedData();
+seedDatabase();
