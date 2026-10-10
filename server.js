@@ -821,7 +821,10 @@ app.get('/api/settings', (req, res) => {
                 casualLeaves: 12,
                 sickLeaves: 10,
                 pfContribution: "12% of Basic Salary",
-                cutoffDate: "25th of every month"
+                cutoffDate: "25th of every month",
+                shiftStartTime: "10:00 AM", // Yahan apni default start time likhein
+                shiftEndTime: "06:00 PM",   // Yahan apni default end time likhein
+                gracePeriod: "5"            // Yahan grace period likhein
             };
             writeDb(db);
         }
