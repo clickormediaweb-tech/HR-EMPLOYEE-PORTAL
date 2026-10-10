@@ -480,14 +480,15 @@
                     if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = s.shiftEndTime || "06:30 PM";
                     if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = s.gracePeriod || "15";
                     
+                    // Yahan s.shiftStartTime aur s.shiftEndTime ka use kiya gaya hai taaki updated timings dikhein
                     let shiftDisplay = document.getElementById('activeShiftDisplay');
                     if(shiftDisplay) {
-                        shiftDisplay.innerHTML = `${s.shiftStartTime} – ${s.shiftEndTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${s.gracePeriod} mins)</span>`;
+                        shiftDisplay.innerHTML = `${s.shiftStartTime || "09:30 AM"} – ${s.shiftEndTime || "06:30 PM"} <span class="text-xs font-normal text-gray-500">(Grace Period: ${s.gracePeriod || "15"} mins)</span>`;
                     }
                     
                     let subTitle = document.getElementById('onTimeCardSubtitle');
                     if(subTitle) {
-                        subTitle.innerText = `Clocked in before ${s.shiftStartTime}`;
+                        subTitle.innerText = `Clocked in before ${s.shiftStartTime || "09:30 AM"}`;
                     }
                 }
             } catch (err) {
@@ -687,6 +688,7 @@
                 });
                 const data = await response.json();
                 if (response.ok && data.success) {
+                    // Yahan bhi variables properly pass ho rahe hain
                     document.getElementById('onTimeCardSubtitle').innerText = `Clocked in before ${shiftStartTime}`;
                     document.getElementById('activeShiftDisplay').innerHTML = `${shiftStartTime} – ${shiftEndTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${gracePeriod} mins)</span>`;
                     closeTimingsModal();
@@ -754,21 +756,19 @@
         }
 
         window.onload = function() {
-            // Aaj ki live date ko YYYY-MM-DD format mein set karein
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('selectedDate');
             if(dateInput) {
                 dateInput.value = today;
             }
 
-            // Manual attendance modal wale date input ko bhi aaj ki date par set kar dein
             const manualDateInput = document.getElementById('manualLogDate');
             if(manualDateInput) {
                 manualDateInput.value = today;
             }
 
-            fetchAttendanceLogs();
-            loadSettings();
+            loadSettings();       // Pehle settings load hongi
+            fetchAttendanceLogs();// Phir logs load honge
         };
     </script>
 </body>
