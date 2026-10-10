@@ -6,6 +6,60 @@ const session = require('express-session'); // <-- Added for session management
 
 const app = express();
 
+const mongoose = require('mongoose');
+const MONGO_URI = "mongodb+srv://clickormediaweb_db_user:Clickormedia123@cluster0.uqgeway.mongodb.net/hr_portal?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("--- CONNECTED TO MONGODB ATLAS SUCCESSFULLY ---"))
+    .catch(err => console.error("MongoDB connection error:", err));
+
+// --- MONGODB SINGLE BLOB STORE SCHEMA (Replaces database.json) ---
+const storeSchema = new mongoose.Schema({
+    data: { type: Object, default: {} }
+}, { strict: false });
+
+const Store = mongoose.model('Store', storeSchema);
+
+// Async Helper functions to read/write from MongoDB Atlas instead of local filesystem
+async function readDb() {
+    try {
+        let record = await Store.findOne();
+        if (!record) {
+            // Default initial structure agar database empty hai
+            const defaultData = {
+                users: [],
+                attendance: [],
+                leaves: [],
+                myLeaves: [],
+                holidays: [],
+                payroll: [],
+                departments: [],
+                settings: { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" }
+            };
+            record = await Store.create({ data: defaultData });
+        }
+        return record.data;
+    } catch (err) {
+        console.error("Error reading from MongoDB:", err);
+        return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
+    }
+}
+
+async function writeDb(data) {
+    try {
+        let record = await Store.findOne();
+        if (!record) {
+            await Store.create({ data: data });
+        } else {
+            record.data = data;
+            record.markModified('data');
+            await record.save();
+        }
+    } catch (err) {
+        console.error("Error writing to MongoDB:", err);
+    }
+}
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,30 +77,6 @@ app.use(session({
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
-
-// Helper functions to read/write database.json safely
-const dbFilePath = path.join(__dirname, 'database.json');
-
-function readDb() {
-    if (!fs.existsSync(dbFilePath)) {
-        return {
-            users: [],
-            attendance: [],
-            leaves: [],
-            myLeaves: [],
-            holidays: [],
-            payroll: [],
-            departments: [],
-            settings: { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" }
-        };
-    }
-    const data = fs.readFileSync(dbFilePath, 'utf8');
-    return JSON.parse(data);
-}
-
-function writeDb(data) {
-    fs.writeFileSync(dbFilePath, JSON.stringify(data, null, 2), 'utf8');
-}
 
 // Nodemailer Transporter Configuration (Update with your email & app password)
 const transporter = nodemailer.createTransport({
@@ -70,9 +100,8 @@ app.get('/login.html', (req, res) => {
 });
 
 
-// 1. Password Update Route (Directly updates user password in database.json)
-// 1. Password Update Route (Dynamic & Secure for all users)
-app.post('/api/employee/update-password', (req, res) => {
+// 1. Password Update Route (Directly updates user password in MongoDB)
+app.post('/api/employee/update-password', async (req, res) => {
     try {
         const { newPassword } = req.body;
         console.log("Incoming password update request:", newPassword);
@@ -81,10 +110,9 @@ app.post('/api/employee/update-password', (req, res) => {
             return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
         }
        
-        const db = readDb();
+        const db = await readDb();
         if (!db.users) db.users = [];
        
-        // Session ya logged-in user ke email se user ko find karein
         let userEmail = req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in";
         let user = db.users.find(u => u.email && u.email.toLowerCase() === userEmail.toLowerCase());
        
@@ -94,11 +122,11 @@ app.post('/api/employee/update-password', (req, res) => {
        
         if (user) {
             user.password = newPassword;
-            writeDb(db);
-            console.log(`SUCCESS: Password updated in database.json for ${user.name} to ${newPassword}`);
+            await writeDb(db);
+            console.log(`SUCCESS: Password updated in MongoDB for ${user.name} to ${newPassword}`);
             return res.json({ success: true, message: "Password updated successfully" });
         } else {
-            console.log("ERROR: No users found in database.json");
+            console.log("ERROR: No users found in database");
             return res.status(404).json({ success: false, message: "User not found in database" });
         }
     } catch (err) {
@@ -108,17 +136,16 @@ app.post('/api/employee/update-password', (req, res) => {
 });
 
 // 2. Strict Login Verification Route with Role-Based Redirection
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const db = readDb();
+        const db = await readDb();
        
         const user = db.users ? db.users.find(u => u.email.toLowerCase() === (email || "").trim().toLowerCase()) : null;
        
         if (user && user.password === password) {
             req.session.user = { name: user.name, email: user.email, role: user.role };
            
-            // Role ke hisab se redirection (agar role admin hai toh HR portal)
             let redirectUrl = "/employee/dashboard";
             if (user.role === 'admin') {
                 redirectUrl = "/hr/dashboard";
@@ -140,7 +167,7 @@ app.post('/api/auth/logout', (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
         }
-        res.clearCookie('connect.sid'); // Clear session cookie
+        res.clearCookie('connect.sid');
         return res.json({ success: true, message: 'Logged out successfully' });
     });
 });
@@ -156,9 +183,9 @@ app.get('/hr/dashboard', (req, res) => {
 });
 
 // 4. Employee Directory Page Route
-app.get('/hr/employees', (req, res) => {
+app.get('/hr/employees', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         const employees = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
         const exEmployees = db.users ? db.users.filter(u => u.role === 'former') : [];
        
@@ -170,14 +197,14 @@ app.get('/hr/employees', (req, res) => {
 });
 
 // --- API: Get Total Employee Count for Dashboard Stats ---
-app.get('/api/hr/stats', (req, res) => {
+app.get('/api/hr/stats', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
        
         res.json({
             success: true,
-            totalEmployees: activeUsers.length > 0 ? activeUsers.length : 5 // Fallback count
+            totalEmployees: activeUsers.length > 0 ? activeUsers.length : 5
         });
     } catch (err) {
         console.error('Error fetching HR stats:', err);
@@ -185,10 +212,10 @@ app.get('/api/hr/stats', (req, res) => {
     }
 });
 
-// API: Get Active Employees (JSON for attendance modal dropdowns)
-app.get('/api/employees/active', (req, res) => {
+// API: Get Active Employees
+app.get('/api/employees/active', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         const activeEmployees = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
         res.json({ success: true, employees: activeEmployees });
     } catch (err) {
@@ -197,10 +224,10 @@ app.get('/api/employees/active', (req, res) => {
 });
 
 // 5. API: Add New Employee
-app.post('/api/employees/add', (req, res) => {
+app.post('/api/employees/add', async (req, res) => {
     try {
         const { name, email, department, designation, phone } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.users) db.users = [];
 
         const newEmployee = {
@@ -216,7 +243,7 @@ app.post('/api/employees/add', (req, res) => {
         };
 
         db.users.push(newEmployee);
-        writeDb(db);
+        await writeDb(db);
 
         console.log(`--- PERMANENTLY ADDED: ${name} ---`);
         res.json({ success: true, message: 'Employee added successfully!' });
@@ -226,28 +253,26 @@ app.post('/api/employees/add', (req, res) => {
     }
 });
 
-// 6. API: Archive Employee (Soft Delete -> removes from Active Directory, Attendance, and Leaves)
-app.delete('/api/employees/:id', (req, res) => {
+// 6. API: Archive Employee
+app.delete('/api/employees/:id', async (req, res) => {
     try {
         const empId = req.params.id;
-        const db = readDb();
+        const db = await readDb();
 
         if (db.users) {
             const user = db.users.find(u => u._id === empId || u.email === empId);
             if (user) {
                 user.role = 'former';
                
-                // 1. Remove from active attendance logs
                 if (db.attendance) {
                     db.attendance = db.attendance.filter(log => log.email.toLowerCase() !== user.email.toLowerCase());
                 }
 
-                // 2. Remove from active leave requests
                 if (db.leaves) {
                     db.leaves = db.leaves.filter(leave => leave.email && leave.email.toLowerCase() !== user.email.toLowerCase());
                 }
 
-                writeDb(db);
+                await writeDb(db);
                 console.log(`--- PERMANENTLY REMOVED & SYNCED ACROSS ALL MODULES: ${user.name} ---`);
             }
         }
@@ -260,13 +285,13 @@ app.delete('/api/employees/:id', (req, res) => {
 });
 
 // 7. API: Get Attendance Logs
-app.get('/api/attendance', (req, res) => {
+app.get('/api/attendance', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
-        if (!db.attendance) {
+        if (!db.attendance || db.attendance.length === 0) {
             db.attendance = [
                 { name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", role: "HR Manager", checkInTime: "08:55 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
                 { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "Engineering", role: "Software Engineer", checkInTime: "09:00 AM", checkInLoc: "Remote / WFH (GPS Verified)", checkOutTime: "06:30 PM", checkOutLoc: "Remote / WFH (GPS Verified)", status: "On Time", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
@@ -274,7 +299,7 @@ app.get('/api/attendance', (req, res) => {
                 { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Operations", role: "Operations Executive", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
                 { name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", role: "Marketing Specialist", checkInTime: "09:15 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
             ];
-            writeDb(db);
+            await writeDb(db);
         }
 
         const filteredAttendance = db.attendance.filter(log => activeEmails.includes(log.email.toLowerCase()));
@@ -286,15 +311,15 @@ app.get('/api/attendance', (req, res) => {
 });
 
 // 8. API: Save Manual Attendance Log
-app.post('/api/attendance/add', (req, res) => {
+app.post('/api/attendance/add', async (req, res) => {
     try {
         const { name, email, dept, role, date, checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.attendance) db.attendance = [];
 
         const newLog = { name, email, dept, role, date: date || '2026-09-28', checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar };
         db.attendance.unshift(newLog);
-        writeDb(db);
+        await writeDb(db);
 
         console.log(`--- ATTENDANCE LOG RECORDED FOR ${name} ON ${date} ---`);
         res.json({ success: true, message: 'Attendance recorded successfully!' });
@@ -305,39 +330,54 @@ app.post('/api/attendance/add', (req, res) => {
 });
 
 // 9. API: Get Settings / Office Timings
-app.get('/api/settings', (req, res) => {
+app.get('/api/settings', async (req, res) => {
     try {
-        const db = readDb();
-        if (!db.settings) {
-            db.settings = { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" };
-            writeDb(db);
+        const db = await readDb();
+        if (!db.settings || !db.settings.shiftStartTime) {
+            db.settings = {
+                shiftStartTime: "09:30 AM",
+                shiftEndTime: "06:30 PM",
+                gracePeriod: "15",
+                companyName: "CLICKORMEDIA PRIVATE LIMITED",
+                cin: "U72900DL2024PTC123456",
+                hrEmail: "hr@clickormedia.co.in",
+                location: "Sanat Nagar, Jammu & Kashmir, India",
+                paidLeaves: 18,
+                casualLeaves: 12,
+                sickLeaves: 10
+            };
+            await writeDb(db);
         }
         res.json({ success: true, settings: db.settings });
     } catch (err) {
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, settings: { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" } });
     }
 });
 
 // 10. API: Save Office Timings Permanently
-app.post('/api/settings/update', (req, res) => {
+app.post('/api/settings/update', async (req, res) => {
     try {
         const { shiftStartTime, shiftEndTime, gracePeriod } = req.body;
-        const db = readDb();
-        db.settings = { ...db.settings, shiftStartTime, shiftEndTime, gracePeriod };
-        writeDb(db);
-        console.log(`--- OFFICE TIMINGS SAVED TO DISK: ${shiftStartTime} - ${shiftEndTime} ---`);
+        const db = await readDb();
+       
+        if (!db.settings) db.settings = {};
+       
+        db.settings.shiftStartTime = shiftStartTime || "09:30 AM";
+        db.settings.shiftEndTime = shiftEndTime || "06:30 PM";
+        db.settings.gracePeriod = gracePeriod || "15";
+
+        await writeDb(db);
         res.json({ success: true, message: 'Settings saved permanently!' });
     } catch (err) {
         console.error('Error saving settings:', err);
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, message: 'Server error while saving settings' });
     }
 });
 
 // --- LEAVE MANAGEMENT APIS ---
-
-app.get('/api/leaves', (req, res) => {
+app.get('/api/leaves', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.leaves || db.leaves.length === 0) {
             db.leaves = [
                 { id: 1, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", type: "Annual Leave", duration: "Oct 02 - Oct 05 (4 Days)", reason: "Personal work & family trip", status: "PENDING", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
@@ -346,7 +386,7 @@ app.get('/api/leaves', (req, res) => {
                 { id: 4, name: "Robin", email: "robin@clickormedia.co.in", type: "Annual Leave", duration: "Nov 12 - Nov 15 (4 Days)", reason: "Out of Station", status: "REJECTED", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces" },
                 { id: 5, name: "Tanya Dua", email: "tanya@clickormedia.co.in", type: "Sick Leave", duration: "Sep 29 (1 Day)", reason: "Medical Appointment", status: "APPROVED", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" }
             ];
-            writeDb(db);
+            await writeDb(db);
         }
         if (!db.myLeaves) {
             db.myLeaves = [];
@@ -357,9 +397,9 @@ app.get('/api/leaves', (req, res) => {
     }
 });
 
-app.get('/api/employee/leaves', (req, res) => {
+app.get('/api/employee/leaves', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.leaves) db.leaves = [];
        
         let currentUserName = req.query.name || "Pranchal Rajpal";
@@ -374,19 +414,19 @@ app.get('/api/employee/leaves', (req, res) => {
     }
 });
 
-app.get('/api/hr/leaves', (req, res) => {
+app.get('/api/hr/leaves', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         res.json({ success: true, leaves: db.leaves || [] });
     } catch (err) {
         res.status(500).json({ success: false, leaves: [] });
     }
 });
 
-app.post('/api/leaves/update', (req, res) => {
+app.post('/api/leaves/update', async (req, res) => {
     try {
         const { id, status } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.leaves) db.leaves = [];
         if (!db.myLeaves) db.myLeaves = [];
 
@@ -406,7 +446,7 @@ app.post('/api/leaves/update', (req, res) => {
             db.myLeaves.unshift(hrItem);
         }
 
-        writeDb(db);
+        await writeDb(db);
         res.json({ success: true, message: 'Status updated successfully!' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error' });
@@ -416,7 +456,7 @@ app.post('/api/leaves/update', (req, res) => {
 app.post('/api/leaves/apply', async (req, res) => {
     try {
         const { type, duration, reason, name } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.leaves) db.leaves = [];
         if (!db.myLeaves) db.myLeaves = [];
 
@@ -438,7 +478,7 @@ app.post('/api/leaves/apply', async (req, res) => {
 
         db.leaves.unshift(newSub);
         db.myLeaves.unshift(newSub);
-        writeDb(db);
+        await writeDb(db);
 
         res.json({ success: true, message: 'Leave application submitted successfully!' });
     } catch (err) {
@@ -447,9 +487,9 @@ app.post('/api/leaves/apply', async (req, res) => {
 });
 
 // --- HOLIDAY APIS ---
-app.get('/api/holidays', (req, res) => {
+app.get('/api/holidays', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.holidays || db.holidays.length === 0) {
             db.holidays = [
                 { date: "2026-01-26", day: "Monday", name: "Republic Day", category: "National Holiday" },
@@ -465,7 +505,7 @@ app.get('/api/holidays', (req, res) => {
                 { date: "2026-11-08", day: "Sunday", name: "Diwali", category: "Festival" },
                 { date: "2026-12-25", day: "Friday", name: "Christmas Day", category: "Festival" }
             ];
-            writeDb(db);
+            await writeDb(db);
         }
         res.json({ success: true, holidays: db.holidays });
     } catch (err) {
@@ -473,15 +513,15 @@ app.get('/api/holidays', (req, res) => {
     }
 });
 
-app.post('/api/holidays/add', (req, res) => {
+app.post('/api/holidays/add', async (req, res) => {
     try {
         const { date, day, name, category } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.holidays) db.holidays = [];
 
         db.holidays.push({ date, day, name, category });
         db.holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
-        writeDb(db);
+        await writeDb(db);
 
         res.json({ success: true, message: 'Holiday added successfully!' });
     } catch (err) {
@@ -489,13 +529,13 @@ app.post('/api/holidays/add', (req, res) => {
     }
 });
 
-app.delete('/api/holidays/:index', (req, res) => {
+app.delete('/api/holidays/:index', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
-        const db = readDb();
+        const db = await readDb();
         if (db.holidays && db.holidays[index]) {
             db.holidays.splice(index, 1);
-            writeDb(db);
+            await writeDb(db);
         }
         res.json({ success: true, message: 'Holiday deleted successfully!' });
     } catch (err) {
@@ -517,9 +557,9 @@ app.get('/hr/holidaycalendar', (req, res) => {
 });
 
 // --- ANALYTICS PERSISTENCE API ---
-app.get('/api/analytics', (req, res) => {
+app.get('/api/analytics', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         const activeUsers = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
        
         const deptCounts = {};
@@ -543,9 +583,9 @@ app.get('/hr/analytics', (req, res) => {
 });
 
 // --- PAYROLL PERSISTENCE API ---
-app.get('/api/payroll', (req, res) => {
+app.get('/api/payroll', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll || db.payroll.length === 0) {
             db.payroll = [
                 { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", baseNum: 85000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 29, 2026", day: "Tuesday", type: "Paid Leave", reason: "Medical Appointment" }], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
@@ -554,7 +594,7 @@ app.get('/api/payroll', (req, res) => {
                 { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Operations", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
                 { id: 5, name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", baseNum: 80000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
             ];
-            writeDb(db);
+            await writeDb(db);
         }
 
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
@@ -568,10 +608,10 @@ app.get('/api/payroll', (req, res) => {
     }
 });
 
-app.post('/api/payroll/update-status', (req, res) => {
+app.post('/api/payroll/update-status', async (req, res) => {
     try {
         const { id, status } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         if (id === 'all') {
@@ -581,24 +621,24 @@ app.post('/api/payroll/update-status', (req, res) => {
             if (rec) rec.status = status;
         }
 
-        writeDb(db);
+        await writeDb(db);
         res.json({ success: true, message: 'Payroll status updated successfully!' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-app.post('/api/payroll/update-attendance', (req, res) => {
+app.post('/api/payroll/update-attendance', async (req, res) => {
     try {
         const { id, leaveBalance, halfDays } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         let rec = db.payroll.find(r => r.id == id);
         if (rec) {
             rec.leaveBalance = parseFloat(leaveBalance);
             rec.halfDays = parseFloat(halfDays);
-            writeDb(db);
+            await writeDb(db);
             res.json({ success: true, message: 'Attendance records updated successfully!' });
         } else {
             res.status(404).json({ success: false, message: 'Record not found' });
@@ -612,16 +652,16 @@ app.get('/hr/payroll', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'payroll.html'));
 });
 
-app.post('/api/payroll/update-salary', (req, res) => {
+app.post('/api/payroll/update-salary', async (req, res) => {
     try {
         const { id, baseNum } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         let rec = db.payroll.find(r => r.id == id);
         if (rec) {
             rec.baseNum = parseFloat(baseNum);
-            writeDb(db);
+            await writeDb(db);
             res.json({ success: true, message: 'Base salary updated successfully!' });
         } else {
             res.status(404).json({ success: false, message: 'Payroll record not found' });
@@ -631,10 +671,10 @@ app.post('/api/payroll/update-salary', (req, res) => {
     }
 });
 
-app.post('/api/payroll/add-leave-log', (req, res) => {
+app.post('/api/payroll/add-leave-log', async (req, res) => {
     try {
         const { id, type, reason, date, day, isHalfDay } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         let rec = db.payroll.find(r => r.id == id);
@@ -652,7 +692,7 @@ app.post('/api/payroll/add-leave-log', (req, res) => {
                 rec.halfDays = (rec.halfDays || 0) + 0.5;
             }
 
-            writeDb(db);
+            await writeDb(db);
             res.json({ success: true, message: 'Leave log and attendance penalty updated successfully!' });
         } else {
             res.status(404).json({ success: false, message: 'Record not found' });
@@ -662,10 +702,10 @@ app.post('/api/payroll/add-leave-log', (req, res) => {
     }
 });
 
-app.post('/api/payroll/delete-leave-log', (req, res) => {
+app.post('/api/payroll/delete-leave-log', async (req, res) => {
     try {
         const { id, logIndex } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         let rec = db.payroll.find(r => r.id == id);
@@ -676,7 +716,7 @@ app.post('/api/payroll/delete-leave-log', (req, res) => {
                 rec.halfDays = Math.max(0, rec.halfDays - 0.5);
             }
 
-            writeDb(db);
+            await writeDb(db);
             res.json({ success: true, message: 'Leave log removed successfully!' });
         } else {
             res.status(404).json({ success: false, message: 'Record or log not found' });
@@ -687,9 +727,9 @@ app.post('/api/payroll/delete-leave-log', (req, res) => {
 });
 
 // --- DEPARTMENTS PERSISTENCE API ---
-app.get('/api/departments', (req, res) => {
+app.get('/api/departments', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
        
         if (!db.departments || db.departments.length === 0) {
             let creativeMembers = ["Tanya Dua", "Anshdeep", "Sukhi"];
@@ -731,7 +771,7 @@ app.get('/api/departments', (req, res) => {
                     ]
                 }
             ];
-            writeDb(db);
+            await writeDb(db);
         }
 
         res.json({ success: true, departments: db.departments });
@@ -740,10 +780,10 @@ app.get('/api/departments', (req, res) => {
     }
 });
 
-app.post('/api/departments/add', (req, res) => {
+app.post('/api/departments/add', async (req, res) => {
     try {
         const { name, lead, staff, budget } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.departments) db.departments = [];
 
         const icons = ["fa-layer-group", "fa-network-wired", "fa-atom", "fa-puzzle-piece", "fa-briefcase"];
@@ -763,21 +803,21 @@ app.post('/api/departments/add', (req, res) => {
         };
 
         db.departments.push(newDept);
-        writeDb(db);
+        await writeDb(db);
         res.json({ success: true, message: 'Department created successfully!' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-app.post('/api/departments/delete', (req, res) => {
+app.post('/api/departments/delete', async (req, res) => {
     try {
         const { id } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.departments) db.departments = [];
 
         db.departments = db.departments.filter(d => d.id != id);
-        writeDb(db);
+        await writeDb(db);
         res.json({ success: true, message: 'Department removed successfully!' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error' });
@@ -789,22 +829,25 @@ app.get('/hr/departments', (req, res) => {
 });
 
 // --- SETTINGS PERSISTENCE API ---
-app.get('/api/settings', (req, res) => {
+app.get('/api/settings', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.settings) {
             db.settings = {
                 companyName: "CLICKORMEDIA PRIVATE LIMITED",
                 cin: "U72900DL2024PTC123456",
                 hrEmail: "hr@clickormedia.co.in",
                 location: "Sanat Nagar, Jammu & Kashmir, India",
-                paidLeaves: 18,
-                casualLeaves: 12,
-                sickLeaves: 10,
+                paidLeaves: 12,
+                casualLeaves: 0,
+                sickLeaves: 0,
                 pfContribution: "12% of Basic Salary",
-                cutoffDate: "25th of every month"
+                cutoffDate: "7th of every month",
+                shiftStartTime: "10:00 AM",
+                shiftEndTime: "06:00 PM",
+                gracePeriod: "5"
             };
-            writeDb(db);
+            await writeDb(db);
         }
         res.json({ success: true, settings: db.settings });
     } catch (err) {
@@ -812,27 +855,27 @@ app.get('/api/settings', (req, res) => {
     }
 });
 
-app.post('/api/settings/save', (req, res) => {
+app.post('/api/settings/save', async (req, res) => {
     try {
         const { companyName, cin, hrEmail, location, paidLeaves, casualLeaves, sickLeaves, pfContribution, cutoffDate } = req.body;
-        const db = readDb();
+        const db = await readDb();
        
-        db.settings = {
-            ...db.settings,
-            companyName,
-            cin,
-            hrEmail,
-            location,
-            paidLeaves: parseInt(paidLeaves) || 18,
-            casualLeaves: parseInt(casualLeaves) || 12,
-            sickLeaves: parseInt(sickLeaves) || 10,
-            pfContribution,
-            cutoffDate
-        };
+        if (!db.settings) db.settings = {};
 
-        writeDb(db);
+        db.settings.companyName = companyName || db.settings.companyName;
+        db.settings.cin = cin || db.settings.cin;
+        db.settings.hrEmail = hrEmail || db.settings.hrEmail;
+        db.settings.location = location || db.settings.location;
+        db.settings.paidLeaves = parseInt(paidLeaves) || 12;
+        db.settings.casualLeaves = parseInt(casualLeaves) || 0;
+        db.settings.sickLeaves = parseInt(sickLeaves) || 0;
+        db.settings.pfContribution = pfContribution || db.settings.pfContribution;
+        db.settings.cutoffDate = cutoffDate || "7th of every month";
+
+        await writeDb(db);
         res.json({ success: true, message: 'Settings saved successfully!' });
     } catch (err) {
+        console.error('Error saving settings:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -842,11 +885,10 @@ app.get('/hr/settings', (req, res) => {
 });
 
 // --- EMPLOYEE PORTAL API ---
-app.get('/api/employee/stats', (req, res) => {
+app.get('/api/employee/stats', async (req, res) => {
     try {
-        const db = readDb();
-        
-        // Agar session mein user logged in hai toh uska naam lein, nahi toh query ya default Pranchal
+        const db = await readDb();
+       
         let empName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
        
         if (!db.payroll) db.payroll = [];
@@ -891,10 +933,10 @@ app.get('/employee/attendance', (req, res) => {
 });
 
 // --- API: Employee Punch-In / Punch-Out Sync with HR Portal ---
-app.post('/api/employee/punch', (req, res) => {
+app.post('/api/employee/punch', async (req, res) => {
     try {
         const { name, email, action, time, location } = req.body;
-        const db = readDb();
+        const db = await readDb();
         if (!db.attendance) db.attendance = [];
 
         const todayDate = new Date().toISOString().split('T')[0];
@@ -941,7 +983,7 @@ app.post('/api/employee/punch', (req, res) => {
             }
         }
 
-        writeDb(db);
+        await writeDb(db);
         res.json({ success: true, message: `Punch ${action} recorded and synced to HR portal successfully!` });
     } catch (err) {
         console.error('Error recording punch:', err);
@@ -950,10 +992,10 @@ app.post('/api/employee/punch', (req, res) => {
 });
 
 // --- API: Get Today's Punch Status for Employee ---
-app.get('/api/employee/punch-status', (req, res) => {
+app.get('/api/employee/punch-status', async (req, res) => {
     try {
         const email = req.query.email || (req.session.user ? req.session.user.email : "");
-        const db = readDb();
+        const db = await readDb();
         const todayDate = new Date().toISOString().split('T')[0];
 
         if (!db.attendance) db.attendance = [];
@@ -975,9 +1017,9 @@ app.get('/api/employee/punch-status', (req, res) => {
 });
 
 // Employee Specific Payroll API Route
-app.get('/api/employee/payroll', (req, res) => {
+app.get('/api/employee/payroll', async (req, res) => {
     try {
-        const db = readDb();
+        const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
         let currentUserName = req.query.name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
@@ -1014,4 +1056,31 @@ app.get('/employee/settings', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// API: Edit Employee Details & Department
+app.put('/api/employees/edit/:id', async (req, res) => {
+    try {
+        const empId = req.params.id;
+        const { name, email, designation, department } = req.body;
+        const db = await readDb();
+
+        if (db.users) {
+            let user = db.users.find(u => u._id === empId || u.email.toLowerCase() === (email || "").toLowerCase());
+            if (user) {
+                user.name = name || user.name;
+                user.email = email || user.email;
+                user.designation = designation || user.designation;
+                user.department = department || user.department;
+               
+                await writeDb(db);
+                console.log(`--- UPDATED EMPLOYEE & DEPT: ${user.name} -> ${user.department} ---`);
+                return res.json({ success: true, message: 'Employee details updated successfully!' });
+            }
+        }
+        res.status(404).json({ success: false, message: 'Employee not found' });
+    } catch (err) {
+        console.error('Error updating employee:', err);
+        res.status(500).json({ success: false, message: 'Server error while updating employee' });
+    }
 });
