@@ -309,25 +309,42 @@
 
     <!-- Script for Profile Management & Dropdowns -->
     <script>
-        window.onload = function() {
-            if (localStorage.getItem('hr_logged_in') !== 'true') {
-                window.location.href = "login.html";
-                return;
-            }
+        window.onload = async function() {
+    if (localStorage.getItem('hr_logged_in') !== 'true') {
+        window.location.href = "login.html";
+        return;
+    }
 
-            let user = localStorage.getItem('hr_user') || 'Employee User';
-            document.getElementById('empProfileName').innerText = user;
-            document.getElementById('empDropdownName').innerText = user;
-            document.getElementById('heroName').innerText = user;
-            document.getElementById('detailName').innerText = user;
+    let userName = localStorage.getItem('hr_user') || 'Employee User';
 
-            let savedPhone = localStorage.getItem('emp_phone');
-            let savedAddress = localStorage.getItem('emp_address');
+    try {
+        // Backend se real user data fetch karein
+        let response = await fetch(`/api/current-user?name=${encodeURIComponent(userName)}`);
+        let userData = await response.json();
 
-            if (savedPhone) document.getElementById('detailPhone').innerText = savedPhone;
-            if (savedAddress) document.getElementById('detailAddress').innerText = savedAddress;
-        };
+        if (userData) {
+            // Dynamic values assign karein jo database me hain
+            let name = userData.name || userName;
+            let designation = userData.designation || 'Software Engineer';
+            let department = userData.department || 'Software Engineering';
+            let email = userData.email || 'user@clickormedia.co.in';
+            let phone = userData.phone || '+91 98765 43210';
+            let address = userData.address || 'Main Office Campus';
 
+            document.getElementById('empProfileName').innerText = name;
+            document.getElementById('empDropdownName').innerText = name;
+            document.getElementById('heroName').innerText = name;
+            document.getElementById('detailName').innerText = name;
+            document.getElementById('detailEmail').innerText = email;
+            document.getElementById('detailPhone').innerText = phone;
+            document.getElementById('detailAddress').innerText = address;
+
+            // Designation aur Department elements ko bhi update kar dein
+        }
+    } catch (e) {
+        console.error("Error fetching profile data:", e);
+    }
+};
         function openEditModal() {
             document.getElementById('editPhone').value = document.getElementById('detailPhone').innerText;
             document.getElementById('editAddress').value = document.getElementById('detailAddress').innerText;
