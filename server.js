@@ -308,13 +308,24 @@ app.post('/api/attendance/add', (req, res) => {
 app.get('/api/settings', (req, res) => {
     try {
         const db = readDb();
-        if (!db.settings) {
-            db.settings = { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" };
+        if (!db.settings || !db.settings.shiftStartTime) {
+            db.settings = { 
+                shiftStartTime: "09:30 AM", 
+                shiftEndTime: "06:30 PM", 
+                gracePeriod: "15",
+                companyName: "CLICKORMEDIA PRIVATE LIMITED",
+                cin: "U72900DL2024PTC123456",
+                hrEmail: "hr@clickormedia.co.in",
+                location: "Sanat Nagar, Jammu & Kashmir, India",
+                paidLeaves: 18,
+                casualLeaves: 12,
+                sickLeaves: 10
+            };
             writeDb(db);
         }
         res.json({ success: true, settings: db.settings });
     } catch (err) {
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, settings: { shiftStartTime: "09:30 AM", shiftEndTime: "06:30 PM", gracePeriod: "15" } });
     }
 });
 
