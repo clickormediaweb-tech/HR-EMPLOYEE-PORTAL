@@ -1016,11 +1016,11 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// API: Edit Employee Details
+// API: Edit Employee Details & Department
 app.put('/api/employees/edit/:id', (req, res) => {
     try {
         const empId = req.params.id;
-        const { name, email, designation } = req.body;
+        const { name, email, designation, department } = req.body;
         const db = readDb();
 
         if (db.users) {
@@ -1029,9 +1029,10 @@ app.put('/api/employees/edit/:id', (req, res) => {
                 user.name = name || user.name;
                 user.email = email || user.email;
                 user.designation = designation || user.designation;
-               
+                user.department = department || user.department;
+                
                 writeDb(db);
-                console.log(`--- UPDATED EMPLOYEE: ${user.name} ---`);
+                console.log(`--- UPDATED EMPLOYEE & DEPT: ${user.name} -> ${user.department} ---`);
                 return res.json({ success: true, message: 'Employee details updated successfully!' });
             }
         }
