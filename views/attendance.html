@@ -184,8 +184,7 @@
                     <p class="text-xs text-gray-500 mt-1">Monitor daily check-ins, separate check-in/out locations, timestamps, and punch records.</p>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <input type="date" id="selectedDate" value="2026-10-06" onchange="renderAttendanceTable()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                   
+<input type="date" id="selectedDate" onchange="renderAttendanceTable()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">                   
                     <button onclick="openTimingsModal()" class="px-4 py-2.5 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs shadow-sm hover:bg-amber-200 transition-all cursor-pointer flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Update Office Timings</span>
@@ -744,6 +743,19 @@
         }
 
         window.onload = function() {
+            // Aaj ki live date ko YYYY-MM-DD format mein set karein
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('selectedDate');
+            if(dateInput) {
+                dateInput.value = today;
+            }
+
+            // Manual attendance modal wale date input ko bhi aaj ki date par set kar dein
+            const manualDateInput = document.getElementById('manualLogDate');
+            if(manualDateInput) {
+                manualDateInput.value = today;
+            }
+
             fetchAttendanceLogs();
             loadSettings();
         };
