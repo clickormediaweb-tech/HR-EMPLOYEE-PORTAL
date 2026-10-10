@@ -334,13 +334,18 @@ app.post('/api/settings/update', (req, res) => {
     try {
         const { shiftStartTime, shiftEndTime, gracePeriod } = req.body;
         const db = readDb();
-        db.settings = { ...db.settings, shiftStartTime, shiftEndTime, gracePeriod };
+        if (!db.settings) db.settings = {};
+        
+        db.settings.shiftStartTime = shiftStartTime || "09:30 AM";
+        db.settings.shiftEndTime = shiftEndTime || "06:30 PM";
+        db.settings.gracePeriod = gracePeriod || "15";
+
         writeDb(db);
         console.log(`--- OFFICE TIMINGS SAVED TO DISK: ${shiftStartTime} - ${shiftEndTime} ---`);
         res.json({ success: true, message: 'Settings saved permanently!' });
     } catch (err) {
         console.error('Error saving settings:', err);
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, message: 'Server error while saving settings' });
     }
 });
 
