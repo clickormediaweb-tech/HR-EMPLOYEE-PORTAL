@@ -334,14 +334,17 @@ app.post('/api/settings/update', (req, res) => {
     try {
         const { shiftStartTime, shiftEndTime, gracePeriod } = req.body;
         const db = readDb();
+        
+        // Ensure karein ki db.settings object exist karta hai
         if (!db.settings) db.settings = {};
         
+        // Sirf settings update honi chahiye, baki data ko touch nahi karna hai
         db.settings.shiftStartTime = shiftStartTime || "09:30 AM";
         db.settings.shiftEndTime = shiftEndTime || "06:30 PM";
         db.settings.gracePeriod = gracePeriod || "15";
 
-        writeDb(db);
-        console.log(`--- OFFICE TIMINGS SAVED TO DISK: ${shiftStartTime} - ${shiftEndTime} ---`);
+        writeDb(db); // Yeh sirf database.json mein save karega, attendance delete nahi hogi
+        
         res.json({ success: true, message: 'Settings saved permanently!' });
     } catch (err) {
         console.error('Error saving settings:', err);
