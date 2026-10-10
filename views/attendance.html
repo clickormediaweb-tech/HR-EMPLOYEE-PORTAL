@@ -172,8 +172,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800">Active Office Shift Policy</h4>
-                        <p class="text-sm font-extrabold text-[#222222]" id="activeShiftDisplay">09:30 AM – 06:30 PM <span class="text-xs font-normal text-gray-500">(Grace Period: 15 mins)</span></p>
-                    </div>
+<p class="text-sm font-extrabold text-[#222222]" id="activeShiftDisplay">Loading shift policy...</p>                    </div>
                 </div>
             </div>
 
@@ -207,8 +206,7 @@
                 <div onclick="filterByCard('')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Overall Attendance</p>
-                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors">100%</h3>
-                        <span class="text-xs font-bold text-emerald-600 mt-2 inline-block"><i class="fa-solid fa-arrow-trend-up"></i> Full team accounted</span>
+<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors" id="cardOverallPercent">100%</h3>                        <span class="text-xs font-bold text-emerald-600 mt-2 inline-block"><i class="fa-solid fa-arrow-trend-up"></i> Full team accounted</span>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-user-check"></i>
@@ -218,8 +216,7 @@
                 <div onclick="filterByCard('On Time')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
                     <div>
                         <p class="text-sm font-medium text-gray-500">On Time</p>
-                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-blue-600 transition-colors">4</h3>
-                        <span id="onTimeCardSubtitle" class="text-xs font-bold text-emerald-600 mt-2 inline-block">Clocked in before 09:30 AM</span>
+<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-blue-600 transition-colors" id="cardOnTimeCount">4</h3>                        <span id="onTimeCardSubtitle" class="text-xs font-bold text-emerald-600 mt-2 inline-block">Clocked in before 09:30 AM</span>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-clock"></i>
@@ -229,8 +226,7 @@
                 <div onclick="filterByCard('Late')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Late Arrivals</p>
-                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors">1</h3>
-                        <span class="text-xs font-bold text-amber-600 mt-2 inline-block">Requires warning check</span>
+<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-amber-600 transition-colors" id="cardLateCount">1</h3>                        <span class="text-xs font-bold text-amber-600 mt-2 inline-block">Requires warning check</span>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -240,8 +236,7 @@
                 <div onclick="filterByCard('Absent')" class="bg-white p-6 rounded-2xl border border-[#EAEAEA] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between cursor-pointer group">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Absent / Leave</p>
-                        <h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-rose-600 transition-colors">0</h3>
-                        <span class="text-xs font-bold text-rose-600 mt-2 inline-block">Approved & unapproved</span>
+<h3 class="text-3xl font-extrabold text-[#222222] mt-1 group-hover:text-rose-600 transition-colors" id="cardAbsentCount">0</h3>                        <span class="text-xs font-bold text-rose-600 mt-2 inline-block">Approved & unapproved</span>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-user-xmark"></i>
@@ -478,23 +473,22 @@
                 const res = await fetch('/api/settings');
                 const data = await res.json();
                 
-                // Safe fallbacks agar data undefined ho
-                let startTime = (data.success && data.settings && data.settings.shiftStartTime) ? data.settings.shiftStartTime : "09:30 AM";
-                let endTime = (data.success && data.settings && data.settings.shiftEndTime) ? data.settings.shiftEndTime : "06:30 PM";
-                let grace = (data.success && data.settings && data.settings.gracePeriod) ? data.settings.gracePeriod : "15";
-
-                if(document.getElementById('shiftStartTime')) document.getElementById('shiftStartTime').value = startTime;
-                if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = endTime;
-                if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = grace;
-                
-                let shiftDisplay = document.getElementById('activeShiftDisplay');
-                if(shiftDisplay) {
-                    shiftDisplay.innerHTML = `${startTime} – ${endTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${grace} mins)</span>`;
-                }
-                
-                let subTitle = document.getElementById('onTimeCardSubtitle');
-                if(subTitle) {
-                    subTitle.innerText = `Clocked in before ${startTime}`;
+                if (data.success && data.settings) {
+                    let s = data.settings;
+                    
+                    if(document.getElementById('shiftStartTime')) document.getElementById('shiftStartTime').value = s.shiftStartTime || "09:30 AM";
+                    if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = s.shiftEndTime || "06:30 PM";
+                    if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = s.gracePeriod || "15";
+                    
+                    let shiftDisplay = document.getElementById('activeShiftDisplay');
+                    if(shiftDisplay) {
+                        shiftDisplay.innerHTML = `${s.shiftStartTime} – ${s.shiftEndTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${s.gracePeriod} mins)</span>`;
+                    }
+                    
+                    let subTitle = document.getElementById('onTimeCardSubtitle');
+                    if(subTitle) {
+                        subTitle.innerText = `Clocked in before ${s.shiftStartTime}`;
+                    }
                 }
             } catch (err) {
                 console.error('Error loading settings:', err);
@@ -530,12 +524,29 @@
                 let matchesSearch = log.name.toLowerCase().includes(searchInput) || log.dept.toLowerCase().includes(searchInput);
                 let matchesStatus = statusFilter === "" || log.status.toLowerCase() === statusFilter;
                
-                // Strict Date match
                 let logDate = log.date || '2026-10-06';
                 let matchesDate = (logDate === selectedDateInput);
 
                 return matchesSearch && matchesStatus && matchesDate;
             });
+
+            // --- CARDS COUNT DYNAMIC UPDATE FOR SELECTED DATE ---
+            let dateLogs = attendanceLogs.filter(log => (log.date || '2026-10-06') === selectedDateInput);
+            let totalActiveStaff = 5; // Total active employees count (aapke active staff ke hisab se)
+            let presentCount = dateLogs.length;
+            let onTimeCount = dateLogs.filter(l => l.status === "On Time").length;
+            let lateCount = dateLogs.filter(l => l.status === "Late").length;
+            let absentCount = Math.max(0, totalActiveStaff - presentCount);
+            
+            let attendancePercentage = totalActiveStaff > 0 ? Math.round((presentCount / totalActiveStaff) * 100) : 0;
+
+            // DOM mein cards update karein
+            // Note: HTML mein cards ke numbers ke paas id honi chahiye, niche diye gaye HTML update ko bhi check karein
+            document.getElementById('cardOverallPercent').innerText = attendancePercentage + "%";
+            document.getElementById('cardOnTimeCount').innerText = onTimeCount;
+            document.getElementById('cardLateCount').innerText = lateCount;
+            document.getElementById('cardAbsentCount').innerText = absentCount;
+            // ----------------------------------------------------
 
             document.getElementById('logCountBadge').innerText = `${filtered.length} Total`;
 
@@ -574,7 +585,7 @@
                         </td>
                         <td class="py-3.5 px-4 text-gray-700">
                             <span class="font-bold block">${log.checkOutTime}</span>
-                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500"></i> ${log.checkOutLoc}</span>
+                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500">EN</i> ${log.checkOutLoc}</span>
                         </td>
                         <td class="py-3.5 px-4">${badge}</td>
                         <td class="py-3.5 px-4 text-right">
