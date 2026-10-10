@@ -637,10 +637,33 @@
             }
         }
 
-        function handleEditSubmit(event) {
+         async function handleEditSubmit(event) {
             event.preventDefault();
-            alert('Edit feature updated successfully!');
-            closeModals();
+            if (!activeEmpId) return;
+
+            let name = document.getElementById('editNameInput').value.trim();
+            let email = document.getElementById('editEmailInput').value.trim();
+            let designation = document.getElementById('editRoleInput').value.trim();
+
+            try {
+                const response = await fetch(`/api/employees/edit/${activeEmpId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, designation })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('Employee details updated successfully in database!');
+                    closeModals();
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Error updating employee details.');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Server connection error.');
+            }
         }
     </script>
 </body>
