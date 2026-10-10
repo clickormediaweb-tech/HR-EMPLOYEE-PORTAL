@@ -817,14 +817,14 @@ app.get('/api/settings', (req, res) => {
                 cin: "U72900DL2024PTC123456",
                 hrEmail: "hr@clickormedia.co.in",
                 location: "Sanat Nagar, Jammu & Kashmir, India",
-                paidLeaves: 18,
-                casualLeaves: 12,
-                sickLeaves: 10,
+                paidLeaves: 12,
+                casualLeaves: 0,
+                sickLeaves: 0,
                 pfContribution: "12% of Basic Salary",
-                cutoffDate: "25th of every month",
-                shiftStartTime: "10:00 AM", // Yahan apni default start time likhein
-                shiftEndTime: "06:00 PM",   // Yahan apni default end time likhein
-                gracePeriod: "5"            // Yahan grace period likhein
+                cutoffDate: "7th of every month",
+                shiftStartTime: "10:00 AM",
+                shiftEndTime: "06:00 PM",
+                gracePeriod: "5"
             };
             writeDb(db);
         }
@@ -838,23 +838,23 @@ app.post('/api/settings/save', (req, res) => {
     try {
         const { companyName, cin, hrEmail, location, paidLeaves, casualLeaves, sickLeaves, pfContribution, cutoffDate } = req.body;
         const db = readDb();
-       
-        db.settings = {
-            ...db.settings,
-            companyName,
-            cin,
-            hrEmail,
-            location,
-            paidLeaves: parseInt(paidLeaves) || 18,
-            casualLeaves: parseInt(casualLeaves) || 12,
-            sickLeaves: parseInt(sickLeaves) || 10,
-            pfContribution,
-            cutoffDate
-        };
+        
+        if (!db.settings) db.settings = {};
+
+        db.settings.companyName = companyName || db.settings.companyName;
+        db.settings.cin = cin || db.settings.cin;
+        db.settings.hrEmail = hrEmail || db.settings.hrEmail;
+        db.settings.location = location || db.settings.location;
+        db.settings.paidLeaves = parseInt(paidLeaves) || 12;
+        db.settings.casualLeaves = parseInt(casualLeaves) || 0;
+        db.settings.sickLeaves = parseInt(sickLeaves) || 0;
+        db.settings.pfContribution = pfContribution || db.settings.pfContribution;
+        db.settings.cutoffDate = cutoffDate || "7th of every month";
 
         writeDb(db);
         res.json({ success: true, message: 'Settings saved successfully!' });
     } catch (err) {
+        console.error('Error saving settings:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
