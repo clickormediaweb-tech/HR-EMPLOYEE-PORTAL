@@ -567,11 +567,12 @@
             document.getElementById('viewProfileModal').classList.remove('hidden');
         }
 
-        function openEditModal(id, name, email, role) {
+        function openEditModal(id, name, email, role, dept) {
             activeEmpId = id;
             document.getElementById('editNameInput').value = name;
             document.getElementById('editEmailInput').value = email;
             document.getElementById('editRoleInput').value = role;
+            document.getElementById('editDeptInput').value = dept || 'Engineering';
             document.getElementById('editProfileModal').classList.remove('hidden');
         }
 
@@ -646,24 +647,25 @@
             }
         }
 
-         async function handleEditSubmit(event) {
+        async function handleEditSubmit(event) {
             event.preventDefault();
             if (!activeEmpId) return;
 
             let name = document.getElementById('editNameInput').value.trim();
             let email = document.getElementById('editEmailInput').value.trim();
             let designation = document.getElementById('editRoleInput').value.trim();
+            let department = document.getElementById('editDeptInput').value;
 
             try {
                 const response = await fetch(`/api/employees/edit/${activeEmpId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, designation })
+                    body: JSON.stringify({ name, email, designation, department })
                 });
 
                 const data = await response.json();
                 if (response.ok && data.success) {
-                    alert('Employee details updated successfully in database!');
+                    alert('Employee details and department updated successfully!');
                     closeModals();
                     window.location.reload();
                 } else {
