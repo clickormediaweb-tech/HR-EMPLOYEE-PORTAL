@@ -1077,3 +1077,17 @@ app.put('/api/employees/edit/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error while updating employee' });
     }
 });
+
+// Get current logged-in employee details
+app.get('/api/current-user', async (req, res) => {
+    try {
+        const dbData = await readDb();
+        const users = dbData.users || [];
+        // Session ya localStorage ke hisaab se user match karein
+        const userName = req.session.user || req.query.name; 
+        const currentUser = users.find(u => u.name === userName) || users[0];
+        res.json(currentUser);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch user profile" });
+    }
+});
