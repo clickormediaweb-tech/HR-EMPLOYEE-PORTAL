@@ -417,7 +417,7 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Department</label>
                     <select id="editDeptInput" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134] cursor-pointer">
                         <option value="Design">Design</option>
-                        <option value="Engineering">Engineering</option>
+                        <option value="IT">IT</option>
                         <option value="Marketing">Marketing</option>
                         <option value="HR & Finance">HR & Finance</option>
                     </select>
@@ -463,7 +463,7 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Department</label>
                     <select id="addDept" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFD134]">
                         <option value="Design">Design</option>
-                        <option value="Engineering">Engineering</option>
+                        <option value="IT">IT</option>
                         <option value="Marketing">Marketing</option>
                         <option value="HR & Finance">HR & Finance</option>
                     </select>
@@ -572,7 +572,7 @@
             document.getElementById('editNameInput').value = name;
             document.getElementById('editEmailInput').value = email;
             document.getElementById('editRoleInput').value = role;
-            document.getElementById('editDeptInput').value = dept || 'Engineering';
+            document.getElementById('editDeptInput').value = dept || 'IT';
             document.getElementById('editProfileModal').classList.remove('hidden');
         }
 
