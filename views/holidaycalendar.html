@@ -149,16 +149,45 @@
 
                 <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
 
-                <!-- User Profile -->
-                <div onclick="alert('Admin(HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
-                    <div class="text-right">
-                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
-                        <p class="text-xs text-gray-500">HR Manager</p>
+                 <!-- User Profile Dropdown Menu -->
+                <div class="relative">
+                    <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="text-right">
+                            <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
+                            <p class="text-xs text-gray-500">HR Manager</p>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+
+                    <!-- Profile Menu Content -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-2 z-50">
+                        <div class="px-4 py-3 border-b border-[#EAEAEA]">
+                            <p class="text-xs font-bold text-[#222222]">Admin</p>
+                            <p class="text-[11px] text-gray-500 truncate">admin@clickormedia.co.in</p>
+                        </div>
+                        <div class="py-1">
+                            <button onclick="openModal('profileModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-user-gear w-4 text-gray-400"></i>
+                                <span>My Profile</span>
+                            </button>
+                            <button onclick="openModal('settingsModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-gear w-4 text-gray-400"></i>
+                                <span>Account Settings</span>
+                            </button>
+                            <button onclick="openModal('securityModal')" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-shield-halved w-4 text-gray-400"></i>
+                                <span>Privacy & Security</span>
+                            </button>
+                        </div>
+                        <div class="pt-1 border-t border-[#EAEAEA]">
+                            <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+                                <i class="fa-solid fa-right-from-bracket w-4 text-rose-500"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
         </header>
 
         <!-- PAGE CONTENT CONTAINER -->
@@ -423,6 +452,28 @@
         window.onload = function() {
             fetchHolidays();
         };
+        function toggleProfileDropdown(event) {
+    event.stopPropagation();
+    let dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+window.addEventListener('click', function() {
+    let dropdown = document.getElementById('profileDropdown');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+    }
+});
+function logoutUser() {
+    if (confirm("Are you sure you want to log out of the HR Portal?")) {
+        // Saari login state ya localStorage clear karein
+        localStorage.removeItem('hr_logged_in');
+        localStorage.removeItem('hr_user');
+        
+        // Login page par redirect karein
+        window.location.href = "/login.html"; // ya agar root login hai toh "/"
+    }
+}
     </script>
 </body>
 </html>
