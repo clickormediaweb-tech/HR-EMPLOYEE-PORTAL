@@ -478,21 +478,24 @@
             try {
                 const res = await fetch('/api/settings');
                 const data = await res.json();
-                if (data.success && data.settings) {
-                    let s = data.settings;
-                    if(document.getElementById('shiftStartTime')) document.getElementById('shiftStartTime').value = s.shiftStartTime;
-                    if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = s.shiftEndTime;
-                    if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = s.gracePeriod;
-                   
-                    let shiftDisplay = document.getElementById('activeShiftDisplay');
-                    if(shiftDisplay) {
-                        shiftDisplay.innerHTML = `${s.shiftStartTime} – ${s.shiftEndTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${s.gracePeriod} mins)</span>`;
-                    }
-                   
-                    let subTitle = document.getElementById('onTimeCardSubtitle');
-                    if(subTitle) {
-                        subTitle.innerText = `Clocked in before ${s.shiftStartTime}`;
-                    }
+                
+                // Safe fallbacks agar data undefined ho
+                let startTime = (data.success && data.settings && data.settings.shiftStartTime) ? data.settings.shiftStartTime : "09:30 AM";
+                let endTime = (data.success && data.settings && data.settings.shiftEndTime) ? data.settings.shiftEndTime : "06:30 PM";
+                let grace = (data.success && data.settings && data.settings.gracePeriod) ? data.settings.gracePeriod : "15";
+
+                if(document.getElementById('shiftStartTime')) document.getElementById('shiftStartTime').value = startTime;
+                if(document.getElementById('shiftEndTime')) document.getElementById('shiftEndTime').value = endTime;
+                if(document.getElementById('gracePeriod')) document.getElementById('gracePeriod').value = grace;
+                
+                let shiftDisplay = document.getElementById('activeShiftDisplay');
+                if(shiftDisplay) {
+                    shiftDisplay.innerHTML = `${startTime} – ${endTime} <span class="text-xs font-normal text-gray-500">(Grace Period: ${grace} mins)</span>`;
+                }
+                
+                let subTitle = document.getElementById('onTimeCardSubtitle');
+                if(subTitle) {
+                    subTitle.innerText = `Clocked in before ${startTime}`;
                 }
             } catch (err) {
                 console.error('Error loading settings:', err);
