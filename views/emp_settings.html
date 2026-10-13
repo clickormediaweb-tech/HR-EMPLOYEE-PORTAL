@@ -313,11 +313,9 @@
     </div>
 
     <!-- Script for Data Isolation & Password Management -->
+<!-- Script for Data Isolation & Password Management -->
     <script>
-window.onload = function() {
-    // Agar aap database ke badle yahan direct change karna chahte hain:
-let userDept = "UI/UX Design"; // Apna manchaaha department yahan likhein
-let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
+        window.onload = function() {
             // 1. Fetch current logged-in user details from backend database
             fetch('/api/current-user')
                 .then(res => res.json())
@@ -338,17 +336,6 @@ let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
                         if (document.getElementById('headerDesignation')) {
                             document.getElementById('headerDesignation').innerText = userDesig;
                         }
-
-                        // Header title aur sidebar ka department dynamic karein
-                        let headerSpan = document.getElementById('headerDeptDisplay');
-                        if (headerSpan) {
-                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
-
-                        let sidebarDeptP = document.getElementById('sidebarDept');
-                        if (sidebarDeptP) {
-                            sidebarDeptP.innerText = `Department: ${userDept}`;
-                        }
                     }
                 })
                 .catch(err => console.error("Error fetching current user profile:", err));
@@ -368,7 +355,7 @@ let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
                 document.getElementById('prefPayslip').checked = localStorage.getItem('notif_payslip') === 'true';
             }
         };
-        };
+
         // Toggle Password Visibility
         function togglePasswordVisibility(fieldId, btn) {
             let inputField = document.getElementById(fieldId);
@@ -410,8 +397,6 @@ let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
             event.preventDefault();
             let newVal = document.getElementById('newPass').value;
             let confirmVal = document.getElementById('confirmPass').value;
-
-            console.log("Update password button clicked!"); // Check karne ke liye ki function chal raha hai
 
             if (newVal.length < 6) {
                 alert("New password must be at least 6 characters long.");
@@ -507,20 +492,6 @@ let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
                 localStorage.removeItem('hr_logged_in');
                 localStorage.removeItem('hr_user');
                 window.location.href = "/";
-            }
-        }
-       // Toggle Password Visibility (Fixed & Bulletproof)
-        function togglePasswordVisibility(fieldId, btn) {
-            let inputField = document.getElementById(fieldId);
-            // Button ke andar ka icon dhoondne ke liye safe selector
-            let icon = btn.querySelector('i') || btn.children[0];
-
-            if (inputField.type === "password") {
-                inputField.type = "text";
-                if (icon) icon.className = "fa-solid fa-eye-slash";
-            } else {
-                inputField.type = "password";
-                if (icon) icon.className = "fa-solid fa-eye";
             }
         }
     </script>
