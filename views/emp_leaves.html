@@ -281,18 +281,36 @@
 
     <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
     <script>
-        let loggedInUser = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
-        let lastSeenStatuses = {};
+        let loggedInUser = 'Pranchal Rajpal';
+let lastSeenStatuses = {};
 
-        window.onload = function() {
-            document.getElementById('empProfileName').innerText = loggedInUser;
-            document.getElementById('empDropdownName').innerText = loggedInUser;
+window.onload = function() {
+    // 1. Pehle current logged-in user ki details fetch karein
+    fetch('/api/current-user')
+        .then(res => res.json())
+        .then(user => {
+            if (user && user.success) {
+                loggedInUser = user.name || 'Pranchal Rajpal';
+                
+                // Naam update karein
+                if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = loggedInUser;
+                if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = loggedInUser;
+                
+                // Designation aur Department dynamic update karein
+                if(document.getElementById('headerDesignation')) {
+                    document.getElementById('headerDesignation').innerText = user.designation;
+                }
+            }
             fetchEmployeeLeaves();
+        })
+        .catch(err => {
+            console.error("Error fetching user profile:", err);
+            fetchEmployeeLeaves();
+        });
 
-            // Auto poll every 2 seconds for instantaneous real-time notification & status update
-            setInterval(fetchEmployeeLeaves, 2000);
-        };
-
+    // Auto poll every 2 seconds for instantaneous real-time notification & status update
+    setInterval(fetchEmployeeLeaves, 2000);
+};
         function fetchEmployeeLeaves() {
             fetch('/api/leaves')
                 .then(res => res.json())
