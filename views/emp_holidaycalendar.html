@@ -243,10 +243,12 @@
                 .then(user => {
                     if (user && user.success) {
                         let userName = user.name || 'Pranchal Rajpal';
-                        
-                        // Naam update karein
-                        document.getElementById('empProfileName').innerText = userName;
-                        document.getElementById('empDropdownName').innerText = userName;
+                        let userDesig = user.designation || 'Software Engineer';
+
+                        // UI elements update karein
+                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
+                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
+                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
                     }
                 })
                 .catch(err => console.error("Error fetching current user profile:", err));
@@ -255,8 +257,7 @@
 
             // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
             setInterval(fetchHolidays, 2000);
-        };
-        function fetchHolidays() {
+        }; function fetchHolidays() {
             fetch('/api/holidays')
                 .then(res => res.json())
                 .then(data => {
