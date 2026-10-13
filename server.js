@@ -448,15 +448,29 @@ app.post('/api/leaves/apply', async (req, res) => {
         if (!db.leaves) db.leaves = [];
         if (!db.myLeaves) db.myLeaves = [];
 
-        let applicantName = name || "Pranchal Rajpal";
-        let applicantEmail = "pranchal@clickormedia.co.in";
+        let applicantName = name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
+        let applicantEmail = (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
         let currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // Check available balance before applying
+        let joiningDate = new Date('2026-01-01');
+        let currentDate = new Date();
+        let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
+        let totalEarnedLeaves = Math.max(1, monthsElapsed);
+        
+        let approvedLeavesCount = db.leaves.filter(l => l.name && l.name.toLowerCase() === applicantName.toLowerCase() && l.status === 'APPROVED' && !l.type.includes('Extra')).length;
+        let currentBalance = Math.max(0, totalEarnedLeaves - approvedLeavesCount);
+
+        let finalLeaveType = type;
+        if (currentBalance <= 0) {
+            finalLeaveType = "Extra Leave (Salary Deduction)";
+        }
 
         let newSub = {
             id: Date.now(),
             name: applicantName,
             email: applicantEmail,
-            type,
+            type: finalLeaveType,
             duration,
             reason,
             status: "PENDING",
@@ -470,10 +484,10 @@ app.post('/api/leaves/apply', async (req, res) => {
 
         res.json({ success: true, message: 'Leave application submitted successfully!' });
     } catch (err) {
+        console.error('Error applying leave:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
 // --- HOLIDAY APIS ---
 app.get('/api/holidays', async (req, res) => {
     try {
@@ -886,8 +900,20 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        let leavesTaken = record.leaveLogs ? record.leaveLogs.length : 0;
-        let remainingBalance = Math.max(0, (record.leaveBalance || 4) - leavesTaken);
+        // --- AUTOMATIC MONTHLY LEAVE CALCULATION LOGIC ---
+        let joiningDate = new Date('2026-01-01'); // Apni joining date yahan set karein
+        let currentDate = new Date();
+        
+        let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
+        let totalEarnedLeaves = Math.max(1, monthsElapsed); // Har mahine ki 1 leave earn hoti hai
+        
+        let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === empName.toLowerCase() && l.status === 'APPROVED') : [];
+        let totalLeavesUsed = userLeaves.length;
+
+        // Available balance = Total earned - Used (Rollover included)
+        let remainingBalance = Math.max(0, totalEarnedLeaves - totalLeavesUsed);
+        let extraLeaves = Math.max(0, totalLeavesUsed - totalEarnedLeaves); // Yeh extra leaves hain jinke salary se paise katenge
+
         let netPayout = record.baseNum || 25000;
 
         res.json({
@@ -897,16 +923,17 @@ app.get('/api/employee/stats', async (req, res) => {
                 email: record.email || `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
                 dept: record.dept || "Software Engineering",
                 leaveBalance: remainingBalance,
+                extraLeaves: extraLeaves, // Salary deduction count
                 attendancePercentage: "96.5%",
                 lastPayout: "₹" + netPayout.toLocaleString('en-IN'),
                 recentLeaves: record.leaveLogs || []
             }
         });
     } catch (err) {
+        console.error('Error in employee stats:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
 // --- EMPLOYEE PORTAL PAGE ROUTES ---
 app.get('/employee/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_index.html'));
