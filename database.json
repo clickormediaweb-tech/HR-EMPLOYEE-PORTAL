@@ -17,7 +17,7 @@
       "password": "123456",
       "role": "employee",
       "department": "Engineering",
-      "designation": "Frontend Developer",
+      "designation": "Web Developer",
       "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
     },
     {
@@ -66,8 +66,8 @@
     {
       "name": "Pranchal Rajpal",
       "email": "pranchal@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "IT",
+      "role": "Web Developer",
       "date": "2026-10-09",
       "checkInTime": "04:46 PM",
       "checkInLoc": "National Colony, Bathinda",
@@ -79,8 +79,8 @@
     {
       "name": "Sukhi",
       "email": "sukhi@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "Creative Team",
+      "role": "Videographer",
       "date": "2026-10-09",
       "checkInTime": "04:24 PM",
       "checkInLoc": "National Colony, Bathinda",
@@ -92,8 +92,8 @@
     {
       "name": "Anshdeep",
       "email": "anshdeep@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "Design",
+      "role": "Video Editor",
       "date": "2026-10-09",
       "checkInTime": "04:17 PM",
       "checkInLoc": "",
@@ -105,8 +105,8 @@
     {
       "name": "Tanya Dua",
       "email": "tanya@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "Design",
+      "role": "UI/UX Designer",
       "date": "2026-10-09",
       "checkInTime": "04:13 PM",
       "checkInLoc": "National Colony, Bathinda",
@@ -118,8 +118,8 @@
     {
       "name": "Tanya Dua",
       "email": "tanya@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "Design",
+      "role": "UI/UX Designer",
       "date": "2026-10-06",
       "checkInTime": "10:38 AM",
       "checkInLoc": "National Colony, Bathinda",
@@ -131,8 +131,8 @@
     {
       "name": "Tanya Dua",
       "email": "tanya@clickormedia.co.in",
-      "dept": "Software Engineering",
-      "role": "Software Engineer",
+      "dept": "Design",
+      "role": "UI/UX Designer",
       "date": "2026-10-05",
       "checkInTime": "05:57 PM",
       "checkInLoc": "National Colony, Bathinda",
@@ -157,7 +157,7 @@
       "name": "Pranchal Rajpal",
       "email": "pranchal@clickormedia.co.in",
       "dept": "Engineering",
-      "role": "Frontend Developer",
+      "role": "Web Developer",
       "checkInTime": "09:00 AM",
       "checkInLoc": "Remote / WFH (GPS Verified)",
       "checkOutTime": "06:30 PM",
@@ -405,7 +405,7 @@
         {
           "name": "Pranchal Rajpal",
           "email": "pranchal@clickormedia.co.in",
-          "role": "Software Engineer"
+          "role": "IT"
         }
       ]
     }
