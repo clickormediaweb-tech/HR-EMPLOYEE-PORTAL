@@ -113,9 +113,10 @@
         
         <!-- 2. TOP HEADER -->
         <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
-            <div class="flex items-center gap-3">
-                <h3 class="text-base font-bold text-[#222222]">My Attendance Logs </h3>
-            </div>
+            <div class="text-right">
+    <h4 id="empProfileName" class="text-sm font-bold text-[#222222]">Employee User</h4>
+    <p id="headerDesignation" class="text-xs text-gray-500">Software Engineer</p>
+</div>
 
             <!-- Right Actions & User Profile -->
             <div class="flex items-center gap-5">
@@ -164,8 +165,7 @@
                             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
                             <div>
                                 <p id="empDropdownName" class="font-black text-[#222222] text-sm">Employee User</p>
-                                <p class="text-[11px] text-gray-400 truncate">employee@clickormedia.co.in</p>
-                            </div>
+<p id="empDropdownEmail" class="text-[11px] text-gray-400 truncate">employee@clickormedia.co.in</p>                            </div>
                         </div>
                         <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
                             <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
@@ -274,24 +274,24 @@
 
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
     <script>
-let allEmployeeLogs = [];
-        let loggedInName = 'Pranchal Rajpal';
-
-        window.onload = function() {
+window.onload = function() {
             // 1. Current logged-in user ki details database se fetch karein
             fetch('/api/current-user')
                 .then(res => res.json())
                 .then(user => {
                     if (user && user.success) {
                         loggedInName = user.name || 'Pranchal Rajpal';
+                        let userDesig = user.designation || 'Software Engineer';
+                        let userEmail = user.email || 'employee@clickormedia.co.in';
                         
-                        // Naam update karein
+                        // Naam, designation aur email update karein
                         if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = loggedInName;
                         if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = loggedInName;
+                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
                         
-                        // Designation dynamic update karein
-                        if(document.getElementById('headerDesignation')) {
-                            document.getElementById('headerDesignation').innerText = user.designation;
+                        let emailEl = document.querySelector('#profileDropdown p.truncate');
+                        if (emailEl) {
+                            emailEl.innerText = userEmail;
                         }
                     }
 
@@ -317,9 +317,7 @@ let allEmployeeLogs = [];
                     }
                 })
                 .catch(err => console.error("Error fetching employee stats:", err));
-        };
-
-        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
+        };        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
         function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
