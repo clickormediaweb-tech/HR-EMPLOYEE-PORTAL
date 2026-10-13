@@ -273,8 +273,12 @@
     </div>
 
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
+    <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
     <script>
-window.onload = function() {
+        let allEmployeeLogs = [];
+        let loggedInName = 'Pranchal Rajpal';
+
+        window.onload = function() {
             // 1. Current logged-in user ki details database se fetch karein
             fetch('/api/current-user')
                 .then(res => res.json())
@@ -282,17 +286,13 @@ window.onload = function() {
                     if (user && user.success) {
                         loggedInName = user.name || 'Pranchal Rajpal';
                         let userDesig = user.designation || 'Software Engineer';
-                        let userEmail = user.email || 'employee@clickormedia.co.in';
                         
-                        // Naam, designation aur email update karein
-                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = loggedInName;
-                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = loggedInName;
-                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
-                        
-                        let emailEl = document.querySelector('#profileDropdown p.truncate');
-                        if (emailEl) {
-                            emailEl.innerText = userEmail;
-                        }
+                        // Saari jagah ek hi dynamic naam aur designation update karein
+                        let nameElements = document.querySelectorAll('#empProfileName, #empDropdownName');
+                        nameElements.forEach(el => { el.innerText = loggedInName; });
+
+                        let desigElements = document.querySelectorAll('#headerDesignation');
+                        desigElements.forEach(el => { el.innerText = userDesig; });
                     }
 
                     // 2. Fetch live attendance logs from backend server
@@ -317,7 +317,9 @@ window.onload = function() {
                     }
                 })
                 .catch(err => console.error("Error fetching employee stats:", err));
-        };        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
+        };
+
+        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
         function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
@@ -368,7 +370,7 @@ window.onload = function() {
                         <td class="py-4 px-6 font-bold">${log.date}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkInTime}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
-                      <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                        <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
                         <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
                         <td class="py-4 px-6 text-center">${statusBadge}</td>
                     </tr>
@@ -406,28 +408,28 @@ window.onload = function() {
                 window.location.href = "/";
             }
         }
-        function calculateDuration(inTime, outTime) {
-    if (!inTime || !outTime || outTime === '--:--') return 'Active';
-    
-    try {
-        let parseTime = (timeStr) => {
-            let [time, modifier] = timeStr.split(' ');
-            let [hours, minutes] = time.split(':').map(Number);
-            if (modifier === 'PM' && hours < 12) hours += 12;
-            if (modifier === 'AM' && hours === 12) hours = 0;
-            return hours * 60 + minutes;
-        };
 
-        let diffMins = parseTime(outTime) - parseTime(inTime);
-        if (diffMins < 0) diffMins += 24 * 60; // Handle overnight shifts if any
-        
-        let h = Math.floor(diffMins / 60);
-        let m = diffMins % 60;
-        return `${h}h ${m}m`;
-    } catch (e) {
-        return '0h 0m';
-    }
-}
-    </script>
-</body>
+        function calculateDuration(inTime, outTime) {
+            if (!inTime || !outTime || outTime === '--:--') return 'Active';
+            
+            try {
+                let parseTime = (timeStr) => {
+                    let [time, modifier] = timeStr.split(' ');
+                    let [hours, minutes] = time.split(':').map(Number);
+                    if (modifier === 'PM' && hours < 12) hours += 12;
+                    if (modifier === 'AM' && hours === 12) hours = 0;
+                    return hours * 60 + minutes;
+                };
+
+                let diffMins = parseTime(outTime) - parseTime(inTime);
+                if (diffMins < 0) diffMins += 24 * 60;
+                
+                let h = Math.floor(diffMins / 60);
+                let m = diffMins % 60;
+                return `${h}h ${m}m`;
+            } catch (e) {
+                return '0h 0m';
+            }
+        }
+    </script></body>
 </html>
