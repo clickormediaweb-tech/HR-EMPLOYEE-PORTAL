@@ -167,8 +167,10 @@
                             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
                             <div>
                                 <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
-                                <p class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
-                            </div>
+<div>
+    <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
+    <p id="dropdownDept" class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>
+</div>                            </div>
                         </div>
                         <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
                             <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
@@ -327,7 +329,10 @@ window.onload = function() {
                         // Yahan UI/UX Designer aur UI/UX Design set kar diya gaya hai
                         let userDept = 'UI/UX Design';
                         let userDesig = 'UI/UX Designer';
-
+let dropdownDeptP = document.getElementById('dropdownDept');
+if (dropdownDeptP) {
+    dropdownDeptP.innerText = `${userDept} Dept.`;
+}
                         // UI elements update karein
                         document.getElementById('empProfileName').innerText = userName;
                         document.getElementById('empDropdownName').innerText = userName;
