@@ -320,7 +320,7 @@
 <!-- Script for Data Isolation & Password Management -->
     <script>
 window.onload = function() {
-            // 1. Fetch current logged-in user details from backend database
+            // 1. Fetch current logged-in user details directly from database API
             fetch('/api/current-user')
                 .then(res => res.json())
                 .then(user => {
@@ -328,13 +328,10 @@ window.onload = function() {
                         let userName = user.name || 'Pranchal Rajpal';
                         let userEmail = user.email || 'pranchal@clickormedia.co.in';
                         
-                        // Yahan UI/UX Designer aur UI/UX Design set kar diya gaya hai
-                        let userDept = 'UI/UX Design';
-                        let userDesig = 'UI/UX Designer';
-let dropdownDeptP = document.getElementById('dropdownDept');
-if (dropdownDeptP) {
-    dropdownDeptP.innerText = `${userDept} Dept.`;
-}
+                        // Seedha database se department aur designation uthayega
+                        let userDept = user.department || 'Software Engineering';
+                        let userDesig = user.designation || 'Software Engineer';
+
                         // UI elements update karein
                         document.getElementById('empProfileName').innerText = userName;
                         document.getElementById('empDropdownName').innerText = userName;
@@ -366,6 +363,12 @@ if (dropdownDeptP) {
                         if (document.getElementById('sidebarDept')) {
                             document.getElementById('sidebarDept').innerText = `Department: ${userDept}`;
                         }
+
+                        // Dropdown menu ka department update karein
+                        let dropdownDeptP = document.getElementById('dropdownDept');
+                        if (dropdownDeptP) {
+                            dropdownDeptP.innerText = `${userDept} Dept.`;
+                        }
                     }
                 })
                 .catch(err => console.error("Error fetching current user profile:", err));
@@ -385,7 +388,6 @@ if (dropdownDeptP) {
                 document.getElementById('prefPayslip').checked = localStorage.getItem('notif_payslip') === 'true';
             }
         };
-
         // Toggle Password Visibility
         function togglePasswordVisibility(fieldId, btn) {
             let inputField = document.getElementById(fieldId);
