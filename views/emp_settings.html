@@ -325,7 +325,11 @@
                         let userEmail = user.email || 'pranchal@clickormedia.co.in';
                         let userDept = user.department || 'Software Engineering';
                         let userDesig = user.designation || 'Software Engineer';
-
+// Database se aane wale text ko override karne ke liye yeh line add karein:
+if (user) {
+    user.designation = 'UI/UX Designer';
+    user.department = 'UI/UX Design';
+}
                         // UI elements update karein
                         document.getElementById('empProfileName').innerText = userName;
                         document.getElementById('empDropdownName').innerText = userName;
