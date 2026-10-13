@@ -235,31 +235,9 @@
         </main>
     </div>
 
-    <!-- Script with Real-Time Polling & Sync -->
+<!-- Script with Real-Time Polling & Sync -->
     <script>
         window.onload = function() {
-            // 1. Fetch current logged-in user details from backend database
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        let userName = user.name || 'Pranchal Rajpal';
-                        let userDesig = user.designation || 'Software Engineer';
-
-                        // UI elements update karein
-                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
-                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
-                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
-                    }
-                })
-                .catch(err => console.error("Error fetching current user profile:", err));
-
-            fetchHolidays();
-
-            // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
-            setInterval(fetchHolidays, 2000);
-        };
-      window.onload = function() {
             // 1. Fetch current logged-in user details from backend database
             fetch('/api/current-user')
                 .then(res => res.json())
@@ -274,13 +252,13 @@
                         if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
                         if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
 
-                        // Header title aur dropdown ke andar jo hardcoded "Software Engineering" likha hai, usey replace karne ke liye:
+                        // Header title aur dropdown ke andar ka department update karne ke liye:
                         let headerSpan = document.querySelector('header h3 span');
                         if (headerSpan) {
                             headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
                         }
 
-                        let dropdownDeptP = document.querySelector('#profileDropdown p.text-blue-600.font-bold');
+                        let dropdownDeptP = document.getElementById('dropdownDept');
                         if (dropdownDeptP) {
                             dropdownDeptP.innerText = `${userDept} Dept.`;
                         }
@@ -289,8 +267,12 @@
                 .catch(err => console.error("Error fetching current user profile:", err));
 
             fetchHolidays();
+
+            // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
             setInterval(fetchHolidays, 2000);
-        };  function fetchHolidays() {
+        };
+
+        function fetchHolidays() {
             fetch('/api/holidays')
                 .then(res => res.json())
                 .then(data => {
@@ -312,7 +294,7 @@
                 return;
             }
 
-            let today = new Date(); // Current Date: Oct 7, 2026
+            let today = new Date();
 
             holidays.forEach(h => {
                 let badgeColor = "bg-blue-50 text-blue-700";
@@ -353,12 +335,8 @@
         }
 
         function updateHeroBanner(holidays) {
-            let today = new Date(); // Current Date: Oct 7, 2026
-            
-            // Sirf aane wali (future) holidays ko filter karein aur date ke hisaab se sort karein
+            let today = new Date();
             let upcomingHolidays = holidays.filter(h => new Date(h.date) >= today);
-            
-            // Agar future ki koi holiday milti hai toh sabse pehli wali (nearest) lo, warna fallback mein pehli holiday
             let nextHoliday = upcomingHolidays.length > 0 ? upcomingHolidays[0] : holidays[0];
 
             if (nextHoliday) {
@@ -366,7 +344,6 @@
                 document.getElementById('heroHolidayDate').innerText = `${nextHoliday.day}, ${nextHoliday.date}`;
                 document.getElementById('heroHolidayCategory').innerText = nextHoliday.category || 'Official Holiday';
 
-                // Din (Days) calculate karein countdown ke liye
                 let holidayDate = new Date(nextHoliday.date);
                 let diffTime = holidayDate - today;
                 let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -378,7 +355,6 @@
             }
         }
 
-        // Filter Holiday Cards
         function filterHolidays(type, btn) {
             let buttons = btn.parentElement.querySelectorAll('button');
             buttons.forEach(b => {
