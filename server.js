@@ -1040,7 +1040,6 @@ app.get('/api/current-user', async (req, res) => {
         const dbData = await readDb();
         const users = dbData.users || [];
         
-        // Session ya query parameter se active user ka naam ya email match karein
         let activeName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
         let activeEmail = (req.session.user && req.session.user.email) ? req.session.user.email : "";
 
@@ -1064,7 +1063,7 @@ app.get('/api/current-user', async (req, res) => {
         res.status(500).json({ success: false, error: "Failed to fetch user profile" });
     }
 });
-// Employee Account Settings Page Route
+//Employee Account Settings Page Route
 app.get('/employee/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_settings.html'));
 });
