@@ -211,9 +211,9 @@
                             <span id="profileCardEmail" class="font-bold text-gray-800">pranchal@clickormedia.co.in</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 block font-semibold">Department</span>
-                            <span class="font-bold text-gray-800">Software Engineering</span>
-                        </div>
+    <span class="text-gray-400 block font-semibold">Department</span>
+    <span id="profileDept" class="font-bold text-gray-800">Software Engineering</span>
+</div>
                         <div>
                             <span class="text-gray-400 block font-semibold">Office Location</span>
                             <span class="font-bold text-gray-800">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</span>
@@ -315,7 +315,7 @@
     <!-- Script for Data Isolation & Password Management -->
 <!-- Script for Data Isolation & Password Management -->
     <script>
-        window.onload = function() {
+window.onload = function() {
             // 1. Fetch current logged-in user details from backend database
             fetch('/api/current-user')
                 .then(res => res.json())
@@ -323,22 +323,41 @@
                     if (user && user.success) {
                         let userName = user.name || 'Pranchal Rajpal';
                         let userEmail = user.email || 'pranchal@clickormedia.co.in';
-                        let userDept = user.department || 'Software Engineering';
-                        let userDesig = user.designation || 'Software Engineer';
-// Database se aane wale text ko override karne ke liye yeh line add karein:
-if (user) {
-    user.designation = 'UI/UX Designer';
-    user.department = 'UI/UX Design';
-}
+                        
+                        // Yahan UI/UX Designer aur UI/UX Design set kar diya gaya hai
+                        let userDept = 'UI/UX Design';
+                        let userDesig = 'UI/UX Designer';
+
                         // UI elements update karein
                         document.getElementById('empProfileName').innerText = userName;
                         document.getElementById('empDropdownName').innerText = userName;
                         document.getElementById('profileCardName').innerText = userName;
                         document.getElementById('profileCardEmail').innerText = userEmail;
                         
-                        // Header aur card mein designation update karein
+                        // Header aur profile card ki designation update karein
                         if (document.getElementById('headerDesignation')) {
                             document.getElementById('headerDesignation').innerText = userDesig;
+                        }
+                        
+                        let cardDesig = document.querySelector('.lg\\:col-span-1 p.text-blue-600.font-bold');
+                        if (cardDesig) {
+                            cardDesig.innerText = userDesig;
+                        }
+
+                        // Profile card ka department update karein
+                        if (document.getElementById('profileDept')) {
+                            document.getElementById('profileDept').innerText = userDept;
+                        }
+
+                        // Header title ka badge update karein
+                        let headerSpan = document.getElementById('headerDeptDisplay');
+                        if (headerSpan) {
+                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+                        }
+
+                        // Sidebar footer ka department update karein
+                        if (document.getElementById('sidebarDept')) {
+                            document.getElementById('sidebarDept').innerText = `Department: ${userDept}`;
                         }
                     }
                 })
