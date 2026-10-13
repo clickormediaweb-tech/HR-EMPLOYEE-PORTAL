@@ -315,6 +315,9 @@
     <!-- Script for Data Isolation & Password Management -->
     <script>
 window.onload = function() {
+    // Agar aap database ke badle yahan direct change karna chahte hain:
+let userDept = "UI/UX Design"; // Apna manchaaha department yahan likhein
+let userDesig = "UI/UX Designer"; // Apni manchaahi designation yahan likhein
             // 1. Fetch current logged-in user details from backend database
             fetch('/api/current-user')
                 .then(res => res.json())
