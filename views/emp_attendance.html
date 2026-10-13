@@ -274,15 +274,30 @@
 
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
     <script>
-        let allEmployeeLogs = [];
-        let loggedInName = localStorage.getItem('hr_user') || 'Tanya Dua';
+let allEmployeeLogs = [];
+        let loggedInName = 'Pranchal Rajpal';
 
         window.onload = function() {
-            document.getElementById('empProfileName').innerText = loggedInName;
-            document.getElementById('empDropdownName').innerText = loggedInName;
+            // 1. Current logged-in user ki details database se fetch karein
+            fetch('/api/current-user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user && user.success) {
+                        loggedInName = user.name || 'Pranchal Rajpal';
+                        
+                        // Naam update karein
+                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = loggedInName;
+                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = loggedInName;
+                        
+                        // Designation dynamic update karein
+                        if(document.getElementById('headerDesignation')) {
+                            document.getElementById('headerDesignation').innerText = user.designation;
+                        }
+                    }
 
-            // 1. Fetch live attendance logs from backend server
-            fetch('/api/attendance')
+                    // 2. Fetch live attendance logs from backend server
+                    return fetch('/api/attendance');
+                })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.attendance) {
@@ -292,7 +307,7 @@
                 })
                 .catch(err => console.error("Error fetching attendance records:", err));
 
-            // 2. Fetch backend stats to get dynamic backend leaves taken count
+            // 3. Fetch backend stats to get dynamic backend leaves taken count
             fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInName)}`)
                 .then(res => res.json())
                 .then(data => {
