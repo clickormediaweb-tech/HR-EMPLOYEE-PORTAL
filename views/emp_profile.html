@@ -150,10 +150,9 @@
                 <div class="relative">
                     <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
                         <div class="text-right">
-                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Employee User</h4>
-                            <p class="text-xs text-blue-600 font-medium">Software Engineering</p>
-                        </div>
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Employee User</h4>
+    <p id="headerDesignation" class="text-xs text-blue-600 font-medium">Software Engineering</p>
+</div><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
 
@@ -309,42 +308,48 @@
 
     <!-- Script for Profile Management & Dropdowns -->
     <script>
-        window.onload = async function() {
-    if (localStorage.getItem('hr_logged_in') !== 'true') {
-        window.location.href = "login.html";
-        return;
-    }
+       window.onload = async function() {
+            if (localStorage.getItem('hr_logged_in') !== 'true') {
+                window.location.href = "login.html";
+                return;
+            }
 
-    let userName = localStorage.getItem('hr_user') || 'Employee User';
+            let userName = localStorage.getItem('hr_user') || 'Employee User';
 
-    try {
-        // Backend se real user data fetch karein
-        let response = await fetch(`/api/current-user?name=${encodeURIComponent(userName)}`);
-        let userData = await response.json();
+            try {
+                // Backend se real user data fetch karein
+                let response = await fetch(`/api/current-user?name=${encodeURIComponent(userName)}`);
+                let userData = await response.json();
 
-        if (userData) {
-            // Dynamic values assign karein jo database me hain
-            let name = userData.name || userName;
-            let designation = userData.designation || 'Software Engineer';
-            let department = userData.department || 'Software Engineering';
-            let email = userData.email || 'user@clickormedia.co.in';
-            let phone = userData.phone || '+91 98765 43210';
-            let address = userData.address || 'Main Office Campus';
+                if (userData && userData.success !== false) {
+                    let name = userData.name || userName;
+                    let designation = userData.designation || 'Software Engineer';
+                    let department = userData.department || 'Software Engineering';
+                    let email = userData.email || 'user@clickormedia.co.in';
+                    let phone = userData.phone || '+91 98765 43210';
+                    let address = userData.address || 'Main Office Campus';
 
-            document.getElementById('empProfileName').innerText = name;
-            document.getElementById('empDropdownName').innerText = name;
-            document.getElementById('heroName').innerText = name;
-            document.getElementById('detailName').innerText = name;
-            document.getElementById('detailEmail').innerText = email;
-            document.getElementById('detailPhone').innerText = phone;
-            document.getElementById('detailAddress').innerText = address;
+                    // Name aur contact details update karein
+                    document.getElementById('empProfileName').innerText = name;
+                    document.getElementById('empDropdownName').innerText = name;
+                    document.getElementById('heroName').innerText = name;
+                    document.getElementById('detailName').innerText = name;
+                    document.getElementById('detailEmail').innerText = email;
+                    document.getElementById('detailPhone').innerText = phone;
+                    document.getElementById('detailAddress').innerText = address;
 
-            // Designation aur Department elements ko bhi update kar dein
-        }
-    } catch (e) {
-        console.error("Error fetching profile data:", e);
-    }
-};
+                    // Designation aur Department elements ko dynamic update karein
+                    let desigElements = document.querySelectorAll('.text-blue-600.font-medium, .text-blue-100 span:first-child');
+                    desigElements.forEach(el => {
+                        if (el.textContent.includes('Engineer') || el.textContent.includes('Designer')) {
+                            el.innerHTML = `<i class="fa-solid fa-code mr-1"></i> ${designation}`;
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error fetching profile data:", e);
+            }
+        };
         function openEditModal() {
             document.getElementById('editPhone').value = document.getElementById('detailPhone').innerText;
             document.getElementById('editAddress').value = document.getElementById('detailAddress').innerText;
