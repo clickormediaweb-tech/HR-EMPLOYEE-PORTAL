@@ -161,6 +161,7 @@
                         <div class="text-right">
                             <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Employee User</h4>
                             <!-- Is tarah se id="headerDesignation" jodh dein -->
+                            <p id="empHeaderDesignation" class="text-[11px] text-gray-400 font-medium">Software Engineer</p>
                         </div>
                         <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
@@ -374,7 +375,7 @@
                 document.getElementById('statLeaveBalance').innerText = `${emp.leaveBalance} Days`;
                 document.getElementById('statAttendance').innerText = emp.attendancePercentage;
                 document.getElementById('statNetPayout').innerText = emp.lastPayout;
-
+document.getElementById('empHeaderDesignation').innerText = emp.designation || "Employee";
 
                     // --- LOCALSTORAGE & SERVER SE CHECK KAREIN KI PUNCHED-IN HAI YA NAHI ---
                     let savedPunchState = localStorage.getItem('is_punched_in');
