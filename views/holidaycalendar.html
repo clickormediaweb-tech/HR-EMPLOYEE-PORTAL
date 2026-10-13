@@ -152,9 +152,9 @@
                  <!-- User Profile Dropdown Menu -->
                 <div class="relative">
                     <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
-                        <div class="text-right">
-    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
-    <p id="headerDesignation" class="text-xs text-amber-600 font-medium">HR Manager</p>
+                        <div class="px-4 py-3 border-b border-[#EAEAEA]">
+    <p id="empDropdownName" class="text-xs font-bold text-[#222222]">Admin</p>
+    <p id="empDropdownEmail" class="text-[11px] text-gray-500 truncate">admin@clickormedia.co.in</p>
 </div>
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
@@ -340,13 +340,12 @@
             fetch('/api/current-user')
                 .then(res => res.json())
                 .then(user => {
-                    console.log("Current User API Response:", user); // Console mein check karne ke liye
+                    console.log("Current User API Response:", user);
                     if (user && user.success) {
                         let userName = user.name || 'Admin';
                         let userEmail = user.email || 'admin@clickormedia.co.in';
                         let userDesig = user.designation || 'HR Manager';
 
-                        // Saare IDs par safe check lagakar update karein
                         if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
                         if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
                         if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
@@ -356,8 +355,7 @@
                 .catch(err => console.error("Error fetching current user:", err));
 
             fetchHolidays();
-        };
-        function renderHolidayList() {
+        };     function renderHolidayList() {
             let tbody = document.getElementById('holidayTableBody');
             tbody.innerHTML = "";
 
