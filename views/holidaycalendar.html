@@ -340,24 +340,23 @@
             fetch('/api/current-user')
                 .then(res => res.json())
                 .then(user => {
+                    console.log("Current User API Response:", user); // Console mein check karne ke liye
                     if (user && user.success) {
                         let userName = user.name || 'Admin';
                         let userEmail = user.email || 'admin@clickormedia.co.in';
                         let userDesig = user.designation || 'HR Manager';
 
-                        document.getElementById('empProfileName').innerText = userName;
-                        document.getElementById('empDropdownName').innerText = userName;
-                        document.getElementById('empDropdownEmail').innerText = userEmail;
-                        if (document.getElementById('headerDesignation')) {
-                            document.getElementById('headerDesignation').innerText = userDesig;
-                        }
+                        // Saare IDs par safe check lagakar update karein
+                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
+                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
+                        if(document.getElementById('empDropdownEmail')) document.getElementById('empDropdownEmail').innerText = userEmail;
                     }
                 })
                 .catch(err => console.error("Error fetching current user:", err));
 
             fetchHolidays();
         };
-
         function renderHolidayList() {
             let tbody = document.getElementById('holidayTableBody');
             tbody.innerHTML = "";
