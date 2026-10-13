@@ -237,6 +237,28 @@
 
     <!-- Script with Real-Time Polling & Sync -->
     <script>
+        window.onload = function() {
+            // 1. Fetch current logged-in user details from backend database
+            fetch('/api/current-user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user && user.success) {
+                        let userName = user.name || 'Pranchal Rajpal';
+                        let userDesig = user.designation || 'Software Engineer';
+
+                        // UI elements update karein
+                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
+                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
+                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+                    }
+                })
+                .catch(err => console.error("Error fetching current user profile:", err));
+
+            fetchHolidays();
+
+            // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
+            setInterval(fetchHolidays, 2000);
+        };
        window.onload = function() {
             // Fetch current logged-in user details from backend database
             fetch('/api/current-user')
