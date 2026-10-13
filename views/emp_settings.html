@@ -317,16 +317,29 @@
     <!-- Script for Data Isolation & Password Management -->
     <script>
         window.onload = function() {
-            // Agar user logged in nahi hai, tabhi login par bhejo (development ya test ke liye aap login status set rakhein)
-            if (localStorage.getItem('hr_logged_in') !== 'true') {
-                localStorage.setItem('hr_logged_in', 'true'); // Auto session bypass for seamless testing
-            }
+            // 1. Fetch current logged-in user details from backend database
+            fetch('/api/current-user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user && user.success) {
+                        let userName = user.name || 'Pranchal Rajpal';
+                        let userEmail = user.email || 'pranchal@clickormedia.co.in';
+                        let userDept = user.department || 'Software Engineering';
+                        let userDesig = user.designation || 'Software Engineer';
 
-            let user = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
-            document.getElementById('empProfileName').innerText = user;
-            document.getElementById('empDropdownName').innerText = user;
-            document.getElementById('profileCardName').innerText = user;
-            document.getElementById('profileCardEmail').innerText = `${user.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`;
+                        // UI elements update karein
+                        document.getElementById('empProfileName').innerText = userName;
+                        document.getElementById('empDropdownName').innerText = userName;
+                        document.getElementById('profileCardName').innerText = userName;
+                        document.getElementById('profileCardEmail').innerText = userEmail;
+                        
+                        // Header aur card mein department/designation update karein
+                        if (document.getElementById('headerDesignation')) {
+                            document.getElementById('headerDesignation').innerText = userDesig;
+                        }
+                    }
+                })
+                .catch(err => console.error("Error fetching current user profile:", err));
 
             // Load saved password dynamically into current password field
             let savedPass = localStorage.getItem('emp_active_password') || 'admin123';
@@ -343,7 +356,6 @@
                 document.getElementById('prefPayslip').checked = localStorage.getItem('notif_payslip') === 'true';
             }
         };
-
         // Toggle Password Visibility
         function togglePasswordVisibility(fieldId, btn) {
             let inputField = document.getElementById(fieldId);
