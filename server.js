@@ -1034,7 +1034,36 @@ app.get('/employee/payroll', (req, res) => {
 app.get('/employee/holidaycalendar', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_holidaycalendar.html'));
 });
+// Get current logged-in employee details with real-time DB sync for department & designation
+app.get('/api/current-user', async (req, res) => {
+    try {
+        const dbData = await readDb();
+        const users = dbData.users || [];
+        
+        // Session ya query parameter se active user ka naam ya email match karein
+        let activeName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
+        let activeEmail = (req.session.user && req.session.user.email) ? req.session.user.email : "";
 
+        let currentUser = users.find(u => 
+            (activeEmail && u.email && u.email.toLowerCase() === activeEmail.toLowerCase()) || 
+            (u.name && u.name.toLowerCase() === activeName.toLowerCase())
+        ) || users[0];
+
+        res.json({
+            success: true,
+            _id: currentUser._id || "",
+            name: currentUser.name || "Employee",
+            email: currentUser.email || "",
+            role: currentUser.role || "employee",
+            department: currentUser.department || "Engineering",
+            designation: currentUser.designation || "Staff",
+            avatar: currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+        });
+    } catch (err) {
+        console.error("Error fetching current user:", err);
+        res.status(500).json({ success: false, error: "Failed to fetch user profile" });
+    }
+});
 // Employee Account Settings Page Route
 app.get('/employee/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_settings.html'));
