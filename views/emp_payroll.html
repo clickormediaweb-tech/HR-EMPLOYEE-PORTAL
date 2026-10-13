@@ -392,12 +392,19 @@
 
     <!-- Script for Backend Payroll Sync & Expense Claims -->
     <script>
-        let loggedInUser = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
-        let totalExpenses = 0;
+        let loggedInUser = 'Pranchal Rajpal';
+let totalExpenses = 0;
 
-        window.onload = function() {
-            document.getElementById('empProfileName').innerText = loggedInUser;
-            document.getElementById('empDropdownName').innerText = loggedInUser;
+window.onload = function() {
+    // Pehle current logged-in user ki details fetch karein
+    fetch('/api/current-user')
+        .then(res => res.json())
+        .then(user => {
+            if (user && user.name) {
+                loggedInUser = user.name;
+                document.getElementById('empProfileName').innerText = loggedInUser;
+                document.getElementById('empDropdownName').innerText = loggedInUser;
+            }
 
             let savedExpenses = localStorage.getItem('emp_total_expenses');
             if (savedExpenses) {
@@ -406,9 +413,12 @@
             }
 
             fetchEmployeePayroll();
-        };
-
-        function fetchEmployeePayroll() {
+        })
+        .catch(err => {
+            console.error("Error fetching current user:", err);
+            fetchEmployeePayroll();
+        });
+};        function fetchEmployeePayroll() {
     fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
         .then(res => res.json())
         .then(data => {
