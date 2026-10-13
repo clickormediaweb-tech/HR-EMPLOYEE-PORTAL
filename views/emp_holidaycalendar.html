@@ -236,18 +236,26 @@
 
     <!-- Script with Real-Time Polling & Sync -->
     <script>
-        let loggedInUser = localStorage.getItem('hr_user') || 'Pranchal Rajpal';
-        let allHolidays = [];
+       window.onload = function() {
+            // 1. Fetch current logged-in user details from backend database
+            fetch('/api/current-user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user && user.success) {
+                        let userName = user.name || 'Pranchal Rajpal';
+                        
+                        // Naam update karein
+                        document.getElementById('empProfileName').innerText = userName;
+                        document.getElementById('empDropdownName').innerText = userName;
+                    }
+                })
+                .catch(err => console.error("Error fetching current user profile:", err));
 
-        window.onload = function() {
-            document.getElementById('empProfileName').innerText = loggedInUser;
-            document.getElementById('empDropdownName').innerText = loggedInUser;
             fetchHolidays();
 
             // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
             setInterval(fetchHolidays, 2000);
         };
-
         function fetchHolidays() {
             fetch('/api/holidays')
                 .then(res => res.json())
