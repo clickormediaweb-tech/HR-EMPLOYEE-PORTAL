@@ -371,15 +371,10 @@ app.post('/api/settings/update', async (req, res) => {
 app.get('/api/leaves', async (req, res) => {
     try {
         const db = await readDb();
-        if (!db.leaves || db.leaves.length === 0) {
-            db.leaves = [
-                { id: 1, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", type: "Annual Leave", duration: "Oct 02 - Oct 05 (4 Days)", reason: "Personal work & family trip", status: "PENDING", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
-                { id: 2, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", type: "Sick Leave", duration: "Sep 28 (1 Day)", reason: "Viral Fever", status: "APPROVED", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces" },
-                { id: 3, name: "Sukhi", email: "sukhi@clickormedia.co.in", type: "Casual Leave", duration: "Oct 10 (1 Day)", reason: "Personal Errands", status: "PENDING", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces" },
-                { id: 4, name: "Robin", email: "robin@clickormedia.co.in", type: "Annual Leave", duration: "Nov 12 - Nov 15 (4 Days)", reason: "Out of Station", status: "REJECTED", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces" },
-                { id: 5, name: "Tanya Dua", email: "tanya@clickormedia.co.in", type: "Sick Leave", duration: "Sep 29 (1 Day)", reason: "Medical Appointment", status: "APPROVED", updatedAt: "12:00 PM", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" }
-            ];
-            await writeDb(db);
+        if (!db.leaves) {
+    db.leaves = [];
+    await writeDb(db);
+
         }
         if (!db.myLeaves) {
             db.myLeaves = [];
