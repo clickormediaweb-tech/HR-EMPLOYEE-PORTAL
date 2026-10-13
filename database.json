@@ -373,17 +373,7 @@
     }
   ],
   "myLeaves": [
-    {
-      "id": 1791545750180,
-      "name": "sukhi",
-      "email": "pranchal@clickormedia.co.in",
-      "type": "Half-Day Leave",
-      "duration": "2026-10-09 (Half-Day)",
-      "reason": "work",
-      "status": "REJECTED",
-      "updatedAt": "05:06 PM",
-      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
-    },
+    
     {
       "id": 1791545700452,
       "name": "anshdeep",
