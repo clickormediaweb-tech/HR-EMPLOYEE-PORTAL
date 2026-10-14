@@ -321,98 +321,93 @@
             setInterval(fetchEmployeeLeaves, 2000);
         };
 
-        function fetchEmployeeLeaves() {
-            // 1. Server se automatic monthly calculated stats fetch karein (Har mahine +1 aur rollover)
-            fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInUser)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.employee) {
-                        // Server ka dynamic balance yahan show hoga
-                        document.getElementById('leaveBalanceCount').innerText = `${data.employee.leaveBalance} Days`;
+       function fetchEmployeeLeaves() {
+    // Server se dynamic balance fetch karne ke liye yeh call hona zaroori hai
+    fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInUser)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.employee) {
+                // Yeh line server ke calculated balance ko screen par dikhayegi
+                document.getElementById('leaveBalanceCount').innerText = `${data.employee.leaveBalance} Days`;
+            }
+        })
+        .catch(err => console.error("Error fetching stats:", err));
+
+    fetch('/api/leaves')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                let allLeaves = data.leaves || [];
+                let myLeaves = allLeaves.filter(l => l.name && l.name.toLowerCase() === loggedInUser.toLowerCase());
+
+                checkForRealTimeAlerts(myLeaves);
+
+                let totalUsed = myLeaves.filter(l => l.status === "APPROVED").length;
+                document.getElementById('leavesUsedCount').innerText = `${totalUsed} Days`;
+
+                let notifBadge = document.getElementById('notifBadge');
+                let notifCountText = document.getElementById('notifCountText');
+                let notificationsContainer = document.getElementById('notificationListContainer');
+
+                let processedLeaves = myLeaves.filter(l => l.status === "APPROVED" || l.status === "REJECTED");
+
+                if (processedLeaves.length > 0) {
+                    notifBadge.classList.remove('hidden');
+                    notifCountText.innerText = `${processedLeaves.length} New`;
+                    notificationsContainer.innerHTML = "";
+
+                    processedLeaves.forEach(proc => {
+                        let isApproved = proc.status === "APPROVED";
+                        let badgeColor = isApproved ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-rose-700 bg-rose-50 border-rose-100";
+                        let iconClass = isApproved ? "fa-circle-check text-emerald-600" : "fa-circle-xmark text-rose-600";
+                        let timeStr = proc.updatedAt || "Just now";
+
+                        notificationsContainer.innerHTML += `
+                            <div class="p-3 border rounded-2xl space-y-1 ${badgeColor}">
+                                <div class="flex items-center justify-between font-bold">
+                                    <span><i class="fa-solid ${iconClass} mr-1.5"></i> Leave ${proc.status}</span>
+                                    <span class="text-[10px] text-gray-500">${timeStr}</span>
+                                </div>
+                                <p class="text-gray-700 font-medium">Your request for <strong>${proc.type}</strong> (${proc.duration}) has been <strong>${proc.status.toLowerCase()}</strong> by HR.</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    notifBadge.classList.add('hidden');
+                    notifCountText.innerText = `0 New`;
+                    notificationsContainer.innerHTML = `<p class="text-gray-400 text-center py-4">No new notifications.</p>`;
+                }
+
+                let tableBody = document.getElementById('leaveHistoryTable');
+                tableBody.innerHTML = "";
+
+                if (myLeaves.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-400">No leave history found.</td></tr>`;
+                    return;
+                }
+
+                myLeaves.forEach(leave => {
+                    let statusClass = "bg-amber-50 text-amber-700 border-amber-200";
+                    let statusText = leave.status || "PENDING";
+                    if (statusText === "APPROVED") {
+                        statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    } else if (statusText === "REJECTED") {
+                        statusClass = "bg-rose-50 text-rose-700 border-rose-200";
                     }
-                })
-                .catch(err => console.error("Error fetching stats:", err));
 
-            // 2. Leaves history aur notifications ke liye
-            fetch('/api/leaves')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        let allLeaves = data.leaves || [];
-                        
-                        let myLeaves = allLeaves.filter(l =>
-                            l.name && l.name.toLowerCase() === loggedInUser.toLowerCase()
-                        );
-
-                        checkForRealTimeAlerts(myLeaves);
-
-                        let totalUsed = myLeaves.filter(l => l.status === "APPROVED").length;
-                        document.getElementById('leavesUsedCount').innerText = `${totalUsed} Days`;
-
-                        let notifBadge = document.getElementById('notifBadge');
-                        let notifCountText = document.getElementById('notifCountText');
-                        let notificationsContainer = document.getElementById('notificationListContainer');
-
-                        let processedLeaves = myLeaves.filter(l => l.status === "APPROVED" || l.status === "REJECTED");
-
-                        if (processedLeaves.length > 0) {
-                            notifBadge.classList.remove('hidden');
-                            notifCountText.innerText = `${processedLeaves.length} New`;
-                            notificationsContainer.innerHTML = "";
-
-                            processedLeaves.forEach(proc => {
-                                let isApproved = proc.status === "APPROVED";
-                                let badgeColor = isApproved ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-rose-700 bg-rose-50 border-rose-100";
-                                let iconClass = isApproved ? "fa-circle-check text-emerald-600" : "fa-circle-xmark text-rose-600";
-                                let timeStr = proc.updatedAt || "Just now";
-
-                                notificationsContainer.innerHTML += `
-                                    <div class="p-3 border rounded-2xl space-y-1 ${badgeColor}">
-                                        <div class="flex items-center justify-between font-bold">
-                                            <span><i class="fa-solid ${iconClass} mr-1.5"></i> Leave ${proc.status}</span>
-                                            <span class="text-[10px] text-gray-500">${timeStr}</span>
-                                        </div>
-                                        <p class="text-gray-700 font-medium">Your request for <strong>${proc.type}</strong> (${proc.duration}) has been <strong>${proc.status.toLowerCase()}</strong> by HR.</p>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            notifBadge.classList.add('hidden');
-                            notifCountText.innerText = `0 New`;
-                            notificationsContainer.innerHTML = `<p class="text-gray-400 text-center py-4">No new notifications.</p>`;
-                        }
-
-                        let tableBody = document.getElementById('leaveHistoryTable');
-                        tableBody.innerHTML = "";
-
-                        if (myLeaves.length === 0) {
-                            tableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-400">No leave history found.</td></tr>`;
-                            return;
-                        }
-
-                        myLeaves.forEach(leave => {
-                            let statusClass = "bg-amber-50 text-amber-700 border-amber-200";
-                            let statusText = leave.status || "PENDING";
-                            if (statusText === "APPROVED") {
-                                statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-                            } else if (statusText === "REJECTED") {
-                                statusClass = "bg-rose-50 text-rose-700 border-rose-200";
-                            }
-
-                            tableBody.innerHTML += `
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3.5 px-4 font-bold">${leave.type || 'Leave'}</td>
-                                    <td class="py-3.5 px-4 text-gray-600">${leave.duration || 'N/A'}</td>
-                                    <td class="py-3.5 px-4 text-gray-500 truncate max-w-[150px]">${leave.reason || 'N/A'}</td>
-                                    <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 ${statusClass} font-bold rounded-lg border text-[10px]">${statusText}</span></td>
-                                </tr>
-                            `;
-                        });
-                    }
-                })
-                .catch(err => console.error("Error fetching employee leaves:", err));
-        }
-        function checkForRealTimeAlerts(myLeaves) {
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3.5 px-4 font-bold">${leave.type || 'Leave'}</td>
+                            <td class="py-3.5 px-4 text-gray-600">${leave.duration || 'N/A'}</td>
+                            <td class="py-3.5 px-4 text-gray-500 truncate max-w-[150px]">${leave.reason || 'N/A'}</td>
+                            <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 ${statusClass} font-bold rounded-lg border text-[10px]">${statusText}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        })
+        .catch(err => console.error("Error fetching employee leaves:", err));
+} function checkForRealTimeAlerts(myLeaves) {
             myLeaves.forEach(leave => {
                 let leaveId = leave.id;
                 let currentStatus = leave.status || "PENDING";
