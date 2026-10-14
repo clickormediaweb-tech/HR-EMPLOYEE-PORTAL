@@ -928,29 +928,26 @@ app.get('/api/employee/stats', async (req, res) => {
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
-        // --- EXACT PER-DAY SALARY DEDUCTION CALCULATION ---
-        let baseSalary = record.baseNum || 25000;
-        let perDaySalary = baseSalary / 30; // 30 din ke hisab se 1 din ki salary
-        let totalDeductions = extraLeaves * perDaySalary; 
-        let netPayout = Math.max(0, baseSalary - totalDeductions);
+       // --- EXACT PER-DAY SALARY DEDUCTION CALCULATION FOR DASHBOARD ---
+let baseSalary = record.baseNum || 25000;
+let perDaySalary = baseSalary / 30; // 30 din ke hisab se 1 din ki salary
+let totalDeductions = Math.round(extraLeaves * perDaySalary); 
+let netPayout = Math.max(0, baseSalary - totalDeductions);
 
-        res.json({
-            success: true,
-            employee: {
-                name: record.name || empName,
-                email: record.email || `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
-                dept: record.dept || "Software Engineering",
-                leaveBalance: remainingBalance,
-                extraLeaves: extraLeaves, 
-                attendancePercentage: "96.5%",
-                lastPayout: "₹" + Math.round(netPayout).toLocaleString('en-IN'),
-                recentLeaves: record.leaveLogs || []
-            }
-        });} catch (err) {
-        console.error('Error in employee stats:', err);
-        res.status(500).json({ success: false, message: 'Server error' });
+res.json({
+    success: true,
+    employee: {
+        name: record.name || empName,
+        email: record.email || `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
+        dept: record.dept || "Software Engineering",
+        leaveBalance: remainingBalance,
+        extraLeaves: extraLeaves, 
+        attendancePercentage: "96.5%",
+        lastPayout: "₹" + Math.round(netPayout).toLocaleString('en-IN'), // Yahan ab dynamic net payout jayega
+        recentLeaves: record.leaveLogs || []
     }
-});// --- EMPLOYEE PORTAL PAGE ROUTES ---
+});
+        // --- EMPLOYEE PORTAL PAGE ROUTES ---
 app.get('/employee/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_index.html'));
 });
