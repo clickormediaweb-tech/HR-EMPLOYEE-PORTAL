@@ -789,7 +789,6 @@
     <!-- Script for Backend Payroll Sync & Expense Claims -->
 
     <script>
-
 let loggedInUser = 'Pranchal Rajpal';
         let currentBaseSalary = 16000;
         let calculatedDeductions = 0;
@@ -802,12 +801,13 @@ let loggedInUser = 'Pranchal Rajpal';
                 .then(user => {
                     if (user && user.success) {
                         loggedInUser = user.name || 'Pranchal Rajpal';
-                        let userDesig = user.designation || 'Software Engineer';
+                        let userDesig = user.designation || user.department || 'UI/UX Designer'; 
                         let userDept = user.department || 'Software Engineering';
 
                         document.getElementById('empProfileName').innerText = loggedInUser;
                         document.getElementById('empDropdownName').innerText = loggedInUser;
                         
+                        // Yahan header designation database se fetch ho kar set hogi
                         if(document.getElementById('headerDesignation')) {
                             document.getElementById('headerDesignation').innerText = userDesig;
                         }
@@ -847,15 +847,16 @@ let loggedInUser = 'Pranchal Rajpal';
                         document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
                         
                         let userDept = record.dept || record.department || 'Software Engineering';
-                        let userDesig = record.designation || 'Software Engineer';
+                        let userDesig = record.designation || record.dept || 'UI/UX Designer';
+
+                        // Header designation sync from payroll record
+                        if(document.getElementById('headerDesignation')) {
+                            document.getElementById('headerDesignation').innerText = userDesig;
+                        }
 
                         let headerSpan = document.getElementById('headerDeptDisplay');
                         if (headerSpan) {
                             headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
-
-                        if(document.getElementById('headerDesignation')) {
-                            document.getElementById('headerDesignation').innerText = userDesig;
                         }
 
                         // --- EXACT PER-DAY DEDUCTION CALCULATION ---
