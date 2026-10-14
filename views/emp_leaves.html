@@ -322,6 +322,18 @@
         };
 
         function fetchEmployeeLeaves() {
+            // 1. Server se automatic monthly calculated stats fetch karein (Har mahine +1 aur rollover)
+            fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInUser)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.employee) {
+                        // Server ka dynamic balance yahan show hoga
+                        document.getElementById('leaveBalanceCount').innerText = `${data.employee.leaveBalance} Days`;
+                    }
+                })
+                .catch(err => console.error("Error fetching stats:", err));
+
+            // 2. Leaves history aur notifications ke liye
             fetch('/api/leaves')
                 .then(res => res.json())
                 .then(data => {
@@ -336,8 +348,6 @@
 
                         let totalUsed = myLeaves.filter(l => l.status === "APPROVED").length;
                         document.getElementById('leavesUsedCount').innerText = `${totalUsed} Days`;
-                        let totalAvailable = Math.max(0, 4 - totalUsed);
-                        document.getElementById('leaveBalanceCount').innerText = `${totalAvailable} Days`;
 
                         let notifBadge = document.getElementById('notifBadge');
                         let notifCountText = document.getElementById('notifCountText');
@@ -402,7 +412,6 @@
                 })
                 .catch(err => console.error("Error fetching employee leaves:", err));
         }
-
         function checkForRealTimeAlerts(myLeaves) {
             myLeaves.forEach(leave => {
                 let leaveId = leave.id;
