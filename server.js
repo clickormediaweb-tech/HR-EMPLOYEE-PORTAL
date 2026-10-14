@@ -1048,6 +1048,7 @@ app.get('/api/employee/punch-status', async (req, res) => {
 });
 
 // Employee Specific Payroll API Route
+// Employee Specific Payroll API Route
 app.get('/api/employee/payroll', async (req, res) => {
     try {
         const db = await readDb();
@@ -1061,13 +1062,23 @@ app.get('/api/employee/payroll', async (req, res) => {
             userPayroll = db.payroll.find(p => p.name && p.name.toLowerCase().includes("pranchal")) || db.payroll[1] || db.payroll[0];
         }
 
-        res.json({ success: true, payroll: userPayroll });
+        // --- CALCULATE EXTRA LEAVES FROM DB.LEAVES ---
+        let nameLower = currentUserName.toLowerCase();
+        let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
+        let totalAllLeavesUsed = userLeaves.length;
+        
+        let maxAllowedEarned = nameLower.includes('pranchal') ? 1 : 0;
+        let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
+
+        // Send extraLeaves inside payroll object
+        let payrollObj = { ...userPayroll, extraLeaves: extraLeaves };
+
+        res.json({ success: true, payroll: payrollObj });
     } catch (err) {
         console.error('Error fetching employee payroll:', err);
         res.status(500).json({ success: false, payroll: null });
     }
 });
-
 // Employee Payroll Page Route
 app.get('/employee/payroll', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_payroll.html'));
