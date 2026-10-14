@@ -288,9 +288,9 @@ app.get('/api/attendance', async (req, res) => {
         if (!db.attendance || db.attendance.length === 0) {
             db.attendance = [
                 { name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", role: "HR Manager", checkInTime: "08:55 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "Engineering", role: "Software Engineer", checkInTime: "09:00 AM", checkInLoc: "Remote / WFH (GPS Verified)", checkOutTime: "06:30 PM", checkOutLoc: "Remote / WFH (GPS Verified)", status: "On Time", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
-                { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Engineering", role: "Frontend Developer", checkInTime: "09:10 AM", checkInLoc: "Head Office (Terminal B)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal B)", status: "On Time", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Operations", role: "Operations Executive", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
+                { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", role: "Web Developer", checkInTime: "09:00 AM", checkInLoc: "Remote / WFH (GPS Verified)", checkOutTime: "06:30 PM", checkOutLoc: "Remote / WFH (GPS Verified)", status: "On Time", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
+                { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", role: " Video Editor", checkInTime: "09:10 AM", checkInLoc: "Head Office (Terminal B)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal B)", status: "On Time", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
+                { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", role: " Videographer", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
                 { name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", role: "Marketing Specialist", checkInTime: "09:15 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
             ];
             await writeDb(db);
@@ -592,9 +592,9 @@ app.get('/api/payroll', async (req, res) => {
         if (!db.payroll || db.payroll.length === 0) {
             db.payroll = [
                 { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", baseNum: 85000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 29, 2026", day: "Tuesday", type: "Paid Leave", reason: "Medical Appointment" }], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
-                { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "Engineering", baseNum: 110000, leaveBalance: 4, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
-                { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Engineering", baseNum: 95000, leaveBalance: 6, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 28, 2026", day: "Monday", type: "Paid Leave", reason: "Viral Fever" }], avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Operations", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
+                { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", baseNum: 110000, leaveBalance: 4, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
+                { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", baseNum: 95000, leaveBalance: 6, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 28, 2026", day: "Monday", type: "Paid Leave", reason: "Viral Fever" }], avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
+                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
                 { id: 5, name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", baseNum: 80000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
             ];
             await writeDb(db);
@@ -757,8 +757,8 @@ app.get('/api/departments', async (req, res) => {
                     color: "bg-purple-50 text-purple-600",
                     members: [
                         { name: "Tanya Dua", email: "tanya@clickormedia.co.in", role: "HR Manager" },
-                        { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", role: "Frontend Developer" },
-                        { name: "Sukhi", email: "sukhi@clickormedia.co.in", role: "Operations Specialist" }
+                        { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", role: " Video Editor" },
+                        { name: "Sukhi", email: "sukhi@clickormedia.co.in", role: " Videographer" }
                     ]
                 },
                 {
@@ -770,7 +770,7 @@ app.get('/api/departments', async (req, res) => {
                     icon: "fa-code",
                     color: "bg-blue-50 text-blue-600",
                     members: [
-                        { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", role: "Software Engineer" }
+                        { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", role: "IT" }
                     ]
                 }
             ];
