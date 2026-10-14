@@ -927,10 +927,14 @@ app.get('/api/employee/stats', async (req, res) => {
         let remainingBalance = Math.max(0, maxAllowedEarned - totalLeavesUsed);
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
-
+// --- EXACT PER-DAY SALARY DEDUCTION CALCULATION ---
+        let baseSalary = record.baseNum || 25000;
+        let perDaySalary = baseSalary / 30; // 30 din ke hisab se ek din ki salary
+        let totalDeductions = extraLeaves * perDaySalary; // Extra leaves ke hisab se total deduction
+        let netPayout = Math.max(0, baseSalary - totalDeductions);
         let netPayout = record.baseNum || 25000;
 
-        res.json({
+       res.json({
             success: true,
             employee: {
                 name: record.name || empName,
@@ -939,7 +943,8 @@ app.get('/api/employee/stats', async (req, res) => {
                 leaveBalance: remainingBalance,
                 extraLeaves: extraLeaves, 
                 attendancePercentage: "96.5%",
-                lastPayout: "₹" + netPayout.toLocaleString('en-IN'),
+                lastPayout: "₹" + Math.round(netPayout).toLocaleString('en-IN'),
+                deductionsAmount: "₹" + Math.round(totalDeductions).toLocaleString('en-IN'),
                 recentLeaves: record.leaveLogs || []
             }
         });
