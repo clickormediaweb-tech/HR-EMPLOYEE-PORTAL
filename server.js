@@ -900,19 +900,25 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        // --- AUTOMATIC MONTHLY LEAVE CALCULATION LOGIC ---
-        let joiningDate = new Date('2026-01-01'); // Apni joining date yahan set karein
-        let currentDate = new Date();
+        // --- AUTOMATIC MONTHLY LEAVE ACCRUAL & ROLLOVER LOGIC ---
+        // Maan lijiye employee ki joining date ya portal shuru hone ki date January 2026 hai
+        let joiningDate = new Date('2026-01-01'); 
+        let currentDate = new Date(); // Aaj ki date (Oct 2026 ya jo bhi ho)
         
+        // Mahino ka antar nikalna (Joining se le kar abhi tak kitne mahine ho gaye)
         let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-        let totalEarnedLeaves = Math.max(1, monthsElapsed); // Har mahine ki 1 leave earn hoti hai
         
+        // Total earned leaves = Har mahine ki 1 leave (Kam se kam 1 leave toh hogi hi)
+        let totalEarnedLeaves = Math.max(1, monthsElapsed); 
+        
+        // Database se is specific employee ki approved leaves nikalna
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === empName.toLowerCase() && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.length;
 
-        // Available balance = Total earned - Used (Rollover included)
+        // Dynamic Balance = Total Earned (with rollover) - Total Used
+        // Jaise October tak agar chutti nahi li, toh monthsElapsed badhega aur balance automatically 1+1=2 ya usse zyada judta jayega!
         let remainingBalance = Math.max(0, totalEarnedLeaves - totalLeavesUsed);
-        let extraLeaves = Math.max(0, totalLeavesUsed - totalEarnedLeaves); // Yeh extra leaves hain jinke salary se paise katenge
+        let extraLeaves = Math.max(0, totalLeavesUsed - totalEarnedLeaves); // Agar balance khatam hone ke baad bhi li ho
 
         let netPayout = record.baseNum || 25000;
 
@@ -923,7 +929,7 @@ app.get('/api/employee/stats', async (req, res) => {
                 email: record.email || `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
                 dept: record.dept || "Software Engineering",
                 leaveBalance: remainingBalance,
-                extraLeaves: extraLeaves, // Salary deduction count
+                extraLeaves: extraLeaves, 
                 attendancePercentage: "96.5%",
                 lastPayout: "₹" + netPayout.toLocaleString('en-IN'),
                 recentLeaves: record.leaveLogs || []
@@ -933,8 +939,7 @@ app.get('/api/employee/stats', async (req, res) => {
         console.error('Error in employee stats:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
-});
-// --- EMPLOYEE PORTAL PAGE ROUTES ---
+});// --- EMPLOYEE PORTAL PAGE ROUTES ---
 app.get('/employee/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_index.html'));
 });
