@@ -277,66 +277,68 @@
     <div id="realTimeToastContainer" class="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none"></div>
 
     <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
+    <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
     <script>
-window.onload = function() {
-    fetch('/api/current-user')
-        .then(res => res.json())
-        .then(user => {
-            if (user && user.success) {
-                let userName = user.name || 'Pranchal Rajpal';
-                let userDesig = user.designation || 'UI/UX Designer';
-                let userDept = user.department || 'UI/UX Design';
+        let loggedInUser = "Pranchal Rajpal";
+        let lastSeenStatuses = {};
 
-                if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
-                if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
-                if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+        window.onload = function() {
+            fetch('/api/current-user')
+                .then(res => res.json())
+                .then(user => {
+                    if (user && user.success) {
+                        let userName = user.name || 'Pranchal Rajpal';
+                        loggedInUser = userName;
+                        let userDesig = user.designation || 'Software Engineer';
+                        let userDept = user.department || 'Software Engineering';
 
-                let headerSpan = document.getElementById('headerDeptDisplay');
-                if (headerSpan) {
-                    headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                }
+                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
+                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
+                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
 
-                let dropdownDeptP = document.getElementById('dropdownDept');
-                if (dropdownDeptP) {
-                    dropdownDeptP.innerText = `${userDept} Dept.`;
-                }
+                        let headerSpan = document.getElementById('headerDeptDisplay');
+                        if (headerSpan) {
+                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+                        }
 
-                let sidebarDeptP = document.getElementById('sidebarDept');
-                if (sidebarDeptP) {
-                    sidebarDeptP.innerText = `Department: ${userDept}`;
-                }
-            }
-            fetchEmployeeLeaves();
-        })
-        .catch(err => {
-            console.error("Error fetching user profile:", err);
-            fetchEmployeeLeaves();
-        });
+                        let dropdownDeptP = document.getElementById('dropdownDept');
+                        if (dropdownDeptP) {
+                            dropdownDeptP.innerText = `${userDept} Dept.`;
+                        }
 
-    setInterval(fetchEmployeeLeaves, 2000);
-};
+                        let sidebarDeptP = document.getElementById('sidebarDept');
+                        if (sidebarDeptP) {
+                            sidebarDeptP.innerText = `Department: ${userDept}`;
+                        }
+                    }
+                    fetchEmployeeLeaves();
+                })
+                .catch(err => {
+                    console.error("Error fetching user profile:", err);
+                    fetchEmployeeLeaves();
+                });
+
+            setInterval(fetchEmployeeLeaves, 2000);
+        };
+
         function fetchEmployeeLeaves() {
             fetch('/api/leaves')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         let allLeaves = data.leaves || [];
-                       
-                        // Strict Filtering: Only show leaves for this specific employee
+                        
                         let myLeaves = allLeaves.filter(l =>
                             l.name && l.name.toLowerCase() === loggedInUser.toLowerCase()
                         );
 
-                        // Check for real-time status changes to trigger popup toasts
                         checkForRealTimeAlerts(myLeaves);
 
-                        // Update Metrics Cards
                         let totalUsed = myLeaves.filter(l => l.status === "APPROVED").length;
                         document.getElementById('leavesUsedCount').innerText = `${totalUsed} Days`;
                         let totalAvailable = Math.max(0, 4 - totalUsed);
                         document.getElementById('leaveBalanceCount').innerText = `${totalAvailable} Days`;
 
-                        // Real-Time Notification Dropdown Updates
                         let notifBadge = document.getElementById('notifBadge');
                         let notifCountText = document.getElementById('notifCountText');
                         let notificationsContainer = document.getElementById('notificationListContainer');
@@ -370,7 +372,6 @@ window.onload = function() {
                             notificationsContainer.innerHTML = `<p class="text-gray-400 text-center py-4">No new notifications.</p>`;
                         }
 
-                        // Render History Table
                         let tableBody = document.getElementById('leaveHistoryTable');
                         tableBody.innerHTML = "";
 
@@ -390,7 +391,7 @@ window.onload = function() {
 
                             tableBody.innerHTML += `
                                 <tr class="hover:bg-gray-50">
-                                    <td class="py-3.5 px-4 font-bold">${leave.type || 'Paid Leave'}</td>
+                                    <td class="py-3.5 px-4 font-bold">${leave.type || 'Leave'}</td>
                                     <td class="py-3.5 px-4 text-gray-600">${leave.duration || 'N/A'}</td>
                                     <td class="py-3.5 px-4 text-gray-500 truncate max-w-[150px]">${leave.reason || 'N/A'}</td>
                                     <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 ${statusClass} font-bold rounded-lg border text-[10px]">${statusText}</span></td>
@@ -417,7 +418,7 @@ window.onload = function() {
         function showToastNotification(leaveType, status) {
             let toastContainer = document.getElementById('realTimeToastContainer');
             let isApproved = status === "APPROVED";
-           
+            
             let bgColor = isApproved ? "bg-emerald-600 text-white" : "bg-rose-600 text-white";
             let icon = isApproved ? "fa-circle-check" : "fa-circle-xmark";
 
@@ -451,9 +452,6 @@ window.onload = function() {
             let reason = document.getElementById('leaveReason').value;
 
             let durationStr = start === end ? `${start} (Full Day)` : `${start} to ${end}`;
-            if (type === 'Half-Day Leave') {
-                durationStr = `${start} (Half-Day)`;
-            }
 
             fetch('/api/leaves/apply', {
                 method: 'POST',
@@ -509,26 +507,5 @@ window.onload = function() {
             }
         }
     </script>
-    <script>
-    let loggedInUser = "Pranchal Rajpal"; // Global variable declare karein
-    let lastSeenStatuses = {};
-
-    window.onload = function() {
-        fetch('/api/current-user')
-            .then(res => res.json())
-            .then(user => {
-                if (user && user.success) {
-                    let userName = user.name || 'Pranchal Rajpal';
-                    loggedInUser = userName; // Yahan update ho jayega
-                    let userDesig = user.designation || 'Software Engineer';
-                    let userDept = user.department || 'Software Engineering';
-
-                    if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
-                    if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
-                    if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
-                    // ... baki ka code waisa hi rahega
-                        </script>
-
-
 </body>
 </html>
