@@ -531,7 +531,54 @@
         }
 
         let currentBaseSalary = 23000;
+function fetchEmployeePayroll() {
+            fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.payroll) {
+                        let record = data.payroll;
+                        currentBaseSalary = record.baseNum || 23000;
+                        document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+                        
+                        let userDept = record.dept || record.department || 'Software Engineering';
+                        let userDesig = record.designation || 'Software Engineer';
 
+                        let headerSpan = document.getElementById('headerDeptDisplay');
+                        if (headerSpan) {
+                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+                        }
+
+                        if(document.getElementById('headerDesignation')) {
+                            document.getElementById('headerDesignation').innerText = userDesig;
+                        }
+
+                        // --- EXACT PER-DAY DEDUCTION CALCULATION ---
+                        let perDaySalary = currentBaseSalary / 30;
+                        let extraLeavesCount = record.halfDays || 0; 
+                        let totalDeductions = Math.round(extraLeavesCount * perDaySalary);
+                        if (totalDeductions === 0) totalDeductions = 0;
+
+                        let netPayout = Math.max(0, currentBaseSalary - totalDeductions);
+
+                        let tableBody = document.getElementById('payslipTableBody');
+                        tableBody.innerHTML = `
+                            <tr class="hover:bg-blue-50/30 transition-colors">
+                                <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
+                                <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹${totalDeductions.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${netPayout.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PAID'}</span></td>
+                                <td class="py-4 px-6 text-right whitespace-nowrap">
+                                    <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
+                                        <i class="fa-solid fa-file-lines"></i> View & Download PDF
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(err => console.error("Error fetching payroll data:", err));
+        }
 function openPayslipModal(monthYear) {
     document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
     document.getElementById('modalEmpName').innerText = loggedInUser;
