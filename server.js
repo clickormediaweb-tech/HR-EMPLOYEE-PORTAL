@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');     
 const session = require('express-session'); // <-- Added for session management
 
 const app = express();
