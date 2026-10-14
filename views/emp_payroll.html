@@ -790,577 +790,282 @@
 
     <script>
 
- window.onload = function() {
+let loggedInUser = 'Pranchal Rajpal';
+        let currentBaseSalary = 16000;
+        let calculatedDeductions = 0;
+        let calculatedNetPayout = 16000;
+        let totalExpenses = 0;
 
-            // Pehle current logged-in user ki details fetch karein
-
+        window.onload = function() {
             fetch('/api/current-user')
-
                 .then(res => res.json())
-
                 .then(user => {
-
                     if (user && user.success) {
-
                         loggedInUser = user.name || 'Pranchal Rajpal';
-
                         let userDesig = user.designation || 'Software Engineer';
-
                         let userDept = user.department || 'Software Engineering';
 
-
-
                         document.getElementById('empProfileName').innerText = loggedInUser;
-
                         document.getElementById('empDropdownName').innerText = loggedInUser;
-
                         
-
                         if(document.getElementById('headerDesignation')) {
-
                             document.getElementById('headerDesignation').innerText = userDesig;
-
                         }
-
-
 
                         let headerSpan = document.getElementById('headerDeptDisplay');
-
                         if (headerSpan) {
-
                             headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-
                         }
-
-
 
                         let dropdownDeptP = document.getElementById('dropdownDept');
-
                         if (dropdownDeptP) {
-
                             dropdownDeptP.innerText = `${userDept} Dept.`;
-
                         }
-
                     }
-
-
 
                     let savedExpenses = localStorage.getItem('emp_total_expenses');
-
                     if (savedExpenses) {
-
                         totalExpenses = parseInt(savedExpenses);
-
                         document.getElementById('totalExpenseDisplay').innerText = `₹${totalExpenses.toLocaleString()}`;
-
                     }
 
-
-
                     fetchEmployeePayroll();
-
                 })
-
                 .catch(err => {
-
                     console.error("Error fetching current user:", err);
-
                     fetchEmployeePayroll();
-
                 });
-
         };
 
-
-
         function fetchEmployeePayroll() {
-    fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.payroll) {
-                let record = data.payroll;
-                currentBaseSalary = record.baseNum || 16000;
-                document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-                
-                // Per-day salary calculation (Base / 30)
-                let perDaySalary = currentBaseSalary / 30;
-                let extraLeavesCount = record.extraLeaves || 0; // Jitni approved extra leaves hongi
-                let totalDeductions = Math.round(extraLeavesCount * perDaySalary);
-                
-                let netPayout = Math.max(0, currentBaseSalary - totalDeductions);
+            fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.payroll) {
+                        let record = data.payroll;
+                        currentBaseSalary = record.baseNum || 16000;
+                        document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+                        
+                        let userDept = record.dept || record.department || 'Software Engineering';
+                        let userDesig = record.designation || 'Software Engineer';
 
-                let tableBody = document.getElementById('payslipTableBody');
-                tableBody.innerHTML = `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
-                        <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
-                        <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹${totalDeductions.toLocaleString('en-IN')}</td>
-                        <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${netPayout.toLocaleString('en-IN')}</td>
-                        <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PAID'}</span></td>
-                        <td class="py-4 px-6 text-right whitespace-nowrap">
-                            <button onclick="openPayslipModal('October 2026', ${totalDeductions}, ${netPayout})" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
-                                <i class="fa-solid fa-file-lines"></i> View & Download PDF
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }
-        })
-        .catch(err => console.error("Error fetching payroll data:", err));
-}
+                        let headerSpan = document.getElementById('headerDeptDisplay');
+                        if (headerSpan) {
+                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+                        }
+
+                        if(document.getElementById('headerDesignation')) {
+                            document.getElementById('headerDesignation').innerText = userDesig;
+                        }
+
+                        // --- EXACT PER-DAY DEDUCTION CALCULATION ---
+                        let perDaySalary = currentBaseSalary / 30;
+                        let extraLeavesCount = record.extraLeaves || 0; 
+                        calculatedDeductions = Math.round(extraLeavesCount * perDaySalary);
+                        calculatedNetPayout = Math.max(0, currentBaseSalary - calculatedDeductions);
+
+                        let tableBody = document.getElementById('payslipTableBody');
+                        tableBody.innerHTML = `
+                            <tr class="hover:bg-blue-50/30 transition-colors">
+                                <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
+                                <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹${calculatedDeductions.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${calculatedNetPayout.toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PAID'}</span></td>
+                                <td class="py-4 px-6 text-right whitespace-nowrap">
+                                    <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
+                                        <i class="fa-solid fa-file-lines"></i> View & Download PDF
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(err => console.error("Error fetching payroll data:", err));
+        }
+
         function submitExpenseForm(event) {
-
             event.preventDefault();
-
             let title = document.getElementById('expenseTitle').value;
-
             let amount = parseInt(document.getElementById('expenseAmount').value);
-
             let notes = document.getElementById('expenseNotes').value;
 
-
-
             totalExpenses += amount;
-
             localStorage.setItem('emp_total_expenses', totalExpenses);
-
-
 
             document.getElementById('totalExpenseDisplay').innerText = `₹${totalExpenses.toLocaleString()}`;
 
-
-
             alert(`Expense claim of ₹${amount.toLocaleString()} for "${title}" successfully submitted and added to your upcoming salary calculation!`);
-
             event.target.reset();
-
         }
-
-
 
         function toggleNotificationDropdown(event) {
-
             event.stopPropagation();
-
             let notifDropdown = document.getElementById('notificationDropdown');
-
             let profileDropdown = document.getElementById('profileDropdown');
-
             profileDropdown.classList.add('hidden');
-
             notifDropdown.classList.toggle('hidden');
-
         }
-
-
 
         function toggleProfileDropdown(event) {
-
             event.stopPropagation();
-
             let notifDropdown = document.getElementById('notificationDropdown');
-
             let profileDropdown = document.getElementById('profileDropdown');
-
             notifDropdown.classList.add('hidden');
-
             profileDropdown.classList.toggle('hidden');
-
         }
-
-
 
         function closeAllDropdowns(event) {
-
             let notifDropdown = document.getElementById('notificationDropdown');
-
             let profileDropdown = document.getElementById('profileDropdown');
-
             if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
-
             if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
-
         }
-
-
 
         function logoutUser() {
-
             if (confirm("Are you sure you want to log out of the Employee Portal?")) {
-
                 localStorage.removeItem('hr_logged_in');
-
                 localStorage.removeItem('hr_user');
-
                 window.location.href = "/";
-
             }
-
         }
 
-
-
-        let currentBaseSalary = 23000;
-
-
-
-// Update fetchEmployeePayroll function taaki button par dynamic click bind ho sake
-
-function fetchEmployeePayroll() {
-
-    fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            if (data.success && data.payroll) {
-
-                let record = data.payroll;
-
-                currentBaseSalary = record.baseNum || 23000;
-
-                document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-
-document.getElementById('headerDeptDisplay').innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${record.dept || record.designation || 'Software Engineering'}`;
-
-                let netPayout = currentBaseSalary - 1500;
-
-if (record.designation || record.dept) {
-
-    document.getElementById('headerDesignation').innerText = record.designation || record.dept;
-
-}
-
-                let tableBody = document.getElementById('payslipTableBody');
-
-                tableBody.innerHTML = `
-
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-
-                        <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
-
-                        <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
-
-                        <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹1,500</td>
-
-                        <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${netPayout.toLocaleString('en-IN')}</td>
-
-                        <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PAID'}</span></td>
-
-                        <td class="py-4 px-6 text-right whitespace-nowrap">
-
-                            <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
-
-                                <i class="fa-solid fa-file-lines"></i> View & Download PDF
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-
-        })
-
-        .catch(err => console.error("Error fetching payroll data:", err));
-
-}
-
-
-function openPayslipModal(monthYear, deductions, netPayout) {
-    document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
-    document.getElementById('modalEmpName').innerText = loggedInUser;
-    document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-    document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-    
-    // Dynamic deductions table update inside modal if needed
-    document.getElementById('modalNetPayout').innerText = `₹${netPayout.toLocaleString('en-IN')}`;
-
-    document.getElementById('payslipModal').classList.remove('hidden');
-}
-
-
-
-function closePayslipModal() {
-
-    document.getElementById('payslipModal').classList.add('hidden');
-
-}
-
-
-
-function printOrDownloadPayslip() {
-
-    let printWindow = window.open('', '', 'height=700,width=900');
-
-    
-
-    let slipHtml = `
-
-        <!DOCTYPE html>
-
-        <html lang="en">
-
-        <head>
-
-            <meta charset="UTF-8">
-
-            <title>Official Salary Payslip - October 2026</title>
-
-            <style>
-
-                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 30px; background: #fff; }
-
-                .payslip-container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-
-                .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
-
-                .company-name { font-size: 20px; font-weight: bold; color: #1e3a8a; margin: 0 0 5px 0; }
-
-                .company-address { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
-
-                .meta-info { text-align: right; font-size: 13px; }
-
-                .meta-info span { font-weight: bold; color: #2563eb; }
-
-                .grid-box { display: table; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-bottom: 25px; }
-
-                .grid-row { display: table-row; }
-
-                .grid-cell { display: table-cell; width: 50%; padding: 8px 12px; font-size: 13px; }
-
-                .label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; display: block; margin-bottom: 2px; }
-
-                .value { font-size: 14px; font-weight: bold; color: #0f172a; }
-
-                table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-
-                th, td { border: 1px solid #e2e8f0; padding: 12px 15px; font-size: 13px; text-align: left; }
-
-                th { background: #f1f5f9; color: #475569; text-transform: uppercase; font-size: 11px; }
-
-                .text-right { text-align: right; }
-
-                .text-rose { color: #e11d48; }
-
-                .total-row { font-weight: bold; background: #f8fafc; }
-
-                .net-salary-box { display: flex; justify-content: space-between; align-items: center; background: #eff6ff; border: 1px solid #bfdbfe; padding: 20px; border-radius: 8px; }
-
-                .net-title { font-size: 15px; font-weight: bold; color: #1e3a8a; margin: 0; }
-
-                .net-amount { font-size: 24px; font-weight: 900; color: #059669; margin: 0; }
-
-                .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; pt-3; }
-
-            </style>
-
-            <style>
-
-    @page {
-
-        size: auto;
-
-        margin: 0mm; /* Browser default header/footer headers hatane ke liye */
-
-    }
-
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; background: #fff; }
-
-    /* Baaki CSS same rahegi */
-
-</style>
-
-        </head>
-
-        <body>
-
-            <div class="payslip-container">
-
-                <div class="header">
-
-                    <div>
-
-                        <h2 class="company-name">ClickOrMedia Private Limited</h2>
-
-                        <p class="company-address">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</p>
-
-                    </div>
-
-                    <div class="meta-info">
-
-                        <p>Month: <span>October 2026</span></p>
-
-                        <p style="color: #64748b; font-size: 11px;">Status: Official Document</p>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="grid-box">
-
-                    <div class="grid-row">
-
-                        <div class="grid-cell">
-
-                            <span class="label">Employee Name</span>
-
-                            <span class="value">${loggedInUser}</span>
-
+        function openPayslipModal(monthYear) {
+            document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
+            document.getElementById('modalEmpName').innerText = loggedInUser;
+            document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+            document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
+            document.getElementById('modalDeductionDisplay').innerText = `-₹${calculatedDeductions.toLocaleString('en-IN')}`;
+            document.getElementById('modalTotalDeductionDisplay').innerText = `-₹${calculatedDeductions.toLocaleString('en-IN')}`;
+            document.getElementById('modalNetPayout').innerText = `₹${calculatedNetPayout.toLocaleString('en-IN')}`;
+
+            document.getElementById('payslipModal').classList.remove('hidden');
+        }
+
+        function closePayslipModal() {
+            document.getElementById('payslipModal').classList.add('hidden');
+        }
+
+        function printOrDownloadPayslip() {
+            let printWindow = window.open('', '', 'height=700,width=900');
+            
+            let slipHtml = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Official Salary Payslip - October 2026</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; background: #fff; }
+                        .payslip-container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+                        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+                        .company-name { font-size: 20px; font-weight: bold; color: #1e3a8a; margin: 0 0 5px 0; }
+                        .company-address { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
+                        .meta-info { text-align: right; font-size: 13px; }
+                        .meta-info span { font-weight: bold; color: #2563eb; }
+                        .grid-box { display: table; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-bottom: 25px; }
+                        .grid-row { display: table-row; }
+                        .grid-cell { display: table-cell; width: 50%; padding: 8px 12px; font-size: 13px; }
+                        .label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; display: block; margin-bottom: 2px; }
+                        .value { font-size: 14px; font-weight: bold; color: #0f172a; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+                        th, td { border: 1px solid #e2e8f0; padding: 12px 15px; font-size: 13px; text-align: left; }
+                        th { background: #f1f5f9; color: #475569; text-transform: uppercase; font-size: 11px; }
+                        .text-right { text-align: right; }
+                        .text-rose { color: #e11d48; }
+                        .total-row { font-weight: bold; background: #f8fafc; }
+                        .net-salary-box { display: flex; justify-content: space-between; align-items: center; background: #eff6ff; border: 1px solid #bfdbfe; padding: 20px; border-radius: 8px; }
+                        .net-title { font-size: 15px; font-weight: bold; color: #1e3a8a; margin: 0; }
+                        .net-amount { font-size: 24px; font-weight: 900; color: #059669; margin: 0; }
+                        .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="payslip-container">
+                        <div class="header">
+                            <div>
+                                <h2 class="company-name">ClickOrMedia Private Limited</h2>
+                                <p class="company-address">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</p>
+                            </div>
+                            <div class="meta-info">
+                                <p>Month: <span>October 2026</span></p>
+                                <p style="color: #64748b; font-size: 11px;">Status: Official Document</p>
+                            </div>
                         </div>
 
-                        <div class="grid-cell">
-
-                            <span class="label">Department</span>
-
-                            <span class="value">Software Engineering</span>
-
+                        <div class="grid-box">
+                            <div class="grid-row">
+                                <div class="grid-cell">
+                                    <span class="label">Employee Name</span>
+                                    <span class="value">${loggedInUser}</span>
+                                </div>
+                                <div class="grid-cell">
+                                    <span class="label">Department</span>
+                                    <span class="value">Software Engineering</span>
+                                </div>
+                            </div>
+                            <div class="grid-row" style="padding-top: 10px;">
+                                <div class="grid-cell">
+                                    <span class="label">Bank Account</span>
+                                    <span class="value">HDFC Bank (...4892)</span>
+                                </div>
+                                <div class="grid-cell">
+                                    <span class="label">Payment Status</span>
+                                    <span class="value" style="color: #059669;">PAID</span>
+                                </div>
+                            </div>
                         </div>
 
-                    </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Earnings</th>
+                                    <th class="text-right">Amount (₹)</th>
+                                    <th>Deductions</th>
+                                    <th class="text-right">Amount (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Basic Salary / CTC</td>
+                                    <td class="text-right" style="font-weight: bold;">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                                    <td>Leave Deductions</td>
+                                    <td class="text-right text-rose">-₹${calculatedDeductions.toLocaleString('en-IN')}</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td>Total Earnings</td>
+                                    <td class="text-right">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
+                                    <td>Total Deductions</td>
+                                    <td class="text-right text-rose">-₹${calculatedDeductions.toLocaleString('en-IN')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <div class="grid-row" style="padding-top: 10px;">
-
-                        <div class="grid-cell">
-
-                            <span class="label">Bank Account</span>
-
-                            <span class="value">HDFC Bank (...4892)</span>
-
+                        <div class="net-salary-box">
+                            <div>
+                                <h4 class="net-title">Net Payable Salary</h4>
+                                <p style="font-size: 11px; color: #3b82f6; margin: 2px 0 0 0;">Calculated after standard tax and deductions</p>
+                            </div>
+                            <h2 class="net-amount">₹${calculatedNetPayout.toLocaleString('en-IN')}</h2>
                         </div>
 
-                        <div class="grid-cell">
-
-                            <span class="label">Payment Status</span>
-
-                            <span class="value" style="color: #059669;">PAID</span>
-
+                        <div class="footer">
+                            <p>This is a computer-generated official payslip from ClickOrMedia ESS Portal and does not require a physical signature.</p>
                         </div>
-
                     </div>
+                </body>
+                </html>
+            `;
 
-                </div>
-
-
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Earnings</th>
-
-                            <th class="text-right">Amount (₹)</th>
-
-                            <th>Deductions</th>
-
-                            <th class="text-right">Amount (₹)</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-
-                            <td>Basic Salary / CTC</td>
-
-                            <td class="text-right" style="font-weight: bold;">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
-
-                            <td>Provident Fund (PF)</td>
-
-                            <td class="text-right text-rose">-₹1,200</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>House Rent Allowance (HRA)</td>
-
-                            <td class="text-right" style="font-weight: bold;">₹0</td>
-
-                            <td>Professional Tax</td>
-
-                            <td class="text-right text-rose">-₹300</td>
-
-                        </tr>
-
-                        <tr class="total-row">
-
-                            <td>Total Earnings</td>
-
-                            <td class="text-right">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
-
-                            <td>Total Deductions</td>
-
-                            <td class="text-right text-rose">-₹1,500</td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-
-
-                <div class="net-salary-box">
-
-                    <div>
-
-                        <h4 class="net-title">Net Payable Salary</h4>
-
-                        <p style="font-size: 11px; color: #3b82f6; margin: 2px 0 0 0;">Calculated after standard tax and deductions</p>
-
-                    </div>
-
-                    <h2 class="net-amount">₹${(currentBaseSalary - 1500).toLocaleString('en-IN')}</h2>
-
-                </div>
-
-
-
-                <div class="footer">
-
-                    <p>This is a computer-generated official payslip from ClickOrMedia ESS Portal and does not require a physical signature.</p>
-
-                </div>
-
-            </div>
-
-        </body>
-
-        </html>
-
-    `;
-
-
-
-   printWindow.document.write(slipHtml);
-
-    printWindow.document.close();
-
-    
-
-    setTimeout(() => {
-
-        printWindow.focus();
-
-        printWindow.print();
-
-        printWindow.close(); // Print hone ke baad blank window apne aap close ho jayegi
-
-    }, 500);
-
-}
+            printWindow.document.write(slipHtml);
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
 
     </script>
 
