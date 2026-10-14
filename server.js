@@ -927,14 +927,14 @@ app.get('/api/employee/stats', async (req, res) => {
         let remainingBalance = Math.max(0, maxAllowedEarned - totalLeavesUsed);
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
-// --- EXACT PER-DAY SALARY DEDUCTION CALCULATION ---
-        let baseSalary = record.baseNum || 25000;
-        let perDaySalary = baseSalary / 30; // 30 din ke hisab se ek din ki salary
-        let totalDeductions = extraLeaves * perDaySalary; // Extra leaves ke hisab se total deduction
-        let netPayout = Math.max(0, baseSalary - totalDeductions);
-        let netPayout = record.baseNum || 25000;
 
-       res.json({
+        // --- EXACT PER-DAY SALARY DEDUCTION CALCULATION ---
+        let baseSalary = record.baseNum || 25000;
+        let perDaySalary = baseSalary / 30; // 30 din ke hisab se 1 din ki salary
+        let totalDeductions = extraLeaves * perDaySalary; 
+        let netPayout = Math.max(0, baseSalary - totalDeductions);
+
+        res.json({
             success: true,
             employee: {
                 name: record.name || empName,
@@ -944,11 +944,9 @@ app.get('/api/employee/stats', async (req, res) => {
                 extraLeaves: extraLeaves, 
                 attendancePercentage: "96.5%",
                 lastPayout: "₹" + Math.round(netPayout).toLocaleString('en-IN'),
-                deductionsAmount: "₹" + Math.round(totalDeductions).toLocaleString('en-IN'),
                 recentLeaves: record.leaveLogs || []
             }
-        });
-    } catch (err) {
+        });} catch (err) {
         console.error('Error in employee stats:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
