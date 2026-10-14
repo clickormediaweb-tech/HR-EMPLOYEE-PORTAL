@@ -459,12 +459,11 @@
 
                         // --- EXACT PER-DAY DEDUCTION CALCULATION (Base / 30 * HalfDays/Leaves) ---
                         let perDaySalary = currentBaseSalary / 30;
-                        let extraLeavesCount = record.halfDays || 0; // Ya jitni extra leaves ho
-                        let totalDeductions = Math.round(extraLeavesCount * perDaySalary);
-                        if (totalDeductions === 0) totalDeductions = 0; // Agar koi leave nahi hai toh 0 deduction
+        let extraLeavesCount = record.extraLeaves || 0; // Backend se aayi hui extra leaves
+        let totalDeductions = Math.round(extraLeavesCount * perDaySalary);
+        if (totalDeductions === 0) totalDeductions = 0;
 
-                        let netPayout = Math.max(0, currentBaseSalary - totalDeductions);
-
+        let netPayout = Math.max(0, currentBaseSalary - totalDeductions);
                         let tableBody = document.getElementById('payslipTableBody');
                         tableBody.innerHTML = `
                             <tr class="hover:bg-blue-50/30 transition-colors">
