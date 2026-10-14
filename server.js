@@ -900,7 +900,7 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        // --- STRICT JOINING DATE MAPPING ---
+        // --- STRICT JOINING DATES MAPPING ---
         const employeeJoiningDates = {
             "pranchal rajpal": "2026-09-01", // 1 Sep 2026
             "tanya dua": "2026-07-01",       // 1 July 2026
@@ -928,16 +928,19 @@ app.get('/api/employee/stats', async (req, res) => {
 
         let currentDate = new Date();
         
-        // --- PRECISE COMPLETED MONTHS CALCULATION (NO ADVANCE ACCRUAL) ---
+        // --- STRICT COMPLETED MONTHS CALCULATION (NO CURRENT MONTH ACCRUAL) ---
         let yearsDiff = currentDate.getFullYear() - joiningDate.getFullYear();
         let monthsDiff = currentDate.getMonth() - joiningDate.getMonth();
         let completedMonths = yearsDiff * 12 + monthsDiff;
         
-        // Agar aaj ki date joining ki tareeq se choti hai is mahine mein, toh woh mahina abhi poora nahi hua
+        // Agar aaj ki date joining ki tareeq se choti hai is mahine mein, toh woh mahina poora nahi hua
         if (currentDate.getDate() < joiningDate.getDate()) {
             completedMonths = completedMonths - 1;
         }
         
+        // Agar koi September mein join kiya hai (jaise Sukhi ya Pranchal), toh October chalne ki wajah se 
+        // unka abhi sirf 1 completed month (September) hua hai, isiliye sirf 1 leave dikhegi.
+        // Jaise hi November aayega, completedMonths 2 ho jayenge aur automatic 2 ho jayengi!
         let maxAllowedEarned = Math.max(0, completedMonths); 
         
         // Database se approved leaves minus karna
