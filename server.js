@@ -209,6 +209,7 @@ app.get('/api/hr/stats', async (req, res) => {
 app.get('/api/employees/active', async (req, res) => {
     try {
         const db = await readDb();
+        // Agar database mein users hain toh wahi dikhao, purana hardcoded overwrite mat karo
         const activeEmployees = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
         res.json({ success: true, employees: activeEmployees });
     } catch (err) {
