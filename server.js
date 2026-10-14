@@ -1114,29 +1114,55 @@ app.listen(PORT, () => {
 });
 
 // API: Edit Employee Details & Department
+// --- API: Edit Employee Details & Department (Fully Synced Across Users, Departments & Payroll) ---
 app.put('/api/employees/edit/:id', async (req, res) => {
     try {
         const empId = req.params.id;
         const { name, email, designation, department } = req.body;
         const db = await readDb();
 
+        let oldEmployeeName = "";
+
+        // 1. Update in db.users
         if (db.users) {
-            let user = db.users.find(u => u._id === empId || u.email.toLowerCase() === (email || "").toLowerCase());
+            let user = db.users.find(u => u._id === empId || (u.email && u.email.toLowerCase() === (email || "").toLowerCase()));
             if (user) {
+                oldEmployeeName = user.name;
                 user.name = name || user.name;
                 user.email = email || user.email;
                 user.designation = designation || user.designation;
                 user.department = department || user.department;
-               
-                await writeDb(db);
-                console.log(`--- UPDATED EMPLOYEE & DEPT: ${user.name} -> ${user.department} ---`);
-                return res.json({ success: true, message: 'Employee details updated successfully!' });
             }
         }
-        res.status(404).json({ success: false, message: 'Employee not found' });
+
+        // 2. Update department in db.departments members list
+        if (db.departments && oldEmployeeName) {
+            db.departments.forEach(dept => {
+                if (dept.members) {
+                    dept.members.forEach(member => {
+                        if (member.name.toLowerCase() === oldEmployeeName.toLowerCase()) {
+                            member.department = department || member.department;
+                            member.designation = designation || member.designation;
+                        }
+                    });
+                }
+            });
+        }
+
+        // 3. Update department in db.payroll
+        if (db.payroll && oldEmployeeName) {
+            let payrollRec = db.payroll.find(p => p.name && p.name.toLowerCase() === oldEmployeeName.toLowerCase());
+            if (payrollRec) {
+                payrollRec.dept = department || payrollRec.dept;
+            }
+        }
+
+        await writeDb(db);
+        console.log(`--- FULLY SYNCED & UPDATED: ${oldEmployeeName} -> Dept: ${department} ---`);
+        return res.json({ success: true, message: 'Employee details and department updated successfully across all modules!' });
+
     } catch (err) {
         console.error('Error updating employee:', err);
         res.status(500).json({ success: false, message: 'Server error while updating employee' });
     }
 });
-
