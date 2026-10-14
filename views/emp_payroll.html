@@ -1133,27 +1133,16 @@ if (record.designation || record.dept) {
 }
 
 
-
-function openPayslipModal(monthYear) {
-
+function openPayslipModal(monthYear, deductions, netPayout) {
     document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
-
     document.getElementById('modalEmpName').innerText = loggedInUser;
-
     document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-
     document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-
     
-
-    let net = currentBaseSalary - 1500;
-
-    document.getElementById('modalNetPayout').innerText = `₹${net.toLocaleString('en-IN')}`;
-
-
+    // Dynamic deductions table update inside modal if needed
+    document.getElementById('modalNetPayout').innerText = `₹${netPayout.toLocaleString('en-IN')}`;
 
     document.getElementById('payslipModal').classList.remove('hidden');
-
 }
 
 
