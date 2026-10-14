@@ -900,8 +900,8 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        // --- DYNAMIC DATABASE JOINING DATE OR SAFE FALLBACK ---
-        // Agar database record mein joining date saved hai toh woh use karega, nahi toh default current year ki 1st January ya safe date lega
+        // --- INDIVIDUAL EMPLOYEE DYNAMIC JOINING DATE & ROLLOVER LOGIC ---
+        // 1. Database se is specific employee ka user profile dhoondna jisme joining date ho sakti hai
         let employeeUser = db.users ? db.users.find(u => u.name && u.name.toLowerCase() === empName.toLowerCase()) : null;
         
         let joiningDate;
@@ -910,26 +910,27 @@ app.get('/api/employee/stats', async (req, res) => {
         } else if (record.joiningDate) {
             joiningDate = new Date(record.joiningDate);
         } else {
-            // Default fallback agar date nahi mili toh current year ka January 1st
-            joiningDate = new Date(new Date().getFullYear() + '-01-01');
+            // Fallback: Agar kisi ki joining date mention na ho, toh unke liye default safe month (jaise September 2026 ya portal start date)
+            joiningDate = new Date('2026-09-01');
         }
 
         let currentDate = new Date();
         
-        // Dynamic months calculation from real database joining date
+        // 2. Har employee ke apne joining month se le kar abhi tak ke elapsed months nikalna
         let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-        if (monthsElapsed < 1) monthsElapsed = 1;
+        monthsElapsed = Math.max(1, monthsElapsed); // Kam se kam 1 month toh hoga hi
         
+        // Total earned leaves with rollover for this specific employee
         let maxAllowedEarned = Math.min(monthsElapsed, 12); 
         
-        // Approved leaves count from database
+        // 3. Database se sirf is specific employee ki approved leaves nikalna
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === empName.toLowerCase() && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.filter(l => !l.type.includes('Extra')).length;
 
-        // Dynamic Balance calculation (Earned - Used with rollover)
+        // 4. Individual Dynamic Balance = Earned Leaves (with carry-forward) - Used Paid Leaves
         let remainingBalance = Math.max(0, maxAllowedEarned - totalLeavesUsed);
         
-        // Extra leaves / salary deduction if balance is exhausted
+        // Agar balance khatam hone ke baad extra leave li ho
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
