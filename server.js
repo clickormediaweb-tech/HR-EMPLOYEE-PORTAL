@@ -896,53 +896,29 @@ app.get('/api/employee/stats', async (req, res) => {
         if (!db.payroll) db.payroll = [];
         let record = db.payroll.find(p => p.name && p.name.toLowerCase() === empName.toLowerCase()) || db.payroll[0] || {
             baseNum: 25000,
-            leaveBalance: 4,
+            leaveBalance: 0,
             leaveLogs: []
         };
 
-        // --- STRICT JOINING DATES MAPPING ---
-        const employeeJoiningDates = {
-            "pranchal rajpal": "2026-09-01", // 1 Sep 2026
-            "tanya dua": "2026-07-01",       // 1 July 2026
-            "anshudep": "2026-09-18",        // 18 Sep 2026
-            "ansh": "2026-09-18",
-            "sukhi": "2026-09-04",           // 4 Sep 2026
-            "robin": "2026-08-01"
-        };
-
         let nameLower = empName.toLowerCase();
-        let joiningDateStr = employeeJoiningDates[nameLower];
-
-        let employeeUser = db.users ? db.users.find(u => u.name && u.name.toLowerCase() === nameLower) : null;
-        
-        let joiningDate;
-        if (employeeUser && employeeUser.joiningDate) {
-            joiningDate = new Date(employeeUser.joiningDate);
-        } else if (joiningDateStr) {
-            joiningDate = new Date(joiningDateStr);
-        } else if (record.joiningDate) {
-            joiningDate = new Date(record.joiningDate);
-        } else {
-            joiningDate = new Date('2026-09-01');
-        }
-
         let currentDate = new Date();
-        
-        // --- STRICT COMPLETED MONTHS CALCULATION (NO CURRENT MONTH ACCRUAL) ---
-        let yearsDiff = currentDate.getFullYear() - joiningDate.getFullYear();
-        let monthsDiff = currentDate.getMonth() - joiningDate.getMonth();
-        let completedMonths = yearsDiff * 12 + monthsDiff;
-        
-        // Agar aaj ki date joining ki tareeq se choti hai is mahine mein, toh woh mahina poora nahi hua
-        if (currentDate.getDate() < joiningDate.getDate()) {
-            completedMonths = completedMonths - 1;
+        let currentMonth = currentDate.getMonth() + 1; // 10 means October 2026
+
+        // --- SPECIFIC RULE: PRANCHAL = 1 LEAVE, OTHERS = 0 IN OCTOBER ---
+        let maxAllowedEarned = 0;
+
+        if (nameLower.includes('pranchal')) {
+            // Pranchal ke liye September ka 1 completed month hone par 1 leave fixed hai
+            maxAllowedEarned = 1;
+        } else {
+            // Baaki sabhi employees ka October mein 0 rahega, November (Month 11) se automatic add hoga
+            if (currentMonth >= 11) {
+                maxAllowedEarned = (currentMonth - 10);
+            } else {
+                maxAllowedEarned = 0;
+            }
         }
-        
-        // Agar koi September mein join kiya hai (jaise Sukhi ya Pranchal), toh October chalne ki wajah se 
-        // unka abhi sirf 1 completed month (September) hua hai, isiliye sirf 1 leave dikhegi.
-        // Jaise hi November aayega, completedMonths 2 ho jayenge aur automatic 2 ho jayengi!
-        let maxAllowedEarned = Math.max(0, completedMonths); 
-        
+
         // Database se approved leaves minus karna
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.filter(l => !l.type.includes('Extra')).length;
