@@ -900,33 +900,52 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        // --- INDIVIDUAL DYNAMIC JOINING DATE & COMPLETED MONTHS ACCRUAL ---
-        let employeeUser = db.users ? db.users.find(u => u.name && u.name.toLowerCase() === empName.toLowerCase()) : null;
+        // --- EXACT JOINING DATES MAPPING AS REQUESTED ---
+        const employeeJoiningDates = {
+            "pranchal rajpal": "2026-09-01", // Pranchal: 1 Sep 2026
+            "tanya dua": "2026-07-01",       // Tanya: 1 July 2026
+            "anshudep": "2026-09-18",        // Ansh / Anshdeep: 18 Sep 2026
+            "ansh": "2026-09-18",            // Ansh alternate name
+            "sukhi": "2026-09-04",           // Sukhi: 4 Sep 2026
+            "robin": "2026-08-01"            // Default fallback for others
+        };
+
+        let nameLower = empName.toLowerCase();
+        let joiningDateStr = employeeJoiningDates[nameLower];
+
+        let employeeUser = db.users ? db.users.find(u => u.name && u.name.toLowerCase() === nameLower) : null;
         
         let joiningDate;
         if (employeeUser && employeeUser.joiningDate) {
             joiningDate = new Date(employeeUser.joiningDate);
+        } else if (joiningDateStr) {
+            joiningDate = new Date(joiningDateStr);
         } else if (record.joiningDate) {
             joiningDate = new Date(record.joiningDate);
         } else {
-            joiningDate = new Date('2026-09-01'); // Default joining date (e.g., September 1)
+            joiningDate = new Date('2026-09-01'); // Safe default fallback
         }
 
         let currentDate = new Date();
         
-        // Sirf COMPLETED months count honge (Running current month ki leave tab tak add nahi hogi jab tak woh mahina khatam na ho)
+        // --- PRECISE COMPLETED MONTHS & ROLLOVER ACCRUAL LOGIC ---
         let yearsDiff = currentDate.getFullYear() - joiningDate.getFullYear();
         let monthsDiff = currentDate.getMonth() - joiningDate.getMonth();
         let completedMonths = yearsDiff * 12 + monthsDiff;
         
-        // Agar joining isisi mahine ki hai toh completed months 0 honge, lekin base 1 leave mil sakti hai ya rules ke mutabiq
-        let maxAllowedEarned = Math.max(1, completedMonths); 
+        // Agar current date joining date ki tareeq se pehle ki hai is mahine mein, toh completed months adjust honge
+        if (currentDate.getDate() < joiningDate.getDate()) {
+            completedMonths = Math.max(0, completedMonths - 1);
+        }
+        
+        // Total earned leaves with automatic rollover (minimum 0 ya 1 ke hisab se)
+        let maxAllowedEarned = Math.max(0, completedMonths); 
         
         // Database se is specific employee ki approved leaves nikalna (jo automatically deduct hongi)
-        let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === empName.toLowerCase() && l.status === 'APPROVED') : [];
+        let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.filter(l => !l.type.includes('Extra')).length;
 
-        // Available Balance = Earned Leaves (Completed months) - Used Leaves (Automatically deducted)
+        // Available Balance = Earned Leaves (Rollover included) - Used Leaves (Automatically deducted)
         let remainingBalance = Math.max(0, maxAllowedEarned - totalLeavesUsed);
         
         // Agar balance khatam hone ke baad extra leave li ho toh salary deduction count
