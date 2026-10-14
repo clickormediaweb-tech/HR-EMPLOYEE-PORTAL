@@ -613,7 +613,25 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
         }
     }
 </script>
+<script>
+    let loggedInUser = "Pranchal Rajpal"; // Global variable declare karein
+    let lastSeenStatuses = {};
 
+    window.onload = function() {
+        fetch('/api/current-user')
+            .then(res => res.json())
+            .then(user => {
+                if (user && user.success) {
+                    let userName = user.name || 'Pranchal Rajpal';
+                    loggedInUser = userName; // Yahan update ho jayega
+                    let userDesig = user.designation || 'Software Engineer';
+                    let userDept = user.department || 'Software Engineering';
+
+                    if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
+                    if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
+                    if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+                    // ... baki ka code waisa hi rahega
+                        </script>
 
 </body>
 </html>
