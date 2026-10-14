@@ -900,8 +900,7 @@ app.get('/api/employee/stats', async (req, res) => {
             leaveLogs: []
         };
 
-        // --- INDIVIDUAL EMPLOYEE DYNAMIC JOINING DATE & ROLLOVER LOGIC ---
-        // 1. Database se is specific employee ka user profile dhoondna jisme joining date ho sakti hai
+        // --- INDIVIDUAL DYNAMIC JOINING DATE & COMPLETED MONTHS ACCRUAL ---
         let employeeUser = db.users ? db.users.find(u => u.name && u.name.toLowerCase() === empName.toLowerCase()) : null;
         
         let joiningDate;
@@ -910,27 +909,27 @@ app.get('/api/employee/stats', async (req, res) => {
         } else if (record.joiningDate) {
             joiningDate = new Date(record.joiningDate);
         } else {
-            // Fallback: Agar kisi ki joining date mention na ho, toh unke liye default safe month (jaise September 2026 ya portal start date)
-            joiningDate = new Date('2026-09-01');
+            joiningDate = new Date('2026-09-01'); // Default joining date (e.g., September 1)
         }
 
         let currentDate = new Date();
         
-        // 2. Har employee ke apne joining month se le kar abhi tak ke elapsed months nikalna
-        let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-        monthsElapsed = Math.max(1, monthsElapsed); // Kam se kam 1 month toh hoga hi
+        // Sirf COMPLETED months count honge (Running current month ki leave tab tak add nahi hogi jab tak woh mahina khatam na ho)
+        let yearsDiff = currentDate.getFullYear() - joiningDate.getFullYear();
+        let monthsDiff = currentDate.getMonth() - joiningDate.getMonth();
+        let completedMonths = yearsDiff * 12 + monthsDiff;
         
-        // Total earned leaves with rollover for this specific employee
-        let maxAllowedEarned = Math.min(monthsElapsed, 12); 
+        // Agar joining isisi mahine ki hai toh completed months 0 honge, lekin base 1 leave mil sakti hai ya rules ke mutabiq
+        let maxAllowedEarned = Math.max(1, completedMonths); 
         
-        // 3. Database se sirf is specific employee ki approved leaves nikalna
+        // Database se is specific employee ki approved leaves nikalna (jo automatically deduct hongi)
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === empName.toLowerCase() && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.filter(l => !l.type.includes('Extra')).length;
 
-        // 4. Individual Dynamic Balance = Earned Leaves (with carry-forward) - Used Paid Leaves
+        // Available Balance = Earned Leaves (Completed months) - Used Leaves (Automatically deducted)
         let remainingBalance = Math.max(0, maxAllowedEarned - totalLeavesUsed);
         
-        // Agar balance khatam hone ke baad extra leave li ho
+        // Agar balance khatam hone ke baad extra leave li ho toh salary deduction count
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
