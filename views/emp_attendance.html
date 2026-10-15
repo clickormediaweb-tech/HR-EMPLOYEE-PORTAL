@@ -277,7 +277,7 @@
     <script>
         let allEmployeeLogs = [];
         let loggedInName = 'Pranchal Rajpal';
-
+let loggedInEmail = 'pranchal@clickormedia.co.in'; 
         window.onload = function() {
             // 1. Current logged-in user ki details database se fetch karein
             fetch('/api/current-user')
@@ -285,6 +285,7 @@
                 .then(user => {
                     if (user && user.success) {
                         loggedInName = user.name || 'Pranchal Rajpal';
+                        loggedInEmail = user.email || 'pranchal@clickormedia.co.in'; // Yeh line add karein
                         let userDesig = user.designation || 'Software Engineer';
                         
                         // Saari jagah ek hi dynamic naam aur designation update karein
@@ -344,20 +345,20 @@
             tbody.innerHTML = "";
 
             // Filter by selected month and status
-           let filteredLogs = allEmployeeLogs.filter(log => {
+          let filteredLogs = allEmployeeLogs.filter(log => {
     if (!log.date) return false;
     
-    // Check karein ki log ka naam ya email logged-in user se match ho raha hai ya nahi
-    let matchesUser = log.name.toLowerCase() === loggedInName.toLowerCase() || 
-                      (log.email && userEmail && log.email.toLowerCase() === userEmail.toLowerCase());
+    // Logged-in user ke naam ya email se match karein
+    let matchesUser = (log.name && log.name.toLowerCase() === loggedInName.toLowerCase()) || 
+                      (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
                       
     let logDate = new Date(log.date);
     let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
     let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
     
-    // Agar user Admin/HR hai ya employee khud hai, toh uska data dikhna chahiye
-    return matchesMonth && matchesStatus; // Ya fir matchesUser condition add karein agar sirf apna dekhna ho
-}); document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+    return matchesUser && matchesMonth && matchesStatus;
+});
+            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
