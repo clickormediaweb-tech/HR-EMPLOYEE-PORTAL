@@ -307,27 +307,34 @@ app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
-        const activeEmails = activeUsers.map(u => u.email.toLowerCase());
+        const activeEmails = activeUsers.map(u => u.email ? u.email.toLowerCase() : '');
 
         if (!db.attendance || db.attendance.length === 0) {
-            db.attendance = [
-                { name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", role: "HR Manager", checkInTime: "08:55 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", role: "Web Developer", checkInTime: "09:00 AM", checkInLoc: "Remote / WFH (GPS Verified)", checkOutTime: "06:30 PM", checkOutLoc: "Remote / WFH (GPS Verified)", status: "On Time", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
-                { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", role: " Video Editor", checkInTime: "09:10 AM", checkInLoc: "Head Office (Terminal B)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal B)", status: "On Time", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", role: " Videographer", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
-            ];
-            await writeDb(db);
+            db.attendance = [];
         }
 
-        const filteredAttendance = db.attendance.filter(log => activeEmails.includes(log.email.toLowerCase()) && log.name.toLowerCase() !== 'robin');
+        // Safe iteration with checks
+        db.attendance.forEach(log => {
+            if (log && log.email) {
+                let matchedUser = activeUsers.find(u => u.email && u.email.toLowerCase() === log.email.toLowerCase());
+                if (matchedUser) {
+                    log.role = matchedUser.designation || log.role;
+                    log.dept = matchedUser.department || log.dept;
+                    log.name = matchedUser.name || log.name;
+                }
+            }
+        });
+
+        const filteredAttendance = db.attendance.filter(log => 
+            log && log.email && activeEmails.includes(log.email.toLowerCase()) && log.name.toLowerCase() !== 'robin'
+        );
+        
         res.json({ success: true, attendance: filteredAttendance });
     } catch (err) {
         console.error('Error fetching attendance:', err);
         res.status(500).json({ success: false, attendance: [] });
     }
-});
-
-// 8. API: Save Manual Attendance Log
+});// 8. API: Save Manual Attendance Log
 app.post('/api/attendance/add', async (req, res) => {
     try {
         const { name, email, dept, role, date, checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar } = req.body;
