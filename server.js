@@ -97,8 +97,6 @@ app.get('/login.html', (req, res) => {
 app.post('/api/employee/update-password', async (req, res) => {
     try {
         const { newPassword } = req.body;
-        console.log("Incoming password update request:", newPassword);
-
         if (!newPassword || newPassword.length < 6) {
             return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
         }
@@ -110,25 +108,22 @@ app.post('/api/employee/update-password', async (req, res) => {
         let user = db.users.find(u => u.email && u.email.toLowerCase() === userEmail.toLowerCase());
        
         if (!user && db.users.length > 0) {
-            user = db.users[1] || db.users[0];
+            user = db.users[0];
         }
        
         if (user) {
             user.password = newPassword;
             await writeDb(db);
-            console.log(`SUCCESS: Password updated in MongoDB for ${user.name} to ${newPassword}`);
+            console.log(`--- PASSWORD UPDATED IN MONGODB FOR ${user.name} ---`);
             return res.json({ success: true, message: "Password updated successfully" });
         } else {
-            console.log("ERROR: No users found in database");
             return res.status(404).json({ success: false, message: "User not found in database" });
         }
     } catch (err) {
         console.error('Critical error updating password:', err);
         res.status(500).json({ success: false, message: "Server error while updating password." });
     }
-});
-
-// 2. Strict Login Verification Route with Role-Based Redirection
+});// 2. Strict Login Verification Route with Role-Based Redirection
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -480,24 +475,11 @@ app.post('/api/leaves/apply', async (req, res) => {
         let applicantEmail = (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
         let currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        let joiningDate = new Date('2026-01-01');
-        let currentDate = new Date();
-        let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
-        let totalEarnedLeaves = Math.max(1, monthsElapsed);
-       
-        let approvedLeavesCount = db.leaves.filter(l => l.name && l.name.toLowerCase() === applicantName.toLowerCase() && l.status === 'APPROVED' && !l.type.includes('Extra')).length;
-        let currentBalance = Math.max(0, totalEarnedLeaves - approvedLeavesCount);
-
-        let finalLeaveType = type;
-        if (currentBalance <= 0) {
-            finalLeaveType = "Extra Leave (Salary Deduction)";
-        }
-
         let newSub = {
             id: Date.now(),
             name: applicantName,
             email: applicantEmail,
-            type: finalLeaveType,
+            type: type,
             duration,
             reason,
             status: "PENDING",
@@ -509,13 +491,13 @@ app.post('/api/leaves/apply', async (req, res) => {
         db.myLeaves.unshift(newSub);
         await writeDb(db);
 
-        res.json({ success: true, message: 'Leave application submitted successfully!' });
+        console.log(`--- LEAVE APPLICATION SAVED PERMANENTLY FOR ${applicantName} ---`);
+        res.json({ success: true, message: 'Leave application submitted and saved permanently!' });
     } catch (err) {
         console.error('Error applying leave:', err);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error while applying leave' });
     }
 });
-
 // --- HOLIDAY APIS ---
 app.get('/api/holidays', async (req, res) => {
     try {
@@ -994,8 +976,9 @@ app.post('/api/employee/punch', async (req, res) => {
         if (!db.attendance) db.attendance = [];
 
         const todayDate = new Date().toISOString().split('T')[0];
-
-        let existingLog = db.attendance.find(log => log.email.toLowerCase() === (email || "").toLowerCase() && log.date === todayDate);
+        let existingLog = db.attendance.find(log => 
+            log.email && log.email.toLowerCase() === (email || "").toLowerCase() && log.date === todayDate
+        );
 
         if (action === 'IN') {
             if (!existingLog) {
@@ -1038,13 +1021,13 @@ app.post('/api/employee/punch', async (req, res) => {
         }
 
         await writeDb(db);
-        res.json({ success: true, message: `Punch ${action} recorded and synced to HR portal successfully!` });
+        console.log(`--- PUNCH ${action} SAVED PERMANENTLY FOR ${name} ---`);
+        res.json({ success: true, message: `Punch ${action} recorded and saved to database successfully!` });
     } catch (err) {
         console.error('Error recording punch:', err);
         res.status(500).json({ success: false, message: 'Server error during punch recording' });
     }
 });
-
 // --- API: Get Today's Punch Status for Employee ---
 app.get('/api/employee/punch-status', async (req, res) => {
     try {
