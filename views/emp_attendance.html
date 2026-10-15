@@ -344,27 +344,25 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-   // Filter by selected month and status
-            // Filter by selected month and status (Flexible matching)
+  // Filter by selected month and status
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log.date) return false;
                 
-                // Name ya email match check (Pranchal ke liye)
+                // 1. User matching check (Pranchal Rajpal ke liye flexible check)
                 let matchesUser = (log.name && log.name.toLowerCase().includes('pranchal')) || 
-                                  (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase()) ||
-                                  true; // Temporary fallback taaki sabhi valid logs dikh sakein
+                                  (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
                                   
-                // Date string se month aur year extract karna
+                // 2. Month and Year matching check
                 let logDate = new Date(log.date);
                 let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-                
-                // Agar date format ki wajah se match na ho, toh string check bhi laga sakte hain
                 let isOctoberString = log.date.includes('2026-10');
                 let finalMonthMatch = matchesMonth || (selectedMonthIndex === 9 && isOctoberString);
 
+                // 3. Status matching check
                 let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
                 
-                return finalMonthMatch && matchesStatus;
+                // Yahan matchesUser ko include karna zaroori hai taaki sirf aapka data dikhe
+                return matchesUser && finalMonthMatch && matchesStatus;
             });
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
