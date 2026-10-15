@@ -250,11 +250,12 @@ app.post('/api/employees/add', async (req, res) => {
 // --- API: Update Employee Performance Permanently ---
 app.post('/api/employees/update-performance', async (req, res) => {
     try {
-        const { email, performance } = req.body;
+        const { name, performance } = req.body;
         const db = await readDb();
         if (!db.users) db.users = [];
 
-        let user = db.users.find(u => u.email && u.email.toLowerCase() === (email || "").toLowerCase());
+        // Name se employee ko find karein
+        let user = db.users.find(u => u.name && u.name.toLowerCase() === (name || "").toLowerCase());
         if (user) {
             user.performance = performance;
             await writeDb(db);
@@ -267,9 +268,7 @@ app.post('/api/employees/update-performance', async (req, res) => {
         console.error('Error updating performance:', err);
         res.status(500).json({ success: false, message: 'Server error while updating performance' });
     }
-});
-
-// 6. API: Archive Employee
+});// 6. API: Archive Employee
 app.delete('/api/employees/:id', async (req, res) => {
     try {
         const empId = req.params.id;
