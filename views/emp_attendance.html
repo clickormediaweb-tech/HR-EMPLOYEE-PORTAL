@@ -344,20 +344,20 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-            // Filter by selected month and status
-          let filteredLogs = allEmployeeLogs.filter(log => {
-    if (!log.date) return false;
-    
-    // Logged-in user ke naam ya email se match karein
-    let matchesUser = (log.name && log.name.toLowerCase() === loggedInName.toLowerCase()) || 
-                      (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
-                      
-    let logDate = new Date(log.date);
-    let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-    let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
-    
-    return matchesUser && matchesMonth && matchesStatus;
-});
+   // Filter by selected month and status
+            let filteredLogs = allEmployeeLogs.filter(log => {
+                if (!log.date) return false;
+                
+                // Pranchal ki saari entries match karne ke liye flexible check
+                let matchesUser = (log.name && log.name.toLowerCase().includes('pranchal')) || 
+                                  (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
+                                  
+                let logDate = new Date(log.date);
+                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+                let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
+                
+                return matchesMonth && matchesStatus;
+            });        
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
