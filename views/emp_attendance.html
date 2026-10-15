@@ -344,25 +344,11 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-  // Filter by selected month and status
+  // Temporary check: Sirf October ki sari entries direct dikhane ke liye
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log.date) return false;
-                
-                // 1. User matching check (Pranchal Rajpal ke liye flexible check)
-                let matchesUser = (log.name && log.name.toLowerCase().includes('pranchal')) || 
-                                  (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
-                                  
-                // 2. Month and Year matching check
-                let logDate = new Date(log.date);
-                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-                let isOctoberString = log.date.includes('2026-10');
-                let finalMonthMatch = matchesMonth || (selectedMonthIndex === 9 && isOctoberString);
-
-                // 3. Status matching check
-                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
-                
-                // Yahan matchesUser ko include karna zaroori hai taaki sirf aapka data dikhe
-                return matchesUser && finalMonthMatch && matchesStatus;
+                // Check karein ki date mein October ya '2026-10' hai ya nahi
+                return log.date.includes('2026-10') || log.date.toLowerCase().includes('october');
             });
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
