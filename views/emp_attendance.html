@@ -344,16 +344,20 @@
             tbody.innerHTML = "";
 
             // Filter by selected month and status
-            let filteredLogs = allEmployeeLogs.filter(log => {
-                if (!log.date) return false;
-                let logDate = new Date(log.date);
-                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-                let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
-                
-                return matchesMonth && matchesStatus;
-            });
-
-            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+           let filteredLogs = allEmployeeLogs.filter(log => {
+    if (!log.date) return false;
+    
+    // Check karein ki log ka naam ya email logged-in user se match ho raha hai ya nahi
+    let matchesUser = log.name.toLowerCase() === loggedInName.toLowerCase() || 
+                      (log.email && userEmail && log.email.toLowerCase() === userEmail.toLowerCase());
+                      
+    let logDate = new Date(log.date);
+    let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+    let matchesStatus = statusFilter === 'ALL' || log.status.toUpperCase() === statusFilter.toUpperCase();
+    
+    // Agar user Admin/HR hai ya employee khud hai, toh uska data dikhna chahiye
+    return matchesMonth && matchesStatus; // Ya fir matchesUser condition add karein agar sirf apna dekhna ho
+}); document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
