@@ -303,13 +303,14 @@ app.delete('/api/employees/:id', async (req, res) => {
 });
 
 //7.
+// 7. API: Get Attendance Logs (Safe & Non-destructive)
 app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
-        if (!db.attendance) {
+        if (!db.attendance || db.attendance.length === 0) {
             db.attendance = [];
         }
-        // Saari entries direct bhej dein bina strict email filter ke
+        // Saari attendance entries bina kisi strict deletion ke return karein
         res.json({ success: true, attendance: db.attendance });
     } catch (err) {
         console.error('Error fetching attendance:', err);
