@@ -206,17 +206,25 @@ app.get('/api/hr/stats', async (req, res) => {
 });
 
 // API: Get Active Employees
+// API: Get Active Employees with Default Performance Check
 app.get('/api/employees/active', async (req, res) => {
     try {
         const db = await readDb();
+        if (db.users) {
+            // Ensure every active user has a default performance field if missing
+            db.users.forEach(u => {
+                if (!u.performance) {
+                    u.performance = 'GOOD';
+                }
+            });
+            await writeDb(db);
+        }
         const activeEmployees = db.users ? db.users.filter(u => (u.role === 'employee' || u.role === 'admin') && u.name.toLowerCase() !== 'robin') : [];
         res.json({ success: true, employees: activeEmployees });
     } catch (err) {
         res.status(500).json({ success: false, employees: [] });
     }
-});
-
-// 5. API: Add New Employee
+});// 5. API: Add New Employee
 app.post('/api/employees/add', async (req, res) => {
     try {
         const { name, email, department, designation, phone } = req.body;
