@@ -974,30 +974,43 @@ app.post('/api/employee/punch', async (req, res) => {
         const { name, email, action, time, location } = req.body;
         const db = await readDb();
         if (!db.attendance) db.attendance = [];
+        if (!db.users) db.users = [];
+
+        // Database se employee ka real data find karein
+        let dbUser = db.users.find(u => u.email && email && u.email.toLowerCase() === email.toLowerCase()) || 
+                     db.users.find(u => u.name && name && u.name.toLowerCase() === name.toLowerCase());
+
+        let empName = dbUser ? dbUser.name : (name || "Employee");
+        let empEmail = dbUser ? dbUser.email : (email || "employee@clickormedia.co.in");
+        let empDept = dbUser ? dbUser.department : "Engineering";
+        let empRole = dbUser ? dbUser.designation : "Staff";
+        let empAvatar = dbUser ? dbUser.avatar : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces";
 
         const todayDate = new Date().toISOString().split('T')[0];
         let existingLog = db.attendance.find(log => 
-            log.email && log.email.toLowerCase() === (email || "").toLowerCase() && log.date === todayDate
+            log.email && log.email.toLowerCase() === empEmail.toLowerCase() && log.date === todayDate
         );
 
         if (action === 'IN') {
             if (!existingLog) {
                 db.attendance.unshift({
-                    name: name || "Employee",
-                    email: email || "employee@clickormedia.co.in",
-                    dept: "Software Engineering",
-                    role: "Software Engineer",
+                    name: empName,
+                    email: empEmail,
+                    dept: empDept,
+                    role: empRole,
                     date: todayDate,
                     checkInTime: time,
                     checkInLoc: location,
                     checkOutTime: "--:--",
                     checkOutLoc: "Pending",
                     status: "On Time",
-                    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+                    avatar: empAvatar
                 });
             } else {
                 existingLog.checkInTime = time;
                 existingLog.checkInLoc = location;
+                existingLog.role = empRole;
+                existingLog.dept = empDept;
             }
         } else if (action === 'OUT') {
             if (existingLog) {
@@ -1005,30 +1018,29 @@ app.post('/api/employee/punch', async (req, res) => {
                 existingLog.checkOutLoc = location;
             } else {
                 db.attendance.unshift({
-                    name: name || "Employee",
-                    email: email || "employee@clickormedia.co.in",
-                    dept: "Software Engineering",
-                    role: "Software Engineer",
+                    name: empName,
+                    email: empEmail,
+                    dept: empDept,
+                    role: empRole,
                     date: todayDate,
                     checkInTime: "09:00 AM",
                     checkInLoc: "Office HQ",
                     checkOutTime: time,
                     checkOutLoc: location,
                     status: "On Time",
-                    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+                    avatar: empAvatar
                 });
             }
         }
 
         await writeDb(db);
-        console.log(`--- PUNCH ${action} SAVED PERMANENTLY FOR ${name} ---`);
-        res.json({ success: true, message: `Punch ${action} recorded and saved to database successfully!` });
+        console.log(`--- PUNCH ${action} SAVED FROM DB FOR ${empName} (${empRole}) ---`);
+        res.json({ success: true, message: `Punch ${action} recorded using database profile successfully!` });
     } catch (err) {
         console.error('Error recording punch:', err);
         res.status(500).json({ success: false, message: 'Server error during punch recording' });
     }
-});
-// --- API: Get Today's Punch Status for Employee ---
+});// --- API: Get Today's Punch Status for Employee ---
 app.get('/api/employee/punch-status', async (req, res) => {
     try {
         const email = req.query.email || (req.session.user ? req.session.user.email : "");
