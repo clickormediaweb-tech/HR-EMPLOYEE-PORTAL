@@ -344,26 +344,20 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-  // Filter by selected month and status
-            let filteredLogs = allEmployeeLogs.filter(log => {
-                if (!log.date) return false;
-                
-                // 1. User matching check (Pranchal Rajpal ke liye flexible check)
-                let matchesUser = (log.name && log.name.toLowerCase().includes('pranchal')) || 
-                                  (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase());
-                                  
-                // 2. Month and Year matching check
-                let logDate = new Date(log.date);
-                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-                let isOctoberString = log.date.includes('2026-10');
-                let finalMonthMatch = matchesMonth || (selectedMonthIndex === 9 && isOctoberString);
-
-                // 3. Status matching check
-                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
-                
-                // Yahan matchesUser ko include karna zaroori hai taaki sirf aapka data dikhe
-                return matchesUser && finalMonthMatch && matchesStatus;
-            });
+ let filteredLogs = allEmployeeLogs.filter(log => {
+    if (!log.date) return false;
+    
+    // Strict user matching: Log ki email ya naam strictly logged-in user se match hona chahiye
+    let matchesUser = (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase()) ||
+                      (log.name && loggedInName && log.name.toLowerCase() === loggedInName.toLowerCase());
+                      
+    let logDate = new Date(log.date);
+    let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+    let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
+    
+    // Ab yeh ensure karega ki sirf usi employee ka data dikhega jiski attendance dali gayi hai
+    return matchesUser && matchesMonth && matchesStatus;
+});
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
