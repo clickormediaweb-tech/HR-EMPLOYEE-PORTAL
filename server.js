@@ -302,39 +302,21 @@ app.delete('/api/employees/:id', async (req, res) => {
     }
 });
 
-// 7. API: Get Attendance Logs (Robin removed)
+//7.
 app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
-        const activeEmails = activeUsers.map(u => u.email ? u.email.toLowerCase() : '');
-
-        if (!db.attendance || db.attendance.length === 0) {
+        if (!db.attendance) {
             db.attendance = [];
         }
-
-        // Safe iteration with checks
-        db.attendance.forEach(log => {
-            if (log && log.email) {
-                let matchedUser = activeUsers.find(u => u.email && u.email.toLowerCase() === log.email.toLowerCase());
-                if (matchedUser) {
-                    log.role = matchedUser.designation || log.role;
-                    log.dept = matchedUser.department || log.dept;
-                    log.name = matchedUser.name || log.name;
-                }
-            }
-        });
-
-        const filteredAttendance = db.attendance.filter(log => 
-            log && log.email && activeEmails.includes(log.email.toLowerCase()) && log.name.toLowerCase() !== 'robin'
-        );
-        
-        res.json({ success: true, attendance: filteredAttendance });
+        // Saari entries direct bhej dein bina strict email filter ke
+        res.json({ success: true, attendance: db.attendance });
     } catch (err) {
         console.error('Error fetching attendance:', err);
         res.status(500).json({ success: false, attendance: [] });
     }
-});// 8. API: Save Manual Attendance Log
+});
+// 8. API: Save Manual Attendance Log
 app.post('/api/attendance/add', async (req, res) => {
     try {
         const { name, email, dept, role, date, checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar } = req.body;
