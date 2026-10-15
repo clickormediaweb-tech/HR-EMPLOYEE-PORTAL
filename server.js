@@ -179,7 +179,7 @@ app.get('/hr/dashboard', (req, res) => {
 app.get('/hr/employees', async (req, res) => {
     try {
         const db = await readDb();
-        const employees = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
+        const employees = db.users ? db.users.filter(u => (u.role === 'employee' || u.role === 'admin') && u.name.toLowerCase() !== 'robin') : [];
         const exEmployees = db.users ? db.users.filter(u => u.role === 'former') : [];
        
         res.render('employee', { employees, exEmployees });
@@ -193,11 +193,11 @@ app.get('/hr/employees', async (req, res) => {
 app.get('/api/hr/stats', async (req, res) => {
     try {
         const db = await readDb();
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
+        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
        
         res.json({
             success: true,
-            totalEmployees: activeUsers.length > 0 ? activeUsers.length : 5
+            totalEmployees: activeUsers.length > 0 ? activeUsers.length : 4
         });
     } catch (err) {
         console.error('Error fetching HR stats:', err);
@@ -209,8 +209,7 @@ app.get('/api/hr/stats', async (req, res) => {
 app.get('/api/employees/active', async (req, res) => {
     try {
         const db = await readDb();
-        // Agar database mein users hain toh wahi dikhao, purana hardcoded overwrite mat karo
-        const activeEmployees = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
+        const activeEmployees = db.users ? db.users.filter(u => (u.role === 'employee' || u.role === 'admin') && u.name.toLowerCase() !== 'robin') : [];
         res.json({ success: true, employees: activeEmployees });
     } catch (err) {
         res.status(500).json({ success: false, employees: [] });
@@ -233,6 +232,7 @@ app.post('/api/employees/add', async (req, res) => {
             department: department || 'Engineering',
             designation: designation || 'Staff',
             phone: phone || '',
+            performance: 'GOOD',
             avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces'
         };
 
@@ -244,6 +244,28 @@ app.post('/api/employees/add', async (req, res) => {
     } catch (err) {
         console.error('Error adding employee:', err);
         res.status(500).json({ success: false, message: 'Server error while adding employee' });
+    }
+});
+
+// --- API: Update Employee Performance Permanently ---
+app.post('/api/employees/update-performance', async (req, res) => {
+    try {
+        const { email, performance } = req.body;
+        const db = await readDb();
+        if (!db.users) db.users = [];
+
+        let user = db.users.find(u => u.email && u.email.toLowerCase() === (email || "").toLowerCase());
+        if (user) {
+            user.performance = performance;
+            await writeDb(db);
+            console.log(`--- PERFORMANCE UPDATED FOR ${user.name}: ${performance} ---`);
+            return res.json({ success: true, message: 'Performance updated successfully!' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Employee not found in database.' });
+        }
+    } catch (err) {
+        console.error('Error updating performance:', err);
+        res.status(500).json({ success: false, message: 'Server error while updating performance' });
     }
 });
 
@@ -278,11 +300,11 @@ app.delete('/api/employees/:id', async (req, res) => {
     }
 });
 
-// 7. API: Get Attendance Logs
+// 7. API: Get Attendance Logs (Robin removed)
 app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
+        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
         if (!db.attendance || db.attendance.length === 0) {
@@ -290,13 +312,12 @@ app.get('/api/attendance', async (req, res) => {
                 { name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", role: "HR Manager", checkInTime: "08:55 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
                 { name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", role: "Web Developer", checkInTime: "09:00 AM", checkInLoc: "Remote / WFH (GPS Verified)", checkOutTime: "06:30 PM", checkOutLoc: "Remote / WFH (GPS Verified)", status: "On Time", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
                 { name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", role: " Video Editor", checkInTime: "09:10 AM", checkInLoc: "Head Office (Terminal B)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal B)", status: "On Time", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", role: " Videographer", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
-                { name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", role: "Marketing Specialist", checkInTime: "09:15 AM", checkInLoc: "Head Office (Terminal A)", checkOutTime: "06:00 PM", checkOutLoc: "Head Office (Terminal A)", status: "On Time", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
+                { name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", role: " Videographer", checkInTime: "09:45 AM", checkInLoc: "Branch Office (Jammu)", checkOutTime: "06:15 PM", checkOutLoc: "Branch Office (Jammu)", status: "Late", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
             ];
             await writeDb(db);
         }
 
-        const filteredAttendance = db.attendance.filter(log => activeEmails.includes(log.email.toLowerCase()));
+        const filteredAttendance = db.attendance.filter(log => activeEmails.includes(log.email.toLowerCase()) && log.name.toLowerCase() !== 'robin');
         res.json({ success: true, attendance: filteredAttendance });
     } catch (err) {
         console.error('Error fetching attendance:', err);
@@ -322,6 +343,7 @@ app.post('/api/attendance/add', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error while saving attendance' });
     }
 });
+
 // 9. API: Get Settings / Office Timings
 app.get('/api/settings', async (req, res) => {
     try {
@@ -372,9 +394,8 @@ app.get('/api/leaves', async (req, res) => {
     try {
         const db = await readDb();
         if (!db.leaves) {
-    db.leaves = [];
-    await writeDb(db);
-
+            db.leaves = [];
+            await writeDb(db);
         }
         if (!db.myLeaves) {
             db.myLeaves = [];
@@ -452,12 +473,11 @@ app.post('/api/leaves/apply', async (req, res) => {
         let applicantEmail = (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
         let currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        // Check available balance before applying
         let joiningDate = new Date('2026-01-01');
         let currentDate = new Date();
         let monthsElapsed = (currentDate.getFullYear() - joiningDate.getFullYear()) * 12 + (currentDate.getMonth() - joiningDate.getMonth()) + 1;
         let totalEarnedLeaves = Math.max(1, monthsElapsed);
-        
+       
         let approvedLeavesCount = db.leaves.filter(l => l.name && l.name.toLowerCase() === applicantName.toLowerCase() && l.status === 'APPROVED' && !l.type.includes('Extra')).length;
         let currentBalance = Math.max(0, totalEarnedLeaves - approvedLeavesCount);
 
@@ -488,6 +508,7 @@ app.post('/api/leaves/apply', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
+
 // --- HOLIDAY APIS ---
 app.get('/api/holidays', async (req, res) => {
     try {
@@ -562,7 +583,7 @@ app.get('/hr/holidaycalendar', (req, res) => {
 app.get('/api/analytics', async (req, res) => {
     try {
         const db = await readDb();
-        const activeUsers = db.users ? db.users.filter(u => u.role === 'employee' || u.role === 'admin') : [];
+        const activeUsers = db.users ? db.users.filter(u => (u.role === 'employee' || u.role === 'admin') && u.name.toLowerCase() !== 'robin') : [];
        
         const deptCounts = {};
         activeUsers.forEach(user => {
@@ -584,7 +605,7 @@ app.get('/hr/analytics', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'analytics.html'));
 });
 
-// --- PAYROLL PERSISTENCE API ---
+// --- PAYROLL PERSISTENCE API (Robin removed) ---
 app.get('/api/payroll', async (req, res) => {
     try {
         const db = await readDb();
@@ -593,16 +614,15 @@ app.get('/api/payroll', async (req, res) => {
                 { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", baseNum: 85000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 29, 2026", day: "Tuesday", type: "Paid Leave", reason: "Medical Appointment" }], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
                 { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", baseNum: 110000, leaveBalance: 4, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
                 { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", baseNum: 95000, leaveBalance: 6, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 28, 2026", day: "Monday", type: "Paid Leave", reason: "Viral Fever" }], avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" },
-                { id: 5, name: "Robin", email: "robin@clickormedia.co.in", dept: "Marketing", baseNum: 80000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces" }
+                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
             ];
             await writeDb(db);
         }
 
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former') : [];
+        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
-        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()));
+        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
        
         res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
@@ -902,16 +922,13 @@ app.get('/api/employee/stats', async (req, res) => {
 
         let nameLower = empName.toLowerCase();
         let currentDate = new Date();
-        let currentMonth = currentDate.getMonth() + 1; // 10 means October 2026
+        let currentMonth = currentDate.getMonth() + 1;
 
-        // --- SPECIFIC RULE: PRANCHAL = 1 LEAVE, OTHERS = 0 IN OCTOBER ---
         let maxAllowedEarned = 0;
 
         if (nameLower.includes('pranchal')) {
-            // Pranchal ke liye September ka 1 completed month hone par 1 leave fixed hai
             maxAllowedEarned = 1;
         } else {
-            // Baaki sabhi employees ka October mein 0 rahega, November (Month 11) se automatic add hoga
             if (currentMonth >= 11) {
                 maxAllowedEarned = (currentMonth - 10);
             } else {
@@ -919,7 +936,6 @@ app.get('/api/employee/stats', async (req, res) => {
             }
         }
 
-        // Database se approved leaves minus karna
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
         let totalLeavesUsed = userLeaves.filter(l => !l.type.includes('Extra')).length;
 
@@ -927,9 +943,8 @@ app.get('/api/employee/stats', async (req, res) => {
         let totalAllLeavesUsed = userLeaves.length;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
-        // --- EXACT PER-DAY SALARY DEDUCTION CALCULATION ---
         let baseSalary = record.baseNum || 25000;
-        let perDaySalary = baseSalary / 30; // 30 din ke hisab se 1 din ki salary
+        let perDaySalary = baseSalary / 30; 
         let totalDeductions = extraLeaves * perDaySalary; 
         let netPayout = Math.max(0, baseSalary - totalDeductions);
 
@@ -950,7 +965,8 @@ app.get('/api/employee/stats', async (req, res) => {
         console.error('Error in employee stats:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
-});        // --- EMPLOYEE PORTAL PAGE ROUTES ---
+});
+
 app.get('/employee/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_index.html'));
 });
@@ -1048,7 +1064,6 @@ app.get('/api/employee/punch-status', async (req, res) => {
 });
 
 // Employee Specific Payroll API Route
-// Employee Specific Payroll API Route
 app.get('/api/employee/payroll', async (req, res) => {
     try {
         const db = await readDb();
@@ -1062,15 +1077,13 @@ app.get('/api/employee/payroll', async (req, res) => {
             userPayroll = db.payroll.find(p => p.name && p.name.toLowerCase().includes("pranchal")) || db.payroll[1] || db.payroll[0];
         }
 
-        // --- CALCULATE EXTRA LEAVES FROM DB.LEAVES ---
         let nameLower = currentUserName.toLowerCase();
         let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
         let totalAllLeavesUsed = userLeaves.length;
-        
+       
         let maxAllowedEarned = nameLower.includes('pranchal') ? 1 : 0;
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
-        // Send extraLeaves inside payroll object
         let payrollObj = { ...userPayroll, extraLeaves: extraLeaves };
 
         res.json({ success: true, payroll: payrollObj });
@@ -1079,21 +1092,20 @@ app.get('/api/employee/payroll', async (req, res) => {
         res.status(500).json({ success: false, payroll: null });
     }
 });
-// Employee Payroll Page Route
+
 app.get('/employee/payroll', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_payroll.html'));
 });
 
-// Employee Holiday Calendar Page Route
 app.get('/employee/holidaycalendar', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_holidaycalendar.html'));
 });
-// Get current logged-in employee details with real-time DB sync for department & designation
+
 app.get('/api/current-user', async (req, res) => {
     try {
         const dbData = await readDb();
         const users = dbData.users || [];
-        
+       
         let activeName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
         let activeEmail = (req.session.user && req.session.user.email) ? req.session.user.email : "";
 
@@ -1117,19 +1129,12 @@ app.get('/api/current-user', async (req, res) => {
         res.status(500).json({ success: false, error: "Failed to fetch user profile" });
     }
 });
-//Employee Account Settings Page Route
+
 app.get('/employee/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_settings.html'));
 });
 
-// Start listening on port 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 // API: Edit Employee Details & Department
-// --- API: Edit Employee Details & Department (Fully Synced Across Users, Departments & Payroll) ---
 app.put('/api/employees/edit/:id', async (req, res) => {
     try {
         const empId = req.params.id;
@@ -1138,7 +1143,6 @@ app.put('/api/employees/edit/:id', async (req, res) => {
 
         let oldEmployeeName = "";
 
-        // 1. Update in db.users
         if (db.users) {
             let user = db.users.find(u => u._id === empId || (u.email && u.email.toLowerCase() === (email || "").toLowerCase()));
             if (user) {
@@ -1150,7 +1154,6 @@ app.put('/api/employees/edit/:id', async (req, res) => {
             }
         }
 
-        // 2. Update department in db.departments members list
         if (db.departments && oldEmployeeName) {
             db.departments.forEach(dept => {
                 if (dept.members) {
@@ -1164,7 +1167,6 @@ app.put('/api/employees/edit/:id', async (req, res) => {
             });
         }
 
-        // 3. Update department in db.payroll
         if (db.payroll && oldEmployeeName) {
             let payrollRec = db.payroll.find(p => p.name && p.name.toLowerCase() === oldEmployeeName.toLowerCase());
             if (payrollRec) {
@@ -1180,4 +1182,10 @@ app.put('/api/employees/edit/:id', async (req, res) => {
         console.error('Error updating employee:', err);
         res.status(500).json({ success: false, message: 'Server error while updating employee' });
     }
+});
+
+// Start listening on port 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
