@@ -920,6 +920,38 @@ function openEditPerformanceModal(name, currentPerf) {
         </tr>
     `;
 });
+       document.addEventListener('DOMContentLoaded', () => {
+    // Database se current users/employees ka data fetch karke UI update karne ke liye
+    fetch('/api/employees/active')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.employees) {
+                // Saree rows ko select karein
+                let rows = document.querySelectorAll('#performanceTableBody tr');
+                rows.forEach(row => {
+                    let nameCell = row.querySelector('td:nth-child(2)'); // Name wala column
+                    if (nameCell) {
+                        let empName = nameCell.innerText.trim();
+                        let dbUser = data.employees.find(u => u.name && u.name.toLowerCase() === empName.toLowerCase());
+                        
+                        if (dbUser && dbUser.performance) {
+                            let perfSpan = row.querySelector('td:nth-child(4) span');
+                            if (perfSpan) {
+                                perfSpan.innerText = dbUser.performance;
+                                
+                                // Badge color dynamic update
+                                perfSpan.className = "px-3 py-1 text-xs font-bold border rounded-lg shadow-sm " + 
+                                    (dbUser.performance === 'EXCELLENT' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
+                                     dbUser.performance === 'GOOD' ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                                     dbUser.performance === 'AVERAGE' ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-rose-700 bg-rose-50 border-rose-200');
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(err => console.error("Error syncing performance UI:", err));
+});
 </script>
 </body>
 </html>
