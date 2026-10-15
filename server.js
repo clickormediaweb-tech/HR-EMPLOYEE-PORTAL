@@ -44,9 +44,11 @@ async function writeDb(data) {
         if (!record) {
             await Store.create({ data: data });
         } else {
-            record.data = data;
+            // MongoDB ko explicitly batayein ki data object change ho chuka hai
+            record.set('data', data);
             record.markModified('data');
             await record.save();
+            console.log("--- DATABASE SUCCESSFULLY SAVED & PERSISTED TO MONGODB ---");
         }
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
