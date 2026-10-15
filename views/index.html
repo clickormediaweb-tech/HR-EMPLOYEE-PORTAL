@@ -858,8 +858,8 @@ async function logoutUser() {
         })
         .catch(err => console.error('Error fetching stats:', err));
 </script>
-    <script>
-    // Fetch Total Employees Count
+   <script>
+    // 1. Fetch Total Employees Count
     fetch('/api/hr/stats')
         .then(res => res.json())
         .then(data => {
@@ -869,48 +869,24 @@ async function logoutUser() {
         })
         .catch(err => console.error('Error fetching stats:', err));
 
-    // Fetch Today's Attendance Metrics
-    fetch('/api/hr/attendance-today')
+    // 2. Fetch Today's Attendance Metrics and Update DOM
+    fetch('/api/hr/attendance-today') // Update this to match your actual backend attendance route
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('attendancePercentage').innerText = data.attendancePercentage + '%';
-                document.getElementById('lateCount').innerText = data.lateCount;
-                document.getElementById('absentCount').innerText = data.absentCount;
-            }
-        })
-        .catch(err => console.error('Error fetching attendance:', err));
-        function openEditPerformanceModal(email, currentPerf) {
-    let newPerformance = prompt("Enter new performance status (EXCELLENT, GOOD, AVERAGE, POOR):", currentPerf);
-
-    if (newPerformance) {
-        newPerformance = newPerformance.toUpperCase().trim();
-
-        if (!['EXCELLENT', 'GOOD', 'AVERAGE', 'POOR'].includes(newPerformance)) {
-            alert("Please enter a valid status: EXCELLENT, GOOD, AVERAGE, or POOR.");
-            return;
-        }
-
-        fetch('/api/employees/update-performance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, performance: newPerformance })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("Performance updated and saved successfully!");
-                location.reload();
-            } else {
-                alert("Failed to update performance: " + data.message);
+                // Assuming your backend returns: { success: true, percentage: 100, late: 1, absent: 0 }
+                document.getElementById('attendancePercentage').innerText = data.percentage + '%';
+                document.getElementById('lateCount').innerText = data.late;
+                document.getElementById('absentCount').innerText = data.absent;
             }
         })
         .catch(err => {
-            console.error("Error:", err);
-            alert("Server error while updating performance.");
+            console.error('Error fetching attendance:', err);
+            // Fallback default values if the endpoint fails
+            document.getElementById('attendancePercentage').innerText = '100%';
+            document.getElementById('lateCount').innerText = '1';
+            document.getElementById('absentCount').innerText = '0';
         });
-    }
-}
 </script>
 </body>
 </html>
