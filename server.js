@@ -322,7 +322,27 @@ app.post('/api/attendance/add', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error while saving attendance' });
     }
 });
+// --- API: Update Employee Performance Permanently ---
+app.post('/api/employees/update-performance', async (req, res) => {
+    try {
+        const { email, performance } = req.body;
+        const db = await readDb();
+        if (!db.users) db.users = [];
 
+        let user = db.users.find(u => u.email && u.email.toLowerCase() === (email || "").toLowerCase());
+        if (user) {
+            user.performance = performance; // Database mein performance save hogi
+            await writeDb(db);
+            console.log(`--- PERFORMANCE UPDATED FOR ${user.name}: ${performance} ---`);
+            return res.json({ success: true, message: 'Performance updated successfully!' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Employee not found in database.' });
+        }
+    }jis catch (err) {
+        console.error('Error updating performance:', err);
+        res.status(500).json({ success: false, message: 'Server error while updating performance' });
+    }
+});
 // 9. API: Get Settings / Office Timings
 app.get('/api/settings', async (req, res) => {
     try {
