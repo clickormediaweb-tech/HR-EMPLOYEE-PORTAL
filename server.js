@@ -325,20 +325,20 @@ app.delete('/api/employees/:id', async (req, res) => {
 
 //7.
 // 7. API: Get Attendance Logs (Safe & Non-destructive)
+// --- API: Get All Attendance Logs for Attendance Page ---
 app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
         if (!db.attendance || db.attendance.length === 0) {
             db.attendance = [];
         }
-        // Saari attendance entries bina kisi strict deletion ke return karein
+        // Saari attendance entries (1-15 tak ki ya jitni bhi hain) bina kisi deletion ke return karein
         res.json({ success: true, attendance: db.attendance });
     } catch (err) {
         console.error('Error fetching attendance:', err);
         res.status(500).json({ success: false, attendance: [] });
     }
-});
-// 8. API: Save Manual Attendance Log
+});// 8. API: Save Manual Attendance Log
 app.post('/api/attendance/add', async (req, res) => {
     try {
         const { name, email, dept, role, date, checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar } = req.body;
