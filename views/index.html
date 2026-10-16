@@ -911,5 +911,38 @@ function openEditPerformanceModal(name, currentPerf) {
         .catch(err => console.error("Error syncing performance UI:", err));
 });
 </script>
+    <script>
+    async function loadDashboardAttendance() {
+        try {
+            let res = await fetch('/api/attendance');
+            let data = await res.json();
+            if (data.success && data.attendance) {
+                let todayStr = new Date().toISOString().split('T')[0];
+                let todayLogs = data.attendance.log ? data.attendance : data.attendance.filter(log => log.date === todayStr);
+                
+                // Total active staff count
+                let totalStaff = 5; 
+                let presentCount = todayLogs.length;
+                let percentage = totalStaff > 0 ? Math.round((presentCount / totalStaff) * 100) : 0;
+                
+                // Dashboard elements update karna
+                let attEl = document.getElementById('dashAttendancePercentage');
+                if (attEl) attEl.innerText = percentage + "%";
+
+                let lateEl = document.getElementById('dashLateCount');
+                if (lateEl) lateEl.innerText = todayLogs.filter(l => l.status === 'Late').length;
+
+                let absentEl = document.getElementById('dashAbsentCount');
+                if (absentEl) absentEl.innerText = Math.max(0, totalStaff - presentCount);
+            }
+        } catch (err) {
+            console.error('Error loading dashboard attendance:', err);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDashboardAttendance();
+    });
+</script>
 </body>
 </html>
