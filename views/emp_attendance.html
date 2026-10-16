@@ -316,7 +316,7 @@
 
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
-            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
+            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); // 9 for October
             let year = 2026;
             let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             
@@ -338,7 +338,7 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            // Strict user filtering for individual employee portal
+            // Filter by logged-in user and selected month with robust date parsing
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log || !log.date) return false;
                 
@@ -347,11 +347,23 @@
                 let curName = (loggedInName || "").trim().toLowerCase();
                 let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
+                // Match user strictly by email or name
                 let matchesUser = (curEmail && logEmail === curEmail) || 
                                   (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
                 
+                // Flexible date parsing for MongoDB date formats (e.g., "2026-10-09" or ISO strings)
                 let logDate = new Date(log.date);
-                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+                if (isNaN(logDate.getTime()) && typeof log.date === 'string') {
+                    let parts = log.date.split(/[-/]/);
+                    if (parts.length === 3) {
+                        logDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                    }
+                }
+
+                let matchesMonth = !isNaN(logDate.getTime()) && 
+                                   logDate.getMonth() === selectedMonthIndex && 
+                                   logDate.getFullYear() === year;
+
                 let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
 
                 return matchesUser && matchesMonth && matchesStatus;
@@ -380,8 +392,7 @@
                     </tr>
                 `;
             });
-        }
-    function toggleNotificationDropdown(event) {
+        }   function toggleNotificationDropdown(event) {
             event.stopPropagation();
             let notifDropdown = document.getElementById('notificationDropdown');
             let profileDropdown = document.getElementById('profileDropdown');
