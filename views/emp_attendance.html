@@ -273,8 +273,7 @@
     </div>
 
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
-    <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
-   <script>
+<script>
         let allEmployeeLogs = [];
         let loggedInName = 'Pranchal Rajpal';
         let loggedInEmail = 'pranchal@clickormedia.co.in';
@@ -287,7 +286,7 @@
                     if (user && user.success) {
                         loggedInName = user.name || loggedInName;
                         loggedInEmail = user.email || loggedInEmail;
-                        
+                       
                         document.querySelectorAll('#empProfileName, #empDropdownName').forEach(el => { el.innerText = loggedInName; });
                         document.querySelectorAll('#headerDesignation').forEach(el => { el.innerText = user.designation || 'Software Engineer'; });
                     }
@@ -299,21 +298,9 @@
                     if (data.success && data.attendance) {
                         allEmployeeLogs = data.attendance;
                         filterTable();
-                    } else {
-                        allEmployeeLogs = [];
-                        filterTable();
                     }
                 })
-                .catch(err => {
-                    console.error("Error loading attendance records:", err);
-                    // Fallback fetch attempt
-                    fetch('/api/attendance')
-                        .then(res => res.json())
-                        .then(data => {
-                            allEmployeeLogs = data.attendance || [];
-                            filterTable();
-                        }).catch(e => console.error(e));
-                });
+                .catch(err => console.error("Error loading attendance records:", err));
 
             // 3. Fetch stats for leaves count
             fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInName)}`)
@@ -328,36 +315,54 @@
         };
 
         function filterTable() {
+            let statusFilter = document.getElementById('statusFilter').value;
+            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
+            let year = 2026;
+            let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+           
+            document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
+
+            // --- Working Days Calculation (Total Days in Month - Sundays Only) ---
+            let totalDaysInMonth = new Date(year, selectedMonthIndex + 1, 0).getDate();
+            let sundayCount = 0;
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                let dateObj = new Date(year, selectedMonthIndex, day);
+                if (dateObj.getDay() === 0) { // 0 represents Sunday
+                    sundayCount++;
+                }
+            }
+            let totalWorkingDays = totalDaysInMonth - sundayCount;
+            document.getElementById('workingDaysCount').innerText = `${totalWorkingDays} Days`;
+
             let tbody = document.getElementById('attendanceTableBody');
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            if (!allEmployeeLogs || allEmployeeLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance records found in the database.</td></tr>`;
-                document.getElementById('presentCount').innerText = `0 Days`;
-                document.getElementById('workingDaysCount').innerText = `0 Days`;
-                return;
-            }
-
-            // Filter logs matching the logged-in user
+            // Strict user and month matching based on database records
             let filteredLogs = allEmployeeLogs.filter(log => {
-                if (!log) return false;
+                if (!log || !log.date) return false;
+               
                 let logName = (log.name || "").trim().toLowerCase();
                 let logEmail = (log.email || "").trim().toLowerCase();
                 let curName = (loggedInName || "").trim().toLowerCase();
                 let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
-                return (curEmail && logEmail === curEmail) || 
-                       (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
+                let matchesUser = (curEmail && logEmail === curEmail) ||
+                                  (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
+               
+                let logDate = new Date(log.date);
+                let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
+                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
+
+                return matchesUser && matchesMonth && matchesStatus;
             });
 
-            // Fail-safe: if strict filtering yields 0 results, show all records so the table populates immediately
-            if (filteredLogs.length === 0 && allEmployeeLogs.length > 0) {
-                filteredLogs = allEmployeeLogs; 
-            }
-
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
-            document.getElementById('workingDaysCount').innerText = `${filteredLogs.length} Days`;
+
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
+                return;
+            }
 
             filteredLogs.forEach(log => {
                 let statusBadge = (log.status && log.status.toUpperCase().includes('LATE'))
@@ -366,7 +371,7 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="py-4 px-6 font-bold">${log.date || 'N/A'}</td>
+                        <td class="py-4 px-6 font-bold">${log.date}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
                         <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
@@ -425,7 +430,7 @@
 
                 let diffMins = parseTime(outTime) - parseTime(inTime);
                 if (diffMins < 0) diffMins += 24 * 60;
-                
+               
                 let h = Math.floor(diffMins / 60);
                 let m = diffMins % 60;
                 return `${h}h ${m}m`;
@@ -433,5 +438,6 @@
                 return '0h 0m';
             }
         }
-    </script></body>
+    </script>
+</body>
 </html>
