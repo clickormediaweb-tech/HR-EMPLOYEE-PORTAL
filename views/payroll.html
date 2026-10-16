@@ -735,10 +735,20 @@
         document.getElementById('salaryEmpId').value = rec.id;
         document.getElementById('salaryModalTitle').innerText = `Edit Salary: ${rec.name}`;
         
-        // Employee details, joining date, aur previous salary populate karne ke liye
+        // Employee details, joining date, aur previous salary dynamically set karne ke liye
         document.getElementById('modalEmpName').innerText = `Name: ${rec.name}`;
         document.getElementById('modalEmpDept').innerText = `Department: ${rec.dept}`;
-        document.getElementById('modalEmpJoin').innerText = `Date of Joining: ${rec.joiningDate || '01 Jan 2026'}`;
+        
+        // Har employee ki unki exact joining date assign karna
+        let joinDateMap = {
+            "Tanya Dua": "01 July 2026",
+            "Pranchal Rajpal": "01 September 2026",
+            "Anshdeep": "18 September 2026",
+            "Sukhi": "04 September 2026"
+        };
+        let correctJoinDate = rec.joiningDate || joinDateMap[rec.name] || "01 Sep 2026";
+        
+        document.getElementById('modalEmpJoin').innerText = `Date of Joining: ${correctJoinDate}`;
         document.getElementById('modalPrevSalary').innerText = `Previous Salary: ${formatINR(rec.previousSalary || rec.baseNum)}`;
         
         document.getElementById('newBaseSalaryInput').value = rec.baseNum;
