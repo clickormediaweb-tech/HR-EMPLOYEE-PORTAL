@@ -591,13 +591,64 @@ app.get('/api/payroll', async (req, res) => {
     try {
         const db = await readDb();
         if (!db.payroll || db.payroll.length === 0) {
-            db.payroll = [
-    { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", baseNum: 85000, leaveBalance: 5, halfDays: 0, status: "PAID", joiningDate: "2026-07-01", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
-    { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", baseNum: 110000, leaveBalance: 4, halfDays: 0, status: "PAID", joiningDate: "2026-09-01", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
-    { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", baseNum: 95000, leaveBalance: 6, halfDays: 0, status: "PAID", joiningDate: "2026-09-18", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-    { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 0, status: "PAID", joiningDate: "2026-09-04", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
-];
-            await writeDb(db);
+           db.payroll = [
+    { 
+        id: 1, 
+        name: "Tanya Dua", 
+        email: "tanya@clickormedia.co.in", 
+        dept: "HR & Finance", 
+        baseNum: 16000, 
+        previousSalary: 16000, 
+        leaveBalance: 5, 
+        halfDays: 0, 
+        status: "PAID", 
+        joiningDate: "01 July 2026", 
+        leaveLogs: [], 
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" 
+    },
+    { 
+        id: 2, 
+        name: "Pranchal Rajpal", 
+        email: "pranchal@clickormedia.co.in", 
+        dept: "IT", 
+        baseNum: 23000, 
+        previousSalary: 23000, 
+        leaveBalance: 4, 
+        halfDays: 0, 
+        status: "PAID", 
+        joiningDate: "01 September 2026", 
+        leaveLogs: [], 
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" 
+    },
+    { 
+        id: 3, 
+        name: "Anshdeep", 
+        email: "anshdeep@clickormedia.co.in", 
+        dept: "Design", 
+        baseNum: 16000, 
+        previousSalary: 16000, 
+        leaveBalance: 6, 
+        halfDays: 0, 
+        status: "PAID", 
+        joiningDate: "18 September 2026", 
+        leaveLogs: [], 
+        avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces" 
+    },
+    { 
+        id: 4, 
+        name: "Sukhi", 
+        email: "sukhi@clickormedia.co.in", 
+        dept: "Design", 
+        baseNum: 25000, 
+        previousSalary: 25000, 
+        leaveBalance: 3, 
+        halfDays: 0, 
+        status: "PAId", 
+        joiningDate: "04 September 2026", 
+        leaveLogs: [], 
+        avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces" 
+    }
+]; await writeDb(db);
         }
 
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
@@ -672,16 +723,16 @@ app.post('/api/payroll/update-salary', async (req, res) => {
 
         let rec = db.payroll.find(r => r.id == id);
         if (rec) {
-            // Agar pehle se salary hai aur change ho rahi hai, toh use previousSalary mein save kar dein
+            // Agar pehle se salary hai toh use previousSalary mein save kar do
             if (rec.baseNum && rec.baseNum !== parseFloat(baseNum)) {
                 rec.previousSalary = rec.baseNum;
             }
             rec.baseNum = parseFloat(baseNum);
             
             await writeDb(db);
-            res.json({ success: true, message: 'Base salary and history updated successfully!' });
+            res.json({ success: true, message: 'Salary updated and history saved successfully!' });
         } else {
-            res.status(404).json({ success: false, message: 'Payroll record not found' });
+            res.status(404).json({ success: false, message: 'Record not found' });
         }
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error' });
