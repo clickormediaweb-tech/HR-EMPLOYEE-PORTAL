@@ -911,52 +911,5 @@ function openEditPerformanceModal(name, currentPerf) {
         .catch(err => console.error("Error syncing performance UI:", err));
 });
 </script>
-<script>
-    async function loadDashboardAttendance() {
-        try {
-            // 1. Pehle active employees fetch karein taaki total count sahi mile
-            let empRes = await fetch('/api/employees/active');
-            let empData = await empRes.json();
-            let totalStaff = (empData.success && empData.employees) ? empData.employees.length : 4;
-
-            // 2. Phir attendance logs fetch karein
-            let attRes = await fetch('/api/attendance');
-            let attData = await attRes.json();
-            
-            if (attData.success && attData.attendance) {
-                let todayStr = new Date().toISOString().split('T')[0];
-                
-                // Aaj ke din ke unique present employees count karein
-                let todayLogs = attData.attendance.filter(log => log.date && log.date.includes(todayStr));
-                
-                // Unique present count by email/name
-                let uniquePresent = [...new Set(todayLogs.map(l => l.email || l.name))].length;
-                
-                // Agar attendance logs mein entries hain lekin date format thoda alag hai, toh fallback use karein
-                let presentCount = uniquePresent > 0 ? uniquePresent : (todayLogs.length > 0 ? 1 : 0);
-                
-                let percentage = totalStaff > 0 ? Math.round((presentCount / totalStaff) * 100) : 0;
-                let absentCount = Math.max(0, totalStaff - presentCount);
-                let lateCount = todayLogs.filter(l => l.status && l.status.toLowerCase().includes('late')).length;
-
-                // UI elements update karein
-                let attEl = document.getElementById('dashAttendancePercentage');
-                if (attEl) attEl.innerText = percentage + "%";
-
-                let lateEl = document.getElementById('dashLateCount');
-                if (lateEl) lateEl.innerText = lateCount;
-
-                let absentEl = document.getElementById('dashAbsentCount');
-                if (absentEl) absentEl.innerText = absentCount;
-            }
-        } catch (err) {
-            console.error('Error loading dashboard attendance:', err);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        loadDashboardAttendance();
-    });
-</script>
 </body>
 </html>
