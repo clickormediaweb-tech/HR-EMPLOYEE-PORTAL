@@ -357,18 +357,29 @@ app.post('/api/attendance/add', async (req, res) => {
     }
 });
 // --- API: Get Today's Attendance Summary for HR Dashboard ---
+// --- API: Get Today's Attendance Summary for HR Dashboard ---
 app.get('/api/hr/attendance-today', async (req, res) => {
     try {
         const db = await readDb();
         const attendanceList = db.attendance || [];
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
-        const totalEmployees = activeUsers.length > 0 ? activeUsers.length : 4;
+        const totalEmployees = activeUsers.length > 0 ? activeUsers.length : 5; // Total active employees (Jaise dashboard pe 5 hain)
 
-        // Aaj ki date (YYYY-MM-DD format me, jaise database me store hoti hai)
+        // Aaj ki date (YYYY-MM-DD format)
         const todayDate = new Date().toISOString().split('T')[0];
 
-        // Aaj ke attendance logs filter karein
-        const todayLogs = attendanceList.filter(log => log.date === todayDate);
+        // Sabse latest date find karein jo database me available ho (taaki agar aaj entry na mile toh latest wali dikhe)
+        let targetDate = todayDate;
+        if (attendanceList.length > 0) {
+            // Agar aaj ki date ka koi log nahi hai, toh list ka sabse pehla/latest date utha lo
+            const hasTodayLogs = attendanceList.some(log => log.date === todayDate);
+            if (!hasTodayLogs) {
+                targetDate = attendanceList[0].date; 
+            }
+        }
+
+        // Us target date ke saare attendance logs filter karein
+        const todayLogs = attendanceList.filter(log => log.date === targetDate);
 
         let presentCount = todayLogs.length;
         let lateCount = todayLogs.filter(log => log.status && log.status.toLowerCase().includes('late')).length;
@@ -376,14 +387,6 @@ app.get('/api/hr/attendance-today', async (req, res) => {
 
         // Percentage calculate karein
         let percentage = totalEmployees > 0 ? Math.round((presentCount / totalEmployees) * 100) : 100;
-
-        // Agar 1-15 tak ka data hai aur aaj ki direct entry nahi match ho rhi, toh fallback ke taur par latest available date ka data le sakte hain ya 100% dikha sakte hain jaisa aapne bataya ki database me data hai:
-        if (presentCount === 0 && attendanceList.length > 0) {
-            // Agar aaj ki exact entry nahi mili toh total records ke base par ya default 100% set kar sakte hain
-            percentage = 100;
-            lateCount = 0;
-            absentCount = 0;
-        }
 
         res.json({
             success: true,
@@ -395,8 +398,7 @@ app.get('/api/hr/attendance-today', async (req, res) => {
         console.error('Error fetching today attendance:', err);
         res.status(500).json({ success: false, percentage: 0, late: 0, absent: 0 });
     }
-});
-// 9. API: Get Settings / Office Timings
+});// 9. API: Get Settings / Office Timings
 app.get('/api/settings', async (req, res) => {
     try {
         const db = await readDb();
