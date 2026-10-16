@@ -320,44 +320,49 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
                 .catch(err => console.error("Error fetching employee stats:", err));
         };
 
-        // Strict Filtering by Month and Status & Automatic Working Days Calculation (Sundays Only)
         function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
-            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
-            let year = 2026;
-            let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            
-            document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
-
-            // --- Automatic Working Days Calculation (Total Days - Sundays Only) ---
-            let totalDaysInMonth = new Date(year, selectedMonthIndex + 1, 0).getDate();
-            let sundayCount = 0;
-            for (let day = 1; day <= totalDaysInMonth; day++) {
-                let dateObj = new Date(year, selectedMonthIndex, day);
-                if (dateObj.getDay() === 0) { // 0 represents Sunday
-                    sundayCount++;
-                }
-            }
-            let totalWorkingDays = totalDaysInMonth - sundayCount;
-            document.getElementById('workingDaysCount').innerText = `${totalWorkingDays} Days`;
-
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
- let filteredLogs = allEmployeeLogs.filter(log => {
-    if (!log.date) return false;
-    
-    // Strict user matching: Log ki email ya naam strictly logged-in user se match hona chahiye
-    let matchesUser = (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase()) ||
-                      (log.name && loggedInName && log.name.toLowerCase() === loggedInName.toLowerCase());
-                      
-    let logDate = new Date(log.date);
-    let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
-    let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
-    
-    // Ab yeh ensure karega ki sirf usi employee ka data dikhega jiski attendance dali gayi hai
-    return matchesUser && matchesMonth && matchesStatus;
-});
+            // Database ke saare logs filter karein jo is logged-in user ke hain
+            let filteredLogs = allEmployeeLogs.filter(log => {
+                if (!log.name && !log.email) return false;
+                
+                let matchesUser = (log.email && loggedInEmail && log.email.toLowerCase() === loggedInEmail.toLowerCase()) ||
+                                  (log.name && loggedInName && log.name.toLowerCase() === loggedInName.toLowerCase());
+                
+                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
+                
+                // Agar user match ho raha hai toh October ki saari entries dikha do
+                return matchesUser && matchesStatus;
+            });
+
+            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+            document.getElementById('workingDaysCount').innerText = `${filteredLogs.length} Days`;
+
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found.</td></tr>`;
+                return;
+            }
+
+            filteredLogs.forEach(log => {
+                let statusBadge = log.status === "On Time" || log.status === "PRESENT" || log.status === "On Time"
+                    ? `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`
+                    : `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="py-4 px-6 font-bold">${log.date || '2026-10-XX'}</td>
+                        <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
+                        <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
+                        <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                        <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
+                        <td class="py-4 px-6 text-center">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+        }
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
