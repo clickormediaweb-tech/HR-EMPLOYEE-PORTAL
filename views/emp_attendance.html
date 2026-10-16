@@ -327,16 +327,18 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             // Database ke saare logs direct table me render karne ke liye
             let filteredLogs = allEmployeeLogs;
 
-            document.getElementById('presentCount').innerText = ${filteredLogs.length} Days;
-            document.getElementById('workingDaysCount').innerText = ${filteredLogs.length} Days;
+            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+            document.getElementById('workingDaysCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
-                tbody.innerHTML = <tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found in database.</td></tr>;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found in database.</td></tr>`;
                 return;
             }
 
             filteredLogs.forEach(log => {
-                let statusBadge = <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${log.status || 'PRESENT'}</span>;
+                let statusBadge = log.status === "On Time" || log.status === "PRESENT"
+                    ? `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`
+                    : `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition-colors">
