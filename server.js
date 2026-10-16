@@ -55,6 +55,25 @@ async function writeDb(data) {
     }
 }
 
+async function saveAttendanceSafely(newAttendance) {
+    const db = await readDb();
+
+    // Purane attendance records ko preserve karo
+    const oldAttendance = Array.isArray(db.attendance)
+        ? db.attendance
+        : [];
+
+    // Sirf naye records add karo, purane replace mat karo
+    const incoming = Array.isArray(newAttendance)
+        ? newAttendance
+        : [newAttendance];
+
+    db.attendance = [...oldAttendance, ...incoming];
+
+    await writeDb(db);
+    return db.attendance;
+}
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
