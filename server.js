@@ -19,32 +19,36 @@ const storeSchema = new mongoose.Schema({
 
 const Store = mongoose.model('Store', storeSchema);
 
-// Async Helper functions to read/write from MongoDB Atlas instead of local filesystem
+// Async Helper functions to read/write from MongoDB Atlas safely without data loss
 async function readDb() {
     try {
         let record = await Store.findOne();
         console.log("--- DEBUG MONGODB RECORD FOUND: ---", record ? "YES" : "NO");
-        if (record) {
-            console.log("--- USERS COUNT IN DB: ---", record.data && record.data.users ? record.data.users.length : 0);
+        if (record && record.data) {
+            return record.data;
         }
-        if (!record || !record.data || !record.data.users || record.data.users.length === 0) {
-            console.log("⚠️ WARNING: Database is empty or users array is missing!");
-        }
-        return record ? record.data : {};
+        return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
     } catch (err) {
         console.error("Error reading from MongoDB:", err);
         return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
     }
 }
 
-
 async function writeDb(data) {
     try {
         let record = await Store.findOne();
         if (!record) {
             await Store.create({ data: data });
+            console.log("--- NEW DATABASE STORE CREATED IN MONGODB ---");
         } else {
-            // MongoDB ko explicitly batayein ki data object change ho chuka hai
+            // --- SAFETY LOCK ---
+            // Agar naye data me attendance khali ja rahi hai, lekin purane database me records maujood hain,
+            // toh purane attendance data ko preserve karo aur delete hone se bacha lo!
+            if ((!data.attendance || data.attendance.length === 0) && record.data && record.data.attendance && record.data.attendance.length > 0) {
+                console.log("🛡️ SAFETY LOCK TRIGGERED: Preserved existing attendance records from being wiped!");
+                data.attendance = record.data.attendance;
+            }
+
             record.set('data', data);
             record.markModified('data');
             await record.save();
@@ -53,9 +57,7 @@ async function writeDb(data) {
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
     }
-}
-
-async function saveAttendanceSafely(newAttendance) {
+}async function saveAttendanceSafely(newAttendance) {
     const db = await readDb();
 
     // Purane attendance records ko preserve karo
