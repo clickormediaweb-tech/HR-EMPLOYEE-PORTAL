@@ -595,7 +595,7 @@ app.get('/api/payroll', async (req, res) => {
                 { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "HR & Finance", baseNum: 85000, leaveBalance: 5, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 29, 2026", day: "Tuesday", type: "Paid Leave", reason: "Medical Appointment" }], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" },
                 { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "IT", baseNum: 110000, leaveBalance: 4, halfDays: 0, status: "PAID", leaveLogs: [], avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces" },
                 { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", baseNum: 95000, leaveBalance: 6, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 28, 2026", day: "Monday", type: "Paid Leave", reason: "Viral Fever" }], avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces" },
-                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 1, status: "PENDING", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
+                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 70000, leaveBalance: 3, halfDays: 0, status: "PAID", leaveLogs: [{ date: "Sep 18, 2026", day: "Friday", type: "Paid Leave", reason: "Personal Work" }], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces" }
             ];
             await writeDb(db);
         }
@@ -672,9 +672,14 @@ app.post('/api/payroll/update-salary', async (req, res) => {
 
         let rec = db.payroll.find(r => r.id == id);
         if (rec) {
+            // Agar pehle se salary hai aur change ho rahi hai, toh use previousSalary mein save kar dein
+            if (rec.baseNum && rec.baseNum !== parseFloat(baseNum)) {
+                rec.previousSalary = rec.baseNum;
+            }
             rec.baseNum = parseFloat(baseNum);
+            
             await writeDb(db);
-            res.json({ success: true, message: 'Base salary updated successfully!' });
+            res.json({ success: true, message: 'Base salary and history updated successfully!' });
         } else {
             res.status(404).json({ success: false, message: 'Payroll record not found' });
         }
@@ -682,7 +687,6 @@ app.post('/api/payroll/update-salary', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
 app.post('/api/payroll/add-leave-log', async (req, res) => {
     try {
         const { id, type, reason, date, day, isHalfDay } = req.body;
