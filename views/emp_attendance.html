@@ -278,36 +278,36 @@
         let allEmployeeLogs = [];
         let loggedInName = 'Pranchal Rajpal';
 let loggedInEmail = 'pranchal@clickormedia.co.in'; 
-        window.onload = function() {
-            // 1. Current logged-in user ki details database se fetch karein
+       window.onload = function() {
+            // 1. Current user details fetch karein
             fetch('/api/current-user')
                 .then(res => res.json())
                 .then(user => {
                     if (user && user.success) {
                         loggedInName = user.name || 'Pranchal Rajpal';
-                        loggedInEmail = user.email || 'pranchal@clickormedia.co.in'; // Yeh line add karein
-                        let userDesig = user.designation || 'Software Engineer';
-                        
-                        // Saari jagah ek hi dynamic naam aur designation update karein
+                        loggedInEmail = user.email || 'pranchal@clickormedia.co.in';
+                       
                         let nameElements = document.querySelectorAll('#empProfileName, #empDropdownName');
                         nameElements.forEach(el => { el.innerText = loggedInName; });
 
                         let desigElements = document.querySelectorAll('#headerDesignation');
-                        desigElements.forEach(el => { el.innerText = userDesig; });
+                        desigElements.forEach(el => { el.innerText = user.designation || 'Software Engineer'; });
                     }
-
-                    // 2. Fetch live attendance logs from backend server
-                    return fetch('/api/attendance');
                 })
+                .catch(err => console.error("User fetch error:", err));
+
+            // 2. Direct attendance logs fetch karein aur table me render karein
+            fetch('/api/attendance')
                 .then(res => res.json())
                 .then(data => {
+                    console.log("Fetched Attendance:", data);
                     if (data.success && data.attendance) {
                         allEmployeeLogs = data.attendance;
                         filterTable();
                     }
                 })
                 .catch(err => console.error("Error fetching attendance records:", err));
-
+        };
             // 3. Fetch backend stats to get dynamic backend leaves taken count
             fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInName)}`)
                 .then(res => res.json())
@@ -324,7 +324,6 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             let tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = "";
 
-            // Database ke saare logs direct table me render karne ke liye
             let filteredLogs = allEmployeeLogs;
 
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
@@ -336,9 +335,7 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
             }
 
             filteredLogs.forEach(log => {
-                let statusBadge = log.status === "On Time" || log.status === "PRESENT"
-                    ? `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`
-                    : `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
+                let statusBadge = `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition-colors">
@@ -351,7 +348,7 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
                     </tr>
                 `;
             });
-        }     document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+        }  document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
