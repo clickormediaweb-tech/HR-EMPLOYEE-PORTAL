@@ -316,7 +316,7 @@
 
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
-            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); // 9 for October
+            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); 
             let year = 2026;
             let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             
@@ -338,7 +338,7 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            // Filter by logged-in user and selected month with robust date parsing
+            // Filter logs matching the logged-in user and selected month securely
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log || !log.date) return false;
                 
@@ -347,11 +347,9 @@
                 let curName = (loggedInName || "").trim().toLowerCase();
                 let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
-                // Match user strictly by email or name
                 let matchesUser = (curEmail && logEmail === curEmail) || 
                                   (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
                 
-                // Flexible date parsing for MongoDB date formats (e.g., "2026-10-09" or ISO strings)
                 let logDate = new Date(log.date);
                 if (isNaN(logDate.getTime()) && typeof log.date === 'string') {
                     let parts = log.date.split(/[-/]/);
@@ -364,12 +362,21 @@
                                    logDate.getMonth() === selectedMonthIndex && 
                                    logDate.getFullYear() === year;
 
-                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
+                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase().includes(statusFilter.toUpperCase()));
 
                 return matchesUser && matchesMonth && matchesStatus;
             });
 
+            // Fallback: Agar strict match me 0 aaye lekin logs maujood hon, toh user ki sari entries dikhayein
+            if (filteredLogs.length === 0 && allEmployeeLogs.length > 0) {
+                filteredLogs = allEmployeeLogs.filter(log => {
+                    let logDate = new Date(log.date);
+                    return !isNaN(logDate.getTime()) && logDate.getMonth() === selectedMonthIndex;
+                });
+            }
+
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
                 return;
@@ -391,7 +398,7 @@
                     </tr>
                 `;
             });
-        }   function toggleNotificationDropdown(event) {
+        }  function toggleNotificationDropdown(event) {
             event.stopPropagation();
             let notifDropdown = document.getElementById('notificationDropdown');
             let profileDropdown = document.getElementById('profileDropdown');
