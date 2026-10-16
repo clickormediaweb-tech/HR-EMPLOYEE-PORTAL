@@ -735,19 +735,26 @@
         document.getElementById('salaryEmpId').value = rec.id;
         document.getElementById('salaryModalTitle').innerText = `Edit Salary: ${rec.name}`;
         
-        // Employee details, joining date, aur previous salary dynamically set karne ke liye
-        document.getElementById('modalEmpName').innerText = `Name: ${rec.name}`;
-        document.getElementById('modalEmpDept').innerText = `Department: ${rec.dept}`;
+        // Har employee ka exact Department map karna
+        let deptMap = {
+            "Tanya Dua": "HR & Finance",
+            "Pranchal Rajpal": "IT",
+            "Anshdeep": "Design",
+            "Sukhi": "Design"
+        };
+        let correctDept = deptMap[rec.name] || rec.dept;
         
-        // Har employee ki unki exact joining date assign karna
+        // Har employee ki exact Joining Date map karna
         let joinDateMap = {
             "Tanya Dua": "01 July 2026",
             "Pranchal Rajpal": "01 September 2026",
             "Anshdeep": "18 September 2026",
             "Sukhi": "04 September 2026"
         };
-        let correctJoinDate = rec.joiningDate || joinDateMap[rec.name] || "01 Sep 2026";
+        let correctJoinDate = joinDateMap[rec.name] || "01 Sep 2026";
         
+        document.getElementById('modalEmpName').innerText = `Name: ${rec.name}`;
+        document.getElementById('modalEmpDept').innerText = `Department: ${correctDept}`;
         document.getElementById('modalEmpJoin').innerText = `Date of Joining: ${correctJoinDate}`;
         document.getElementById('modalPrevSalary').innerText = `Previous Salary: ${formatINR(rec.previousSalary || rec.baseNum)}`;
         
