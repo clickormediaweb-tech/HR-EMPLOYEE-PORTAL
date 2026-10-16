@@ -369,7 +369,7 @@
                 return matchesUser && matchesMonth && matchesStatus;
             });
 
-document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
                 return;
