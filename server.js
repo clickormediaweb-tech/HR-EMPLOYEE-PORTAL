@@ -648,9 +648,31 @@ app.get('/api/payroll', async (req, res) => {
         leaveLogs: [], 
         avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces" 
     }
-]; await writeDb(db);
+]; 
+            await writeDb(db);
         }
+// Update existing records with correct departments and joining dates
+        let correctDetails = {
+            "Tanya Dua": { dept: "HR & Finance", joiningDate: "01 July 2026" },
+            "Pranchal Rajpal": { dept: "IT", joiningDate: "01 September 2026" },
+            "Anshdeep": { dept: "Design", joiningDate: "18 September 2026" },
+            "Sukhi": { dept: "Design", joiningDate: "04 September 2026" }
+        };
 
+        let updatedFlag = false;
+        db.payroll.forEach(rec => {
+            if (correctDetails[rec.name]) {
+                if (rec.dept !== correctDetails[rec.name].dept || rec.joiningDate !== correctDetails[rec.name].joiningDate) {
+                    rec.dept = correctDetails[rec.name].dept;
+                    rec.joiningDate = correctDetails[rec.name].joiningDate;
+                    updatedFlag = true;
+                }
+            }
+        });
+
+        if (updatedFlag) {
+            await writeDb(db);
+        }
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
