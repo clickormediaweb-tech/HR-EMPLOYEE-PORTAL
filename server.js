@@ -697,14 +697,7 @@ app.get('/api/payroll', async (req, res) => {
 
        
     const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
-      filteredPayroll.forEach(rec => {
-    let allowedBalance = rec.leaveBalance || 0;
-    let halfDaysCount = rec.halfDays || 0;
-    
-    if (halfDaysCount <= allowedBalance) {
-        rec.halfDays = 0;
-    }
-});
+
        
         res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
