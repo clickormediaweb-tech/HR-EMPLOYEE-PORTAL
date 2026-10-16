@@ -51,8 +51,7 @@
 <body class="bg-[#F4F5F7] min-h-screen flex text-[#222222] overflow-x-hidden" onclick="closeAllDropdowns(event)">
 
     <!-- 1. LEFT SIDEBAR (Employee ESS Navigation) -->
-    <aside class="w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between hidden md:flex shrink-0 select-none h-screen sticky top-0 z-30 shadow-sm transition-all duration-300">
-        <div class="flex flex-col h-full">
+<aside id="mobileSidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:sticky md:top-0 w-72 bg-white border-r border-[#EAEAEA] flex flex-col justify-between shrink-0 select-none h-screen z-50 shadow-2xl md:shadow-sm transition-transform duration-300 ease-in-out">        <div class="flex flex-col h-full">
             <!-- Logo / Title -->
             <div class="px-8 pt-8 pb-6 flex items-center gap-3.5">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 transform hover:rotate-6 transition-transform duration-300">
@@ -63,7 +62,9 @@
                     <span class="text-[10px] uppercase tracking-wider font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">CLICKORMEDIA</span>
                 </div>
             </div>
-
+<button onclick="toggleMobileSidebar()" class="md:hidden w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#222222] mr-3 cursor-pointer shrink-0">
+    <i class="fa-solid fa-bars text-lg"></i>
+</button>
             <!-- Navigation Items -->
             <nav class="px-4 space-y-1.5 mt-2 flex-1 overflow-y-auto">
                 <a href="/employee/dashboard" class="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-[#FFD134] text-[#222222] font-semibold shadow-md shadow-[#FFD134]/25 transition-all duration-300 transform scale-[1.02]">
@@ -612,6 +613,10 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
             window.location.href = "/";
         }
     }
+       function toggleMobileSidebar() {
+    let sidebar = document.getElementById('mobileSidebar');
+    sidebar.classList.toggle('-translate-x-full');
+}
 </script>
 </body>
 </html>
