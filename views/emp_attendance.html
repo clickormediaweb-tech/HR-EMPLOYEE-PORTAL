@@ -320,35 +320,58 @@ let loggedInEmail = 'pranchal@clickormedia.co.in';
                 .catch(err => console.error("Error fetching employee stats:", err));
         };
 
-       function filterTable() {
-            let tbody = document.getElementById('attendanceTableBody');
-            tbody.innerHTML = "";
+     function filterTable() {
+    let tbody = document.getElementById('attendanceTableBody');
+    tbody.innerHTML = "";
 
-            let filteredLogs = allEmployeeLogs;
+    console.log("--- DEBUGGING ATTENDANCE ---");
+    console.log("All Logs from DB:", allEmployeeLogs);
+    console.log("Current Logged-In Name:", loggedInName);
+    console.log("Current Logged-In Email:", loggedInEmail);
 
-            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
-            document.getElementById('workingDaysCount').innerText = `${filteredLogs.length} Days`;
+    // Flexible filtering to prevent strict match failures
+    let filteredLogs = allEmployeeLogs.filter(log => {
+        if (!log) return false;
+        
+        let logName = (log.name || "").trim().toLowerCase();
+        let logEmail = (log.email || "").trim().toLowerCase();
+        let curName = (loggedInName || "").trim().toLowerCase();
+        let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
-            if (filteredLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found in database.</td></tr>`;
-                return;
-            }
+        // Match if email matches, or if name matches
+        let matches = (logEmail && curEmail && logEmail === curEmail) || 
+                      (logName && curName && (logName === curName || logName.includes(curName)));
+        
+        return matches;
+    });
 
-            filteredLogs.forEach(log => {
-                let statusBadge = `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
+    console.log("Matched Logs for Display:", filteredLogs);
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="py-4 px-6 font-bold">${log.date || 'N/A'}</td>
-                        <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
-                        <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
-                        <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
-                        <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
-                        <td class="py-4 px-6 text-center">${statusBadge}</td>
-                    </tr>
-                `;
-            });
-        }  document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+    document.getElementById('presentCount').innerText = ${filteredLogs.length} Days;
+    document.getElementById('workingDaysCount').innerText = ${filteredLogs.length} Days;
+
+    if (filteredLogs.length === 0) {
+        tbody.innerHTML = <tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No matching attendance records found for ${loggedInName}. Check console for details.</td></tr>;
+        return;
+    }
+
+    filteredLogs.forEach(log => {
+        let statusBadge = log.status && log.status.toUpperCase().includes('LATE')
+            ? <span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>
+            : <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>;
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-blue-50/30 transition-colors">
+                <td class="py-4 px-6 font-bold">${log.date || 'N/A'}</td>
+                <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
+                <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
+                <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
+                <td class="py-4 px-6 text-center">${statusBadge}</td>
+            </tr>
+        `;
+    });
+}  document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
