@@ -314,12 +314,12 @@
                 .catch(err => console.error("Error fetching stats:", err));
         };
 
-        function filterTable() {
+      function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
             let year = 2026;
             let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-           
+            
             document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
 
             // --- Working Days Calculation (Total Days in Month - Sundays Only) ---
@@ -327,7 +327,7 @@
             let sundayCount = 0;
             for (let day = 1; day <= totalDaysInMonth; day++) {
                 let dateObj = new Date(year, selectedMonthIndex, day);
-                if (dateObj.getDay() === 0) { // 0 represents Sunday
+                if (dateObj.getDay() === 0) {
                     sundayCount++;
                 }
             }
@@ -338,18 +338,18 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            // Strict user and month matching based on database records
+            // Strict user filtering for individual employee portal
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log || !log.date) return false;
-               
+                
                 let logName = (log.name || "").trim().toLowerCase();
                 let logEmail = (log.email || "").trim().toLowerCase();
                 let curName = (loggedInName || "").trim().toLowerCase();
                 let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
-                let matchesUser = (curEmail && logEmail === curEmail) ||
+                let matchesUser = (curEmail && logEmail === curEmail) || 
                                   (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
-               
+                
                 let logDate = new Date(log.date);
                 let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
                 let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
@@ -381,8 +381,7 @@
                 `;
             });
         }
-
-        function toggleNotificationDropdown(event) {
+    function toggleNotificationDropdown(event) {
             event.stopPropagation();
             let notifDropdown = document.getElementById('notificationDropdown');
             let profileDropdown = document.getElementById('profileDropdown');
