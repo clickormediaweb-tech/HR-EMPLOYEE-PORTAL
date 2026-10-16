@@ -314,12 +314,12 @@
                 .catch(err => console.error("Error fetching stats:", err));
         };
 
-       function filterTable() {
+        function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
             let year = 2026;
             let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            
+           
             document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
 
             // --- Working Days Calculation (Total Days in Month - Sundays Only) ---
@@ -327,7 +327,7 @@
             let sundayCount = 0;
             for (let day = 1; day <= totalDaysInMonth; day++) {
                 let dateObj = new Date(year, selectedMonthIndex, day);
-                if (dateObj.getDay() === 0) {
+                if (dateObj.getDay() === 0) { // 0 represents Sunday
                     sundayCount++;
                 }
             }
@@ -338,15 +338,23 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            // REMOVED strict user filter so all 52 database entries for the selected month show up properly
+            // Strict user and month matching based on database records
             let filteredLogs = allEmployeeLogs.filter(log => {
                 if (!log || !log.date) return false;
-                
+               
+                let logName = (log.name || "").trim().toLowerCase();
+                let logEmail = (log.email || "").trim().toLowerCase();
+                let curName = (loggedInName || "").trim().toLowerCase();
+                let curEmail = (loggedInEmail || "").trim().toLowerCase();
+
+                let matchesUser = (curEmail && logEmail === curEmail) ||
+                                  (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
+               
                 let logDate = new Date(log.date);
                 let matchesMonth = logDate.getMonth() === selectedMonthIndex && logDate.getFullYear() === year;
                 let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase() === statusFilter.toUpperCase());
 
-                return matchesMonth && matchesStatus;
+                return matchesUser && matchesMonth && matchesStatus;
             });
 
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
@@ -361,10 +369,9 @@
                     ? `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`
                     : `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
 
-                // Displaying employee name along with date if viewing multi-employee logs
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="py-4 px-6 font-bold">${log.date} <span class="block text-[10px] text-gray-400 font-normal">${log.name || ''}</span></td>
+                        <td class="py-4 px-6 font-bold">${log.date}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
                         <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
                         <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
@@ -374,6 +381,7 @@
                 `;
             });
         }
+
         function toggleNotificationDropdown(event) {
             event.stopPropagation();
             let notifDropdown = document.getElementById('notificationDropdown');
