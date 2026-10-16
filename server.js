@@ -329,13 +329,8 @@ app.delete('/api/employees/:id', async (req, res) => {
 app.get('/api/attendance', async (req, res) => {
     try {
         const db = await readDb();
-        if (!db.attendance || db.attendance.length === 0) {
-            db.attendance = [];
-        }
-        // Saari attendance entries (1-15 tak ki ya jitni bhi hain) bina kisi deletion ke return karein
-        res.json({ success: true, attendance: db.attendance });
+        res.json({ success: true, attendance: db.attendance || [] });
     } catch (err) {
-        console.error('Error fetching attendance:', err);
         res.status(500).json({ success: false, attendance: [] });
     }
 });// 8. API: Save Manual Attendance Log
