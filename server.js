@@ -603,17 +603,17 @@ app.get('/api/payroll', async (req, res) => {
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
-        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
-       filteredPayroll.forEach(rec => {
-    // Agar leaveBalance 0 se zyada hai, toh halfDays ya extra leaves hone par bhi deduction 0 rahegi
+       
+    const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
+      filteredPayroll.forEach(rec => {
     let allowedBalance = rec.leaveBalance || 0;
     let halfDaysCount = rec.halfDays || 0;
     
-    // Agar halfDays allowedBalance se kam ya barabar hain, toh koi deduction nahi
     if (halfDaysCount <= allowedBalance) {
-        rec.calculatedDeduction = 0; // ya apne deduction variable ko 0 set kar dein
+        rec.halfDays = 0;
     }
 });
+       
         res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
         res.status(500).json({ success: false, payroll: [] });
