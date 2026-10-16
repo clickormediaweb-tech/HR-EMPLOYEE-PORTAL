@@ -398,7 +398,29 @@ app.get('/api/hr/attendance-today', async (req, res) => {
         console.error('Error fetching today attendance:', err);
         res.status(500).json({ success: false, percentage: 0, late: 0, absent: 0 });
     }
-});// 9. API: Get Settings / Office Timings
+});
+// --- API: Get Employee Specific Attendance Logs ---
+app.get('/api/employee/attendance', async (req, res) => {
+    try {
+        const db = await readDb();
+        if (!db.attendance) db.attendance = [];
+
+        let currentUserName = req.query.name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
+        let currentUserEmail = req.query.email || (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
+
+        // Is user ke saare attendance logs filter karke bhejein
+        let userLogs = db.attendance.filter(log => 
+            (log.name && log.name.toLowerCase() === currentUserName.toLowerCase()) ||
+            (log.email && log.email.toLowerCase() === currentUserEmail.toLowerCase())
+        );
+
+        res.json({ success: true, attendance: userLogs });
+    } catch (err) {
+        console.error('Error fetching employee attendance:', err);
+        res.status(500).json({ success: false, attendance: [] });
+    }
+});
+// 9. API: Get Settings / Office Timings
 app.get('/api/settings', async (req, res) => {
     try {
         const db = await readDb();
