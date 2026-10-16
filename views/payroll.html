@@ -374,6 +374,13 @@
                 <h3 class="text-lg font-black text-[#222222]" id="salaryModalTitle">Edit Base Salary</h3>
                 <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <!-- Employee Details & Previous Salary Info Box -->
+<div id="salaryDetailsBox" class="bg-amber-50/60 border border-amber-200 p-3.5 rounded-2xl mb-4 space-y-1 text-xs">
+    <p class="font-bold text-[#222222]" id="modalEmpName">Name: --</p>
+    <p class="text-gray-600" id="modalEmpDept">Department: --</p>
+    <p class="text-gray-600" id="modalEmpJoin">Date of Joining: --</p>
+    <p class="text-amber-800 font-semibold" id="modalPrevSalary">Previous Salary: --</p>
+</div>
             <form onsubmit="saveNewSalary(event)" class="space-y-4 text-xs">
     <input type="hidden" id="salaryEmpId">
     <div>
