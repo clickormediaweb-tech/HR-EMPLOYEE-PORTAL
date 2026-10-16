@@ -770,36 +770,21 @@
             }
         }
 
-        window.onload = async function() {
-            await loadSettings();
-            await fetchAttendanceLogs();
-
-            // Attendance logs aane ke baad sabse latest available date set karein
-            if (attendanceLogs.length > 0) {
-                // Sabse latest date find karein
-                let dates = attendanceLogs.map(l => l.date || '2026-10-06').sort();
-                let latestDate = dates[dates.length - 1]; // Sabse aakhri (latest) date
-                
-                const dateInput = document.getElementById('selectedDate');
-                if(dateInput) {
-                    dateInput.value = latestDate;
-                }
-
-                const manualDateInput = document.getElementById('manualLogDate');
-                if(manualDateInput) {
-                    manualDateInput.value = latestDate;
-                }
-                
-                // Table aur cards ko us latest date ke hisaab se render karein
-                renderAttendanceTable();
-            } else {
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('selectedDate').value = today;
-                document.getElementById('manualLogDate').value = today;
-                renderAttendanceTable();
+       window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('selectedDate');
+            if(dateInput) {
+                dateInput.value = today;
             }
-        };
-         function toggleProfileDropdown(event) {
+
+            const manualDateInput = document.getElementById('manualLogDate');
+            if(manualDateInput) {
+                manualDateInput.value = today;
+            }
+
+            loadSettings();       // Pehle settings load hongi
+            fetchAttendanceLogs();// Phir logs load honge
+        };  function toggleProfileDropdown(event) {
     event.stopPropagation();
     let dropdown = document.getElementById('profileDropdown');
     dropdown.classList.toggle('hidden');
