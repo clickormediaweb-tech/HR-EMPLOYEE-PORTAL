@@ -748,8 +748,8 @@ app.get('/api/payroll', async (req, res) => {
         }
 // Update existing records with correct departments and joining dates
         let correctDetails = {
-            "Tanya Dua": { dept: "HR & Finance", joiningDate: "01 July 2026" },
-            "Pranchal Rajpal": { dept: "IT", joiningDate: "01 September 2026" },
+            "Tanya Dua": { dept: "UI/UX Designer", joiningDate: "01 July 2026" },
+            "Pranchal Rajpal": { dept: "Engineering", joiningDate: "01 September 2026" },
             "Anshdeep": { dept: "Design", joiningDate: "18 September 2026" },
             "Sukhi": { dept: "Design", joiningDate: "04 September 2026" }
         };
