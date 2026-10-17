@@ -22,56 +22,69 @@ const Store = mongoose.model('Store', storeSchema);
 // Async Helper functions to read/write from MongoDB Atlas safely without data loss
 // --- MONGODB SECURE HELPER FUNCTIONS ---
 
+// --- MONGODB SINGLETON STORE SCHEMA (Prevents Duplicates & Race Conditions) ---
+const storeSchema = new mongoose.Schema({
+    key: { type: String, unique: true, default: "main_singleton_store" },
+    data: { type: Object, default: {} }
+}, { strict: false });
+
+const Store = mongoose.model('Store', storeSchema);
+
+// Safe Reader using Singleton Key
 async function readDb() {
     try {
-        let record = await Store.findOne();
+        let record = await Store.findOne({ key: "main_singleton_store" });
         if (record && record.data) {
             return record.data;
         }
-        return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
+        // Agar ek bhi record nahi hai, toh pehla secure default record banao
+        let defaultData = { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
+        await Store.findOneAndUpdate(
+            { key: "main_singleton_store" },
+            { $setOnInsert: { data: defaultData } },
+            { upsert: true, new: true }
+        );
+        return defaultData;
     } catch (err) {
         console.error("Error reading from MongoDB:", err);
         return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
     }
 }
 
+// Atomic Safe Writer with Singleton Protection & Safety Lock
 async function writeDb(newData) {
     try {
-        let record = await Store.findOne();
-        if (!record) {
-            await Store.create({ data: newData });
-            console.log("--- NEW DATABASE STORE CREATED IN MONGODB ---");
-        } else {
-            // --- ULTIMATE SAFETY LOCK: NEVER LOSE DATA ---
-            // Agar purane database me attendance ya users pehle se the, aur naye data me wo kam ya khali aa rahe hain,
-            // toh purane data ko automatically merge/preserve kar lo taaki galti se bhi kuch delete na ho!
-            if (record.data) {
-                // 1. Attendance Protection
-                if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
-                    if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
-                        console.log("🛡️ SAFETY LOCK: Preserving older attendance records to prevent data wipe.");
-                        newData.attendance = record.data.attendance;
-                    }
-                }
-                // 2. Users Protection
-                if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
-                    if (!newData.users || newData.users.length < record.data.users.length) {
-                        newData.users = record.data.users;
-                    }
-                }
-                // 3. Payroll Protection
-                if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
-                    if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
-                        newData.payroll = record.data.payroll;
-                    }
+        let record = await Store.findOne({ key: "main_singleton_store" });
+        
+        if (record && record.data) {
+            // --- ULTIMATE SAFETY LOCK ---
+            // Agar purane database me attendance thi, aur naye data me kam ho rahi hai, toh merge/preserve karo
+            if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
+                if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
+                    console.log("🛡️ SAFETY LOCK: Preserving older attendance records.");
+                    newData.attendance = record.data.attendance;
                 }
             }
-
-            record.set('data', newData);
-            record.markModified('data');
-            await record.save();
-            console.log("--- DATABASE SAFELY PERSISTED & PROTECTED IN MONGODB ---");
+            if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
+                if (!newData.users || newData.users.length < record.data.users.length) {
+                    newData.users = record.data.users;
+                }
+            }
+            if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
+                if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
+                    newData.payroll = record.data.payroll;
+                }
+            }
         }
+
+        // Atomic Upsert: Hamesha usi ek single document ko update karega, naya duplicate nahi banne dega
+        await Store.findOneAndUpdate(
+            { key: "main_singleton_store" },
+            { $set: { data: newData } },
+            { upsert: true, new: true }
+        );
+        
+        console.log("--- DATABASE SAFELY PERSISTED & LOCKED TO SINGLETON MONGODB ---");
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
     }
@@ -79,17 +92,13 @@ async function writeDb(newData) {
 
 async function saveAttendanceSafely(newAttendance) {
     const db = await readDb();
-
     const oldAttendance = Array.isArray(db.attendance) ? db.attendance : [];
     const incoming = Array.isArray(newAttendance) ? newAttendance : [newAttendance];
 
-    // Purane data ke aage naye records ko safely append/add kar do bina purane hatae
     db.attendance = [...incoming, ...oldAttendance];
-
     await writeDb(db);
     return db.attendance;
-}
-// Middleware
+}// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views'), { index: false }));
