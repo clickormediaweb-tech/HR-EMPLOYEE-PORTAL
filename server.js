@@ -20,10 +20,11 @@ const storeSchema = new mongoose.Schema({
 const Store = mongoose.model('Store', storeSchema);
 
 // Async Helper functions to read/write from MongoDB Atlas safely without data loss
+// --- MONGODB SECURE HELPER FUNCTIONS ---
+
 async function readDb() {
     try {
         let record = await Store.findOne();
-        console.log("--- DEBUG MONGODB RECORD FOUND: ---", record ? "YES" : "NO");
         if (record && record.data) {
             return record.data;
         }
@@ -34,48 +35,60 @@ async function readDb() {
     }
 }
 
-async function writeDb(data) {
+async function writeDb(newData) {
     try {
         let record = await Store.findOne();
         if (!record) {
-            await Store.create({ data: data });
+            await Store.create({ data: newData });
             console.log("--- NEW DATABASE STORE CREATED IN MONGODB ---");
         } else {
-            // --- SAFETY LOCK ---
-            // Agar naye data me attendance khali ja rahi hai, lekin purane database me records maujood hain,
-            // toh purane attendance data ko preserve karo aur delete hone se bacha lo!
-            if ((!data.attendance || data.attendance.length === 0) && record.data && record.data.attendance && record.data.attendance.length > 0) {
-                console.log("🛡️ SAFETY LOCK TRIGGERED: Preserved existing attendance records from being wiped!");
-                data.attendance = record.data.attendance;
+            // --- ULTIMATE SAFETY LOCK: NEVER LOSE DATA ---
+            // Agar purane database me attendance ya users pehle se the, aur naye data me wo kam ya khali aa rahe hain,
+            // toh purane data ko automatically merge/preserve kar lo taaki galti se bhi kuch delete na ho!
+            if (record.data) {
+                // 1. Attendance Protection
+                if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
+                    if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
+                        console.log("🛡️ SAFETY LOCK: Preserving older attendance records to prevent data wipe.");
+                        newData.attendance = record.data.attendance;
+                    }
+                }
+                // 2. Users Protection
+                if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
+                    if (!newData.users || newData.users.length < record.data.users.length) {
+                        newData.users = record.data.users;
+                    }
+                }
+                // 3. Payroll Protection
+                if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
+                    if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
+                        newData.payroll = record.data.payroll;
+                    }
+                }
             }
 
-            record.set('data', data);
+            record.set('data', newData);
             record.markModified('data');
             await record.save();
-            console.log("--- DATABASE SUCCESSFULLY SAVED & PERSISTED TO MONGODB ---");
+            console.log("--- DATABASE SAFELY PERSISTED & PROTECTED IN MONGODB ---");
         }
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
     }
-}async function saveAttendanceSafely(newAttendance) {
+}
+
+async function saveAttendanceSafely(newAttendance) {
     const db = await readDb();
 
-    // Purane attendance records ko preserve karo
-    const oldAttendance = Array.isArray(db.attendance)
-        ? db.attendance
-        : [];
+    const oldAttendance = Array.isArray(db.attendance) ? db.attendance : [];
+    const incoming = Array.isArray(newAttendance) ? newAttendance : [newAttendance];
 
-    // Sirf naye records add karo, purane replace mat karo
-    const incoming = Array.isArray(newAttendance)
-        ? newAttendance
-        : [newAttendance];
-
-    db.attendance = [...oldAttendance, ...incoming];
+    // Purane data ke aage naye records ko safely append/add kar do bina purane hatae
+    db.attendance = [...incoming, ...oldAttendance];
 
     await writeDb(db);
     return db.attendance;
 }
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
