@@ -32,6 +32,16 @@ const storeSchema = new mongoose.Schema({
 const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
 
 // Safe Reader using Singleton Key
+// --- MONGODB SINGLETON STORE SCHEMA ---
+const storeSchema = new mongoose.Schema({
+    key: { type: String, unique: true, default: "main_singleton_store" },
+    data: { type: Object, default: {} }
+}, { strict: false });
+
+// Model clash se bachne ke liye safe check
+const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
+
+// Safe Reader using Singleton Key
 async function readDb() {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
