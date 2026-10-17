@@ -12,48 +12,26 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log("--- CONNECTED TO MONGODB ATLAS SUCCESSFULLY ---"))
     .catch(err => console.error("MongoDB connection error:", err));
 
-// --- MONGODB SINGLE BLOB STORE SCHEMA (Replaces database.json) ---
+// --- MONGODB SAFE STORE SCHEMA (Without Index Crash) ---
 const storeSchema = new mongoose.Schema({
+    key: { type: String, default: "main_singleton_store" },
     data: { type: Object, default: {} }
 }, { strict: false });
 
-const Store = mongoose.model('Store', storeSchema);
-
-// Async Helper functions to read/write from MongoDB Atlas safely without data loss
-// --- MONGODB SECURE HELPER FUNCTIONS ---
-
-// --- MONGODB SINGLETON STORE SCHEMA ---
-const storeSchema = new mongoose.Schema({
-    key: { type: String, unique: true, default: "main_singleton_store" },
-    data: { type: Object, default: {} }
-}, { strict: false });
-
-// Model clash aur crash se bachne ke liye safe check:
 const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
 
-// Safe Reader using Singleton Key
-// --- MONGODB SINGLETON STORE SCHEMA ---
-const storeSchema = new mongoose.Schema({
-    key: { type: String, unique: true, default: "main_singleton_store" },
-    data: { type: Object, default: {} }
-}, { strict: false });
-
-// Model clash se bachne ke liye safe check
-const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
-
-// Safe Reader using Singleton Key
+// Safe Reader
 async function readDb() {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
+        if (!record) {
+            record = await Store.findOne({}); // Fallback to any existing record if key isn't set yet
+        }
         if (record && record.data) {
             return record.data;
         }
         let defaultData = { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
-        await Store.findOneAndUpdate(
-            { key: "main_singleton_store" },
-            { $setOnInsert: { data: defaultData } },
-            { upsert: true, new: true }
-        );
+        await Store.create({ key: "main_singleton_store", data: defaultData });
         return defaultData;
     } catch (err) {
         console.error("Error reading from MongoDB:", err);
@@ -61,10 +39,13 @@ async function readDb() {
     }
 }
 
-// Atomic Safe Writer with Singleton Protection & Safety Lock
+// Atomic Safe Writer with Safety Lock
 async function writeDb(newData) {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
+        if (!record) {
+            record = await Store.findOne({});
+        }
         
         if (record && record.data) {
             // Attendance Protection
@@ -88,13 +69,16 @@ async function writeDb(newData) {
             }
         }
 
-        await Store.findOneAndUpdate(
-            { key: "main_singleton_store" },
-            { $set: { data: newData } },
-            { upsert: true, new: true }
-        );
+        if (record) {
+            record.key = "main_singleton_store";
+            record.set('data', newData);
+            record.markModified('data');
+            await record.save();
+        } else {
+            await Store.create({ key: "main_singleton_store", data: newData });
+        }
         
-        console.log("--- DATABASE SAFELY PERSISTED & LOCKED TO SINGLETON MONGODB ---");
+        console.log("--- DATABASE SAFELY PERSISTED & PROTECTED ---");
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
     }
