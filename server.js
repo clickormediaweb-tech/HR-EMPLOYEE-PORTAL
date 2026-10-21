@@ -93,20 +93,23 @@ async function saveAttendanceSafely(newAttendance) {
     await writeDb(db);
     return db.attendance;
 }
-// --- AUTOMATED LEAVE & SALARY CALCULATION FUNCTION ---
+// --- FINAL FULLY AUTOMATED LEAVE & SALARY CALCULATION ---
 function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySalary, approvedLeaves, targetYear, targetMonth) {
     let joinDate = new Date(joiningDateStr);
     if (isNaN(joinDate.getTime())) {
-        joinDate = new Date("2026-07-01");
+        joinDate = new Date("2026-09-01");
     }
 
     let targetDate = new Date(targetYear, targetMonth - 1, 1);
+    
+    // Total months earned from joining month up to target month (1 paid leave per month)
     let diffMonths = (targetDate.getFullYear() - joinDate.getFullYear()) * 12 + (targetDate.getMonth() - joinDate.getMonth()) + 1;
     let totalEarnedLeaves = Math.max(0, diffMonths);
 
     let totalUsedPaid = 0;
     let currentMonthUnpaid = 0;
 
+    // Sirf APPROVED leaves ko count karenge
     let empLeaves = approvedLeaves.filter(l => 
         l.name && l.name.toLowerCase() === employeeName.toLowerCase() && 
         (l.status === 'APPROVED' || l.status === 'Approved')
@@ -116,12 +119,14 @@ function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySala
 
     empLeaves.forEach(l => {
         let leaveDate = new Date(l.date || Date.now());
+        // Target month ya usse pehle ki leaves
         if (leaveDate.getFullYear() === targetYear && (leaveDate.getMonth() + 1) === targetMonth) {
-            let duration = 1;
-            if (l.duration && (l.duration.includes('Half') || l.duration.includes('0.5'))) {
+            let duration = 1; // Full day default
+            if (l.duration && (l.duration.includes('Half') || l.duration.includes('0.5') || l.duration.toLowerCase().includes('half'))) {
                 duration = 0.5;
             }
 
+            // Paid balance pehle use hoga, excess unpaid banega
             if (totalEarnedLeaves - totalUsedPaid >= duration) {
                 totalUsedPaid += duration;
             } else {
@@ -135,6 +140,7 @@ function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySala
 
     let remainingBalance = Math.max(0, totalEarnedLeaves - totalUsedPaid);
     
+    // Formulas: Full day = salary / 30, Half day = salary / 60
     let perDayFull = monthlySalary / 30;
     let perDayHalf = monthlySalary / 60;
     
@@ -783,7 +789,6 @@ app.get('/hr/analytics', (req, res) => {
 });
 
 // --- PAYROLL PERSISTENCE API (Robin removed) ---
-// --- PAYROLL PERSISTENCE & AUTOMATED CALCULATION API ---
 app.get('/api/payroll', async (req, res) => {
     try {
         const db = await readDb();
@@ -791,19 +796,19 @@ app.get('/api/payroll', async (req, res) => {
         if (!db.leaves) db.leaves = [];
 
         const employeeDetails = {
-            "Tanya Dua": { joiningDate: "01 July 2026", baseNum: 16000 },
-            "Pranchal Rajpal": { joiningDate: "01 September 2026", baseNum: 23000 },
-            "Anshdeep": { joiningDate: "18 September 2026", baseNum: 16000 },
-            "Sukhi": { joiningDate: "04 September 2026", baseNum: 25000 }
+            "Tanya Dua": { joiningDate: "01 July 2026", baseNum: 16000, dept: "HR & Finance" },
+            "Pranchal Rajpal": { joiningDate: "01 September 2026", baseNum: 23000, dept: "Engineering" },
+            "Anshdeep": { joiningDate: "18 September 2026", baseNum: 16000, dept: "Engineering" },
+            "Sukhi": { joiningDate: "04 September 2026", baseNum: 25000, dept: "Operations" }
         };
 
         let currentYear = 2026;
-        let currentMonth = 10; // October Cycle
+        let currentMonth = 10; // October cycle
 
         db.payroll.forEach(rec => {
-            let details = employeeDetails[rec.name] || { joiningDate: "01 September 2026", baseNum: rec.baseNum || 20000 };
+            let details = employeeDetails[rec.name] || { joiningDate: "01 September 2026", baseNum: rec.baseNum || 20000, dept: rec.dept || "General" };
             
-            rec.dept = details.dept || rec.dept;
+            rec.dept = details.dept;
             rec.joiningDate = details.joiningDate;
 
             let summary = calculateEmployeeLeaveSummary(
@@ -825,7 +830,7 @@ app.get('/api/payroll', async (req, res) => {
 
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
-        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
+        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.email || rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
 
         res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
