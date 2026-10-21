@@ -566,38 +566,61 @@ app.post('/api/leaves/update', async (req, res) => {
     }
 });
 
+
 app.post('/api/leaves/apply', async (req, res) => {
     try {
-        const { type, duration, reason, name } = req.body;
+        const { type, duration, reason, name, startDate, endDate } = req.body;
         const db = await readDb();
+
         if (!db.leaves) db.leaves = [];
         if (!db.myLeaves) db.myLeaves = [];
 
-        let applicantName = name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
-        let applicantEmail = (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
-        let currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const applicantName =
+            (req.session.user && req.session.user.name) ||
+            name ||
+            "Pranchal Rajpal";
 
-        let newSub = {
+        const applicantEmail =
+            (req.session.user && req.session.user.email) ||
+            "pranchal@clickormedia.co.in";
+
+        const currentTime = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const newSub = {
             id: Date.now(),
             name: applicantName,
             email: applicantEmail,
-            type: type,
-            duration,
-            reason,
-            status: "PENDING",
+            type: type || 'Leave',
+            duration: duration || '',
+            startDate: startDate || null,
+            endDate: endDate || null,
+            reason: reason || '',
+            status: 'PENDING',
+            paidStatus: null,
             updatedAt: currentTime,
             avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
         };
 
         db.leaves.unshift(newSub);
         db.myLeaves.unshift(newSub);
+
         await writeDb(db);
 
-        console.log(`--- LEAVE APPLICATION SAVED PERMANENTLY FOR ${applicantName} ---`);
-        res.json({ success: true, message: 'Leave application submitted and saved permanently!' });
+        console.log(`Leave application saved for ${applicantName}`);
+
+        res.json({
+            success: true,
+            message: 'Leave application submitted successfully!'
+        });
     } catch (err) {
         console.error('Error applying leave:', err);
-        res.status(500).json({ success: false, message: 'Server error while applying leave' });
+        res.status(500).json({
+            success: false,
+            message: 'Server error while applying leave'
+        });
     }
 });
 // --- HOLIDAY APIS ---
