@@ -168,10 +168,25 @@ app.post('/api/auth/login', async (req, res) => {
         const { email, password } = req.body;
         const db = await readDb();
        
-        const user = db.users ? db.users.find(u => u.email.toLowerCase() === (email || "").trim().toLowerCase()) : null;
-       
-        if (user && user.password === password) {
-            req.session.user = { name: user.name, email: user.email, role: user.role };
+        const submittedEmail = (email || "").trim().toLowerCase();
+
+const user = Array.isArray(db.users)
+    ? db.users.find(u =>
+        u.email &&
+        u.email.trim().toLowerCase() === submittedEmail
+      )
+    : null;
+
+console.log("[LOGIN DIAGNOSTIC]", {
+    usersArrayExists: Array.isArray(db.users),
+    usersCount: Array.isArray(db.users) ? db.users.length : 0,
+    emailFound: Boolean(user),
+    passwordMatches: Boolean(user && user.password === password),
+    role: user ? user.role : null
+});
+
+if (user && user.password === password) {
+    req.session.user = { name: user.name, email: user.email, role: user.role };
            
             let redirectUrl = "/employee/dashboard";
             if (user.role === 'admin') {
