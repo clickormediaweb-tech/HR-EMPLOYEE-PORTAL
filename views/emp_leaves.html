@@ -461,10 +461,12 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: type,
-                    duration: durationStr,
-                    reason: reason,
-                    name: loggedInUser
+                type: type,
+               duration: durationStr,
+               startDate: start,
+                endDate: end,
+               reason: reason,
+              name: loggedInUser
                 })
             })
             .then(res => res.json())
