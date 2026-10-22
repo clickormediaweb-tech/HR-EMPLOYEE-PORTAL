@@ -1,7 +1,8 @@
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');     
+const nodemailer = require('nodemailer');    
 const session = require('express-session'); // <-- Added for session management
 
 const app = express();
@@ -40,12 +41,33 @@ async function readDb() {
 }
 
 // Atomic Safe Writer with Safety Lock
-// Atomic Safe Writer (Optimized for Instant Persistence)
 async function writeDb(newData) {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
         if (!record) {
             record = await Store.findOne({});
+        }
+       
+        if (record && record.data) {
+            // Attendance Protection
+            if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
+                if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
+                    console.log("🛡️ SAFETY LOCK: Preserving older attendance records.");
+                    newData.attendance = record.data.attendance;
+                }
+            }
+            // Users Protection
+            if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
+                if (!newData.users || newData.users.length < record.data.users.length) {
+                    newData.users = record.data.users;
+                }
+            }
+            // Payroll Protection
+            if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
+                if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
+                    newData.payroll = record.data.payroll;
+                }
+            }
         }
 
         if (record) {
@@ -56,12 +78,13 @@ async function writeDb(newData) {
         } else {
             await Store.create({ key: "main_singleton_store", data: newData });
         }
-        
+       
         console.log("--- DATABASE SAFELY PERSISTED & PROTECTED ---");
     } catch (err) {
         console.error("Error writing to MongoDB:", err);
     }
 }
+
 async function saveAttendanceSafely(newAttendance) {
     const db = await readDb();
     const oldAttendance = Array.isArray(db.attendance) ? db.attendance : [];
@@ -70,85 +93,6 @@ async function saveAttendanceSafely(newAttendance) {
     db.attendance = [...incoming, ...oldAttendance];
     await writeDb(db);
     return db.attendance;
-}
-// --- FINAL FULLY AUTOMATED LEAVE & SALARY CALCULATION ---
-// --- 100% AUTOMATED CARRY-FORWARD & DEDUCTION LOGIC ---
-function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySalary, approvedLeaves, targetYear, targetMonth) {
-    let joinDate = new Date(joiningDateStr);
-    if (isNaN(joinDate.getTime())) {
-        joinDate = new Date("2026-09-01"); // Default fallback
-    }
-
-    let targetDate = new Date(targetYear, targetMonth - 1, 1);
-    
-    // Total months earned from joining month up to target month (1 paid leave per calendar month)
-    let diffMonths = (targetDate.getFullYear() - joinDate.getFullYear()) * 12 + (targetDate.getMonth() - joinDate.getMonth()) + 1;
-    let totalEarnedLeaves = Math.max(0, diffMonths);
-
-    // Sirf APPROVED leaves ko chronologically process karenge
-    let empLeaves = (approvedLeaves || []).filter(l => 
-        l.name && l.name.toLowerCase() === employeeName.toLowerCase() && 
-        (l.status === 'APPROVED' || l.status === 'Approved')
-    );
-
-    // Chronological sorting taaki pehle ki leaves pehle consume ho (Carry Forward & Usage tracking)
-    empLeaves.sort((a, b) => new Date(a.date || a.id) - new Date(b.date || b.id));
-
-    let totalUsedPaid = 0;
-    let currentMonthUnpaid = 0;
-
-    empLeaves.forEach(l => {
-        let leaveDate = new Date(l.date || Date.now());
-        let lYear = leaveDate.getFullYear();
-        let lMonth = leaveDate.getMonth() + 1;
-
-        // Sirf target month ya usse pehle ki leaves consider hongi (Carry forward balance ke sath)
-        if (lYear < targetYear || (lYear === targetYear && lMonth <= targetMonth)) {
-            let duration = 1; // Default full day
-            if (l.duration && (l.duration.includes('Half') || l.duration.includes('0.5') || l.duration.toLowerCase().includes('half'))) {
-                duration = 0.5;
-            }
-
-            // Check if we have earned leave pool available (carrying forward automatically)
-            if (totalEarnedLeaves - totalUsedPaid >= duration) {
-                totalUsedPaid += duration; // Paid leave consume ho gayi
-            } else {
-                // Agar balance khatam ho gaya, toh bacha hua part ya nayi leave unpaid (excess) ho jayegi
-                let remainingPaid = Math.max(0, totalEarnedLeaves - totalUsedPaid);
-                let unpaidPart = duration - remainingPaid;
-                totalUsedPaid += remainingPaid;
-
-                // Deduct sirf target month ki excess leaves ka hoga
-                if (lYear === targetYear && lMonth === targetMonth) {
-                    currentMonthUnpaid += unpaidPart;
-                }
-            }
-        }
-    });
-
-    // Remaining carry forward balance
-    let remainingBalance = Math.max(0, totalEarnedLeaves - totalUsedPaid);
-
-    // Salary deduction formulas: Full day = Salary / 30, Half day = Salary / 60
-    let perDayFull = monthlySalary / 30;
-    let perDayHalf = monthlySalary / 60;
-
-    let fullUnpaidDays = Math.floor(currentMonthUnpaid);
-    let halfUnpaidDays = (currentMonthUnpaid % 1 !== 0) ? 1 : 0;
-
-    let totalDeduction = (fullUnpaidDays * perDayFull) + (halfUnpaidDays * perDayHalf);
-    let netSalary = Math.max(0, monthlySalary - totalDeduction);
-
-    return {
-        earnedLeaves: totalEarnedLeaves,
-        usedLeaves: totalUsedPaid,
-        remainingBalance: remainingBalance,
-        unpaidDays: currentMonthUnpaid,
-        fullUnpaidDays: fullUnpaidDays,
-        halfUnpaidDays: halfUnpaidDays,
-        totalDeduction: Math.round(totalDeduction * 100) / 100,
-        netSalary: Math.round(netSalary * 100) / 100
-    };
 }// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -459,7 +403,7 @@ app.get('/api/hr/attendance-today', async (req, res) => {
             // Agar aaj ki date ka koi log nahi hai, toh list ka sabse pehla/latest date utha lo
             const hasTodayLogs = attendanceList.some(log => log.date === todayDate);
             if (!hasTodayLogs) {
-                targetDate = attendanceList[0].date; 
+                targetDate = attendanceList[0].date;
             }
         }
 
@@ -494,7 +438,7 @@ app.get('/api/employee/attendance', async (req, res) => {
         let currentUserEmail = req.query.email || (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
 
         // Is user ke saare attendance logs filter karke bhejein
-        let userLogs = db.attendance.filter(log => 
+        let userLogs = db.attendance.filter(log =>
             (log.name && log.name.toLowerCase() === currentUserName.toLowerCase()) ||
             (log.email && log.email.toLowerCase() === currentUserEmail.toLowerCase())
         );
@@ -775,61 +719,107 @@ app.get('/api/analytics', async (req, res) => {
 app.get('/hr/analytics', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'analytics.html'));
 });
+
 // --- PAYROLL PERSISTENCE API (Robin removed) ---
 app.get('/api/payroll', async (req, res) => {
     try {
         const db = await readDb();
-        if (!db.payroll) db.payroll = [];
-        if (!db.leaves) db.leaves = [];
+        if (!db.payroll || db.payroll.length === 0) {
+           db.payroll = [
+    {
+        id: 1,
+        name: "Tanya Dua",
+        email: "tanya@clickormedia.co.in",
+        dept: "HR & Finance",
+        baseNum: 16000,
+        previousSalary: 16000,
+        leaveBalance: 5,
+        halfDays: 0,
+        status: "PAID",
+        joiningDate: "01 July 2026",
+        leaveLogs: [],
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces"
+    },
+    {
+        id: 2,
+        name: "Pranchal Rajpal",
+        email: "pranchal@clickormedia.co.in",
+        dept: "IT",
+        baseNum: 23000,
+        previousSalary: 23000,
+        leaveBalance: 4,
+        halfDays: 0,
+        status: "PAID",
+        joiningDate: "01 September 2026",
+        leaveLogs: [],
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+        id: 3,
+        name: "Anshdeep",
+        email: "anshdeep@clickormedia.co.in",
+        dept: "Design",
+        baseNum: 16000,
+        previousSalary: 16000,
+        leaveBalance: 6,
+        halfDays: 0,
+        status: "PAID",
+        joiningDate: "18 September 2026",
+        leaveLogs: [],
+        avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces"
+    },
+    {
+        id: 4,
+        name: "Sukhi",
+        email: "sukhi@clickormedia.co.in",
+        dept: "Design",
+        baseNum: 25000,
+        previousSalary: 25000,
+        leaveBalance: 3,
+        halfDays: 0,
+        status: "PAId",
+        joiningDate: "04 September 2026",
+        leaveLogs: [],
+        avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces"
+    }
+];
+            await writeDb(db);
+        }
+// Update existing records with correct departments and joining dates
+        let correctDetails = {
+            "Tanya Dua": { dept: "UI/UX Designer", joiningDate: "01 July 2026" },
+            "Pranchal Rajpal": { dept: "Engineering", joiningDate: "01 September 2026" },
+            "Anshdeep": { dept: "Design", joiningDate: "18 September 2026" },
+            "Sukhi": { dept: "Design", joiningDate: "04 September 2026" }
+        };
 
-        // Forcefully ensure default employees exist in payroll table
-        const requiredEmployees = ["Tanya Dua", "Pranchal Rajpal", "Anshdeep", "Sukhi"];
-        requiredEmployees.forEach(empName => {
-            let exists = db.payroll.find(p => p.name && p.name.toLowerCase() === empName.toLowerCase());
-            if (!exists) {
-                let defaultSalary = empName === "Pranchal Rajpal" ? 23000 : (empName === "Sukhi" ? 25000 : 16000);
-                let defaultDept = empName === "Tanya Dua" ? "HR & Finance" : (empName === "Pranchal Rajpal" || empName === "Anshdeep" ? "Engineering" : "Operations");
-                db.payroll.push({
-                    id: Date.now() + Math.random(),
-                    name: empName,
-                    email: `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
-                    dept: defaultDept,
-                    baseNum: defaultSalary,
-                    status: "PENDING"
-                });
+        let updatedFlag = false;
+        db.payroll.forEach(rec => {
+            if (correctDetails[rec.name]) {
+                if (rec.dept !== correctDetails[rec.name].dept || rec.joiningDate !== correctDetails[rec.name].joiningDate) {
+                    rec.dept = correctDetails[rec.name].dept;
+                    rec.joiningDate = correctDetails[rec.name].joiningDate;
+                    updatedFlag = true;
+                }
             }
         });
-        let currentYear = 2026;
-        let currentMonth = 10; // October cycle
 
-        db.payroll.forEach(rec => {
-            let details = employeeDetails[rec.name] || { joiningDate: "01 September 2026", baseNum: rec.baseNum || 20000, dept: rec.dept || "General" };
-            
-            rec.dept = details.dept;
-            rec.joiningDate = details.joiningDate;
+        if (updatedFlag) {
+            await writeDb(db);
+        }
+        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
+        const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
-            let summary = calculateEmployeeLeaveSummary(
-                rec.name, 
-                details.joiningDate, 
-                rec.baseNum || details.baseNum, 
-                db.leaves, 
-                currentYear, 
-                currentMonth
-            );
+       
+    const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
 
-            rec.leaveBalance = summary.remainingBalance;
-            rec.halfDays = summary.halfUnpaidDays;
-            rec.unpaidDeduction = summary.totalDeduction;
-            rec.netPayout = summary.netSalary;
-        });
-
-        await writeDb(db);
-res.json({ success: true, payroll: db.payroll });
+       
+        res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
-        console.error("Error in /api/payroll:", err);
         res.status(500).json({ success: false, payroll: [] });
     }
 });
+
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
         const { id, status } = req.body;
@@ -887,7 +877,7 @@ app.post('/api/payroll/update-salary', async (req, res) => {
                 rec.previousSalary = rec.baseNum;
             }
             rec.baseNum = parseFloat(baseNum);
-            
+           
             await writeDb(db);
             res.json({ success: true, message: 'Salary updated and history saved successfully!' });
         } else {
@@ -1148,8 +1138,8 @@ app.get('/api/employee/stats', async (req, res) => {
         let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
 
         let baseSalary = record.baseNum || 25000;
-        let perDaySalary = baseSalary / 30; 
-        let totalDeductions = extraLeaves * perDaySalary; 
+        let perDaySalary = baseSalary / 30;
+        let totalDeductions = extraLeaves * perDaySalary;
         let netPayout = Math.max(0, baseSalary - totalDeductions);
 
         res.json({
@@ -1159,7 +1149,7 @@ app.get('/api/employee/stats', async (req, res) => {
                 email: record.email || `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
                 dept: record.dept || "Software Engineering",
                 leaveBalance: remainingBalance,
-                extraLeaves: extraLeaves, 
+                extraLeaves: extraLeaves,
                 attendancePercentage: "96.5%",
                 lastPayout: "₹" + Math.round(netPayout).toLocaleString('en-IN'),
                 recentLeaves: record.leaveLogs || []
@@ -1192,7 +1182,7 @@ app.post('/api/employee/punch', async (req, res) => {
         if (!db.users) db.users = [];
 
         // Database se employee ka real data find karein
-        let dbUser = db.users.find(u => u.email && email && u.email.toLowerCase() === email.toLowerCase()) || 
+        let dbUser = db.users.find(u => u.email && email && u.email.toLowerCase() === email.toLowerCase()) ||
                      db.users.find(u => u.name && name && u.name.toLowerCase() === name.toLowerCase());
 
         let empName = dbUser ? dbUser.name : (name || "Employee");
@@ -1202,7 +1192,7 @@ app.post('/api/employee/punch', async (req, res) => {
         let empAvatar = dbUser ? dbUser.avatar : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces";
 
         const todayDate = new Date().toISOString().split('T')[0];
-        let existingLog = db.attendance.find(log => 
+        let existingLog = db.attendance.find(log =>
             log.email && log.email.toLowerCase() === empEmail.toLowerCase() && log.date === todayDate
         );
 
@@ -1326,8 +1316,8 @@ app.get('/api/current-user', async (req, res) => {
         let activeName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
         let activeEmail = (req.session.user && req.session.user.email) ? req.session.user.email : "";
 
-        let currentUser = users.find(u => 
-            (activeEmail && u.email && u.email.toLowerCase() === activeEmail.toLowerCase()) || 
+        let currentUser = users.find(u =>
+            (activeEmail && u.email && u.email.toLowerCase() === activeEmail.toLowerCase()) ||
             (u.name && u.name.toLowerCase() === activeName.toLowerCase())
         ) || users[0];
 
