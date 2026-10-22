@@ -153,8 +153,8 @@
                 <div class="relative">
                     <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
                         <div class="text-right">
-    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
-    <p id="headerDesignation" class="text-xs text-blue-600 font-medium">Software Engineering</p>
+    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Loading...</h4>
+    <p id="headerDesignation" class="text-xs text-blue-600 font-medium">Loading...</p>
 </div><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
@@ -164,8 +164,8 @@
                         <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
                             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
                             <div>
-                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
-<p id="dropdownDept" class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>                            </div>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Loading...</p>
+<p id="dropdownDept" class="text-[11px] text-blue-600 font-bold">Loading...</p>                            </div>
                         </div>
                         <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
                             <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
@@ -239,33 +239,35 @@
     <script>
         window.onload = function() {
             // 1. Fetch current logged-in user details from backend database
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        let userName = user.name || 'Pranchal Rajpal';
-                        let userDesig = user.designation || 'UI/UX Designer';
-                        let userDept = user.department || 'UI/UX Design';
+           fetch('/api/current-user', {
+    credentials: 'same-origin'
+})
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.success && data.user) {
+            const user = data.user;
 
-                        // Name aur designation update karein
-                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
-                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
-                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+            const userName = user.name || 'Employee';
+            const userDesig = user.designation || user.role || 'Employee';
+            const userDept = user.department || 'Department';
 
-                        // Header title aur dropdown ke andar ka department update karne ke liye:
-                        let headerSpan = document.querySelector('header h3 span');
-                        if (headerSpan) {
-                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
+            document.getElementById('empProfileName').innerText = userName;
+            document.getElementById('empDropdownName').innerText = userName;
+            document.getElementById('headerDesignation').innerText = userDesig;
 
-                        let dropdownDeptP = document.getElementById('dropdownDept');
-                        if (dropdownDeptP) {
-                            dropdownDeptP.innerText = `${userDept} Dept.`;
-                        }
-                    }
-                })
-                .catch(err => console.error("Error fetching current user profile:", err));
+            const headerSpan = document.querySelector('header h3 span');
+            if (headerSpan) {
+                headerSpan.innerHTML =
+                    `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+            }
 
+            const dropdownDept = document.getElementById('dropdownDept');
+            if (dropdownDept) {
+                dropdownDept.innerText = `${userDept} Dept.`;
+            }
+        }
+    })
+    .catch(err => console.error('Error fetching current user profile:', err));
             fetchHolidays();
 
             // Auto poll every 2 seconds to instantly reflect HR portal holiday updates
