@@ -685,21 +685,39 @@ app.post('/api/settings/update', async (req, res) => {
 // --- LEAVE MANAGEMENT APIS ---
 app.get('/api/leaves', async (req, res) => {
     try {
+        if (!req.session?.user?.email) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please log in again.',
+                leaves: [],
+                myLeaves: []
+            });
+        }
+
         const db = await readDb();
-        if (!db.leaves) {
-            db.leaves = [];
-            await writeDb(db);
-        }
-        if (!db.myLeaves) {
-            db.myLeaves = [];
-        }
-        res.json({ success: true, leaves: db.leaves, myLeaves: db.myLeaves });
+        const email = req.session.user.email.toLowerCase();
+
+        const allLeaves = Array.isArray(db.leaves) ? db.leaves : [];
+
+        const myLeaves = allLeaves.filter(leave =>
+            leave.email &&
+            leave.email.toLowerCase() === email
+        );
+
+        return res.json({
+            success: true,
+            leaves: myLeaves,
+            myLeaves: myLeaves
+        });
     } catch (err) {
-        res.status(500).json({ success: false, leaves: [], myLeaves: [] });
+        console.error('Error fetching employee leaves:', err);
+        return res.status(500).json({
+            success: false,
+            leaves: [],
+            myLeaves: []
+        });
     }
 });
-
-
 app.get('/api/employee/leaves', async (req, res) => {
     try {
         if (!req.session.user || !req.session.user.email) {
