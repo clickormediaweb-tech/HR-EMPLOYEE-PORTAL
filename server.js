@@ -1013,14 +1013,15 @@ app.get('/api/payroll', async (req, res) => {
             month
         );
 
-        return {
-            ...rec,
-            earnedLeaves: leave.earned,
-            leavesUsedThisMonth: leave.used,
-            paidLeavesUsed: leave.paidUsed,
-            unpaidLeaves: leave.unpaid,
-            calculatedLeaveBalance: leave.balance
-        };
+  return {
+    ...rec,
+    earnedLeaves: leave.earned,
+    leavesUsedThisMonth: leave.used,
+    paidLeavesUsed: leave.paidUsed,
+    unpaidLeaves: leave.unpaid,
+    unpaidHalfDays: leave.unpaidHalfDays,
+    calculatedLeaveBalance: leave.balance
+};
     });
 
 res.json({ success: true, payroll: filteredPayroll });
@@ -1512,6 +1513,7 @@ const payrollObj = {
     leavesUsedThisMonth: leave.used,
     paidLeavesUsed: leave.paidUsed,
     unpaidLeaves: leave.unpaid,
+    unpaidHalfDays: leave.unpaidHalfDays,
     calculatedLeaveBalance: leave.balance,
     extraLeaves: leave.unpaid
 };
