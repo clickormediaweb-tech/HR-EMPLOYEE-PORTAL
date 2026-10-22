@@ -825,12 +825,7 @@ app.get('/api/payroll', async (req, res) => {
         });
 
         await writeDb(db);
-
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
-        const activeEmails = activeUsers.map(u => u.email.toLowerCase());
-        const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.email || rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
-
-        res.json({ success: true, payroll: filteredPayroll });
+res.json({ success: true, payroll: db.payroll });
     } catch (err) {
         console.error("Error in /api/payroll:", err);
         res.status(500).json({ success: false, payroll: [] });
