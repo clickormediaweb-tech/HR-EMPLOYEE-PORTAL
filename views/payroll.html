@@ -1124,62 +1124,66 @@
 
 
 
-        function calculatePayrollMetrics(rec) {
+       
+function calculatePayrollMetrics(rec) {
+    const baseSalary = Number(rec.baseNum) || 0;
+    const perDaySalary = baseSalary / 30;
+    const perHalfDaySalary = baseSalary / 60;
 
-            let workingDays = 30;
+    // Leave figures calculated by server.js from approved requests.
+    const approvedLeaveDays = Number(rec.leavesUsedThisMonth) || 0;
+    const paidLeavesUsed = Number(rec.paidLeavesUsed) || 0;
+    const unpaidLeaves = Number(rec.unpaidLeaves) || 0;
+    const leaveBalance = Number(rec.calculatedLeaveBalance) || 0;
+    const earnedLeaves = Number(rec.earnedLeaves) || 0;
 
-            let perDaySalary = rec.baseNum / workingDays;
+    // Keep manually recorded half-day logs separate.
+    const allLogs = Array.isArray(rec.leaveLogs)
+        ? rec.leaveLogs
+        : [];
 
+    const halfDayLogs = allLogs.filter(log =>
+        /half-day|half day/i.test(String(log.type || ""))
+    );
 
+    const halfDaysCount = halfDayLogs.length;
+    const halfDayDeduction = Math.round(
+        halfDaysCount * perHalfDaySalary
+    );
 
-            let allLogs = rec.leaveLogs || [];
+    // Approved full-day leave deductions are calculated server-side.
+    // Do not count the same approved requests again from leaveLogs.
+    const unpaidLeaveDeduction = Math.round(
+        unpaidLeaves * perDaySalary
+    );
 
-            let fullLeaves = allLogs.filter(log => !log.type.includes('Half-Day'));
+    const totalDeductionAmount =
+        unpaidLeaveDeduction + halfDayDeduction;
 
-            let halfDayLogsCount = allLogs.filter(log => log.type.includes('Half-Day')).length;
+    const netPayout = Math.max(
+        0,
+        baseSalary - totalDeductionAmount
+    );
 
-            
+    return {
+        deductionStr: totalDeductionAmount > 0
+            ? "-" + formatINR(totalDeductionAmount)
+            : "₹0",
 
-            let totalHalfDays = (rec.halfDays || 0) + halfDayLogsCount;
+        netStr: formatINR(netPayout),
 
+        fullLeavesCount: approvedLeaveDays,
+        halfDaysCount: halfDaysCount,
 
+        deductionNum: totalDeductionAmount,
+        netNum: netPayout,
 
-            // Deductions apply only if full leaves taken exceed available leave balance
-
-            let unpaidLeaves = Math.max(0, fullLeaves.length - rec.leaveBalance);
-
-            let halfDayDeductionDays = totalHalfDays * 0.5;
-
-
-
-            let totalDeductionDays = unpaidLeaves + halfDayDeductionDays;
-
-            let totalDeductionAmount = Math.round(totalDeductionDays * perDaySalary);
-
-            let netPayout = Math.max(0, rec.baseNum - totalDeductionAmount);
-
-
-
-            return {
-
-                deductionStr: totalDeductionAmount > 0 ? "-" + formatINR(totalDeductionAmount) : "₹0",
-
-                netStr: formatINR(netPayout),
-
-                fullLeavesCount: fullLeaves.length,
-
-                halfDaysCount: totalHalfDays,
-
-                deductionNum: totalDeductionAmount,
-
-                netNum: netPayout
-
-            };
-
-        }
-
-
-
+        earnedLeaves: earnedLeaves,
+        paidLeavesUsed: paidLeavesUsed,
+        unpaidLeaves: unpaidLeaves,
+        leaveBalance: leaveBalance
+    };
+}
         function renderPayrollTable() {
 
             let tbody = document.getElementById('payrollTableBody');
