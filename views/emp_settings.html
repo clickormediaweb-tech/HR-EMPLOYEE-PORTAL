@@ -157,8 +157,8 @@
                 <div class="relative">
                     <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
                         <div class="text-right">
-                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
-                            <p id="headerDesignation" class="text-xs text-gray-500 font-medium">Web Developer</p>
+                            <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Loading...</h4>
+                            <p id="headerDesignation" class="text-xs text-gray-500 font-medium">Loading...</p>
                         </div>
                         <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
@@ -169,8 +169,8 @@
                         <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
                             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
                             <div>
-                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
-                                <p id="dropdownDept" class="text-[11px] text-gray-400 truncate">pranchal@clickormedia.co.in</p>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Loading...</p>
+                                <p id="dropdownDept" class="text-[11px] text-gray-400 truncate">Loading...</p>
                             </div>
                         </div>
                         <a href="/employee/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
@@ -202,8 +202,8 @@
                     <div class="flex items-center gap-4 border-b border-gray-100 pb-5">
                         <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-16 h-16 rounded-full object-cover ring-4 ring-blue-100 shadow-md">
                         <div>
-                            <h4 id="profileCardName" class="font-black text-[#222222] text-base">Pranchal Rajpal</h4>
-                            <p class="text-xs text-blue-600 font-bold">Software Engineer</p>
+                            <h4 id="profileCardName" class="font-black text-[#222222] text-base">Loading...</h4>
+                            <p class="text-xs text-blue-600 font-bold">Loading...</p>
                             <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active Session</span>
                         </div>
                     </div>
@@ -211,11 +211,11 @@
                     <div class="space-y-3 text-xs">
                         <div>
                             <span class="text-gray-400 block font-semibold">Registered Email</span>
-                            <span id="profileCardEmail" class="font-bold text-gray-800">pranchal@clickormedia.co.in</span>
+                            <span id="profileCardEmail" class="font-bold text-gray-800">Loading...</span>
                         </div>
                         <div>
     <span class="text-gray-400 block font-semibold">Department</span>
-    <span id="profileDept" class="font-bold text-gray-800">Software Engineering</span>
+    <span id="profileDept" class="font-bold text-gray-800">Loading...</span>
 </div>
                         <div>
                             <span class="text-gray-400 block font-semibold">Office Location</span>
@@ -320,58 +320,38 @@
     <script>
 window.onload = function() {
             // 1. Fetch current logged-in user details directly from database API
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        let userName = user.name || 'Pranchal Rajpal';
-                        let userEmail = user.email || 'pranchal@clickormedia.co.in';
-                        
-                        // Seedha database se department aur designation uthayega
-                        let userDept = user.department || 'Software Engineering';
-                        let userDesig = user.designation || 'Software Engineer';
+           
+fetch('/api/current-user', {
+    credentials: 'same-origin'
+})
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.success && data.user) {
+            const user = data.user;
 
-                        // UI elements update karein
-                        document.getElementById('empProfileName').innerText = userName;
-                        document.getElementById('empDropdownName').innerText = userName;
-                        document.getElementById('profileCardName').innerText = userName;
-                        document.getElementById('profileCardEmail').innerText = userEmail;
-                        
-                        // Header aur profile card ki designation update karein
-                        if (document.getElementById('headerDesignation')) {
-                            document.getElementById('headerDesignation').innerText = userDesig;
-                        }
-                        
-                        let cardDesig = document.querySelector('.lg\\:col-span-1 p.text-blue-600.font-bold');
-                        if (cardDesig) {
-                            cardDesig.innerText = userDesig;
-                        }
+            const userName = user.name || 'Employee';
+            const userEmail = user.email || '';
+            const userDept = user.department || 'Department';
+            const userDesig = user.designation || user.role || 'Employee';
 
-                        // Profile card ka department update karein
-                        if (document.getElementById('profileDept')) {
-                            document.getElementById('profileDept').innerText = userDept;
-                        }
+            document.getElementById('empProfileName').innerText = userName;
+            document.getElementById('empDropdownName').innerText = userName;
+            document.getElementById('profileCardName').innerText = userName;
+            document.getElementById('profileCardEmail').innerText = userEmail;
+            document.getElementById('headerDesignation').innerText = userDesig;
 
-                        // Header title ka badge update karein
-                        let headerSpan = document.getElementById('headerDeptDisplay');
-                        if (headerSpan) {
-                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
+            const cardDesig = document.querySelector('.lg\\:col-span-1 p.text-blue-600.font-bold');
+            if (cardDesig) cardDesig.innerText = userDesig;
 
-                        // Sidebar footer ka department update karein
-                        if (document.getElementById('sidebarDept')) {
-                            document.getElementById('sidebarDept').innerText = `Department: ${userDept}`;
-                        }
-
-                        // Dropdown menu ka department update karein
-                        let dropdownDeptP = document.getElementById('dropdownDept');
-                        if (dropdownDeptP) {
-                            dropdownDeptP.innerText = `${userDept} Dept.`;
-                        }
-                    }
-                })
-                .catch(err => console.error("Error fetching current user profile:", err));
-
+            document.getElementById('profileDept').innerText = userDept;
+            document.getElementById('headerDeptDisplay').innerHTML =
+                `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+            document.getElementById('sidebarDept').innerText =
+                `Department: ${userDept}`;
+            document.getElementById('dropdownDept').innerText = userEmail;
+        }
+    })
+    .catch(err => console.error('Error fetching current user profile:', err));
             // Load saved password dynamically into current password field
             let savedPass = localStorage.getItem('emp_active_password') || 'admin123';
             document.getElementById('currentPass').value = savedPass;
