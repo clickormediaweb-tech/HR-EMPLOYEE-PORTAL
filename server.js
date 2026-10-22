@@ -72,56 +72,67 @@ async function saveAttendanceSafely(newAttendance) {
     return db.attendance;
 }
 // --- FINAL FULLY AUTOMATED LEAVE & SALARY CALCULATION ---
+// --- 100% AUTOMATED CARRY-FORWARD & DEDUCTION LOGIC ---
 function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySalary, approvedLeaves, targetYear, targetMonth) {
     let joinDate = new Date(joiningDateStr);
     if (isNaN(joinDate.getTime())) {
-        joinDate = new Date("2026-09-01");
+        joinDate = new Date("2026-09-01"); // Default fallback
     }
 
     let targetDate = new Date(targetYear, targetMonth - 1, 1);
     
-    // Total months earned from joining month up to target month (1 paid leave per month)
+    // Total months earned from joining month up to target month (1 paid leave per calendar month)
     let diffMonths = (targetDate.getFullYear() - joinDate.getFullYear()) * 12 + (targetDate.getMonth() - joinDate.getMonth()) + 1;
     let totalEarnedLeaves = Math.max(0, diffMonths);
+
+    // Sirf APPROVED leaves ko chronologically process karenge
+    let empLeaves = (approvedLeaves || []).filter(l => 
+        l.name && l.name.toLowerCase() === employeeName.toLowerCase() && 
+        (l.status === 'APPROVED' /ii/ l.status === 'Approved')
+    );
+
+    // Chronological sorting taaki pehle ki leaves pehle consume ho (Carry Forward & Usage tracking)
+    empLeaves.sort((a, b) => new Date(a.date || a.id) - new Date(b.date || b.id));
 
     let totalUsedPaid = 0;
     let currentMonthUnpaid = 0;
 
-    // Sirf APPROVED leaves ko count karenge
-    let empLeaves = approvedLeaves.filter(l => 
-        l.name && l.name.toLowerCase() === employeeName.toLowerCase() && 
-        (l.status === 'APPROVED' || l.status === 'Approved')
-    );
-
-    empLeaves.sort((a, b) => new Date(a.date || a.id) - new Date(b.date || b.id));
-
     empLeaves.forEach(l => {
         let leaveDate = new Date(l.date || Date.now());
-        // Target month ya usse pehle ki leaves
-        if (leaveDate.getFullYear() === targetYear && (leaveDate.getMonth() + 1) === targetMonth) {
-            let duration = 1; // Full day default
+        let lYear = leaveDate.getFullYear();
+        let lMonth = leaveDate.getMonth() + 1;
+
+        // Sirf target month ya usse pehle ki leaves consider hongi (Carry forward balance ke sath)
+        if (lYear < targetYear || (lYear === targetYear && lMonth <= targetMonth)) {
+            let duration = 1; // Default full day
             if (l.duration && (l.duration.includes('Half') || l.duration.includes('0.5') || l.duration.toLowerCase().includes('half'))) {
                 duration = 0.5;
             }
 
-            // Paid balance pehle use hoga, excess unpaid banega
+            // Check if we have earned leave pool available (carrying forward automatically)
             if (totalEarnedLeaves - totalUsedPaid >= duration) {
-                totalUsedPaid += duration;
+                totalUsedPaid += duration; // Paid leave consume ho gayi
             } else {
+                // Agar balance khatam ho gaya, toh bacha hua part ya nayi leave unpaid (excess) ho jayegi
                 let remainingPaid = Math.max(0, totalEarnedLeaves - totalUsedPaid);
                 let unpaidPart = duration - remainingPaid;
                 totalUsedPaid += remainingPaid;
-                currentMonthUnpaid += unpaidPart;
+
+                // Deduct sirf target month ki excess leaves ka hoga
+                if (lYear === targetYear && lMonth === targetMonth) {
+                    currentMonthUnpaid += unpaidPart;
+                }
             }
         }
     });
 
+    // Remaining carry forward balance
     let remainingBalance = Math.max(0, totalEarnedLeaves - totalUsedPaid);
-    
-    // Formulas: Full day = salary / 30, Half day = salary / 60
+
+    // Salary deduction formulas: Full day = Salary / 30, Half day = Salary / 60
     let perDayFull = monthlySalary / 30;
     let perDayHalf = monthlySalary / 60;
-    
+
     let fullUnpaidDays = Math.floor(currentMonthUnpaid);
     let halfUnpaidDays = (currentMonthUnpaid % 1 !== 0) ? 1 : 0;
 
@@ -138,8 +149,7 @@ function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySala
         totalDeduction: Math.round(totalDeduction * 100) / 100,
         netSalary: Math.round(netSalary * 100) / 100
     };
-}
-// Middleware
+}// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views'), { index: false }));
