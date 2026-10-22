@@ -1029,25 +1029,37 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
             .trim()
             .toLowerCase();
 
-        const leaves = (Array.isArray(db.leaves) ? db.leaves : [])
-            .filter(leave =>
-                String(leave.name || "").trim().toLowerCase() === employeeName
-            )
-            .map(leave => ({
-                id: leave.id,
-                name: leave.name,
-                type: leave.type,
-                duration: leave.duration,
-                dayType: leave.dayType,
-                startDate: leave.startDate,
-                endDate: leave.endDate,
-                status: leave.status
-            }));
+        function findRecords(records, source) {
+            return (Array.isArray(records) ? records : [])
+                .filter(leave =>
+                    String(leave.name || "")
+                        .trim()
+                        .toLowerCase() === employeeName
+                )
+                .map(leave => ({
+                    source,
+                    id: leave.id,
+                    name: leave.name,
+                    type: leave.type,
+                    duration: leave.duration,
+                    dayType: leave.dayType,
+                    startDate: leave.startDate,
+                    endDate: leave.endDate,
+                    status: leave.status
+                }));
+        }
+
+        const leaves = [
+            ...findRecords(db.leaves, "leaves"),
+            ...findRecords(db.myLeaves, "myLeaves")
+        ];
 
         res.json({
             success: true,
             employee: employeeName,
-            totalRecords: leaves.length,
+            leavesCount: Array.isArray(db.leaves) ? db.leaves.length : 0,
+            myLeavesCount: Array.isArray(db.myLeaves) ? db.myLeaves.length : 0,
+            matchingRecords: leaves.length,
             leaves
         });
     } catch (err) {
@@ -1058,7 +1070,6 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
         });
     }
 });
-
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
         const { id, status } = req.body;
