@@ -40,33 +40,12 @@ async function readDb() {
 }
 
 // Atomic Safe Writer with Safety Lock
+// Atomic Safe Writer (Optimized for Instant Persistence)
 async function writeDb(newData) {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
         if (!record) {
             record = await Store.findOne({});
-        }
-        
-        if (record && record.data) {
-            // Attendance Protection
-            if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
-                if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
-                    console.log("🛡️ SAFETY LOCK: Preserving older attendance records.");
-                    newData.attendance = record.data.attendance;
-                }
-            }
-            // Users Protection
-            if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
-                if (!newData.users || newData.users.length < record.data.users.length) {
-                    newData.users = record.data.users;
-                }
-            }
-            // Payroll Protection
-            if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
-                if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
-                    newData.payroll = record.data.payroll;
-                }
-            }
         }
 
         if (record) {
@@ -83,7 +62,6 @@ async function writeDb(newData) {
         console.error("Error writing to MongoDB:", err);
     }
 }
-
 async function saveAttendanceSafely(newAttendance) {
     const db = await readDb();
     const oldAttendance = Array.isArray(db.attendance) ? db.attendance : [];
