@@ -437,15 +437,7 @@
                                 <label class="block font-semibold text-gray-600 mb-1.5">Leave Date</label>
                                 <input type="date" id="manualLeaveDate" required class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-[#FFD134]">
                             </div>
-                            <div>
-                                <label class="block font-semibold text-gray-600 mb-1.5">Entry Type</label>
-                                <select id="manualLeaveType" class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                                    <option value="Paid Leave">Paid Leave</option>
-                                    <option value="Unpaid Leave">Unpaid Leave</option>
-                                    <option value="Half-Day Absence">Half-Day Absence</option>
-                                </select>
-                            </div>
-                        </div>
+                              </div>
 
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1.5">Reason / Note</label>
@@ -562,33 +554,23 @@
         }
 
         function calculatePayrollMetrics(rec) {
-            let workingDays = 30;
-            let perDaySalary = rec.baseNum / workingDays;
+            // Backend se aane wale 100% automated values ko seedhe use karenge
+            let totalDeductionAmount = rec.unpaidDeduction || 0;
+            let netPayout = rec.netPayout !== undefined ? rec.netPayout : rec.baseNum;
 
             let allLogs = rec.leaveLogs || [];
             let fullLeaves = allLogs.filter(log => !log.type.includes('Half-Day'));
-            let halfDayLogsCount = allLogs.filter(log => log.type.includes('Half-Day')).length;
-            
-            let totalHalfDays = (rec.halfDays || 0) + halfDayLogsCount;
-
-            // Deductions apply only if full leaves taken exceed available leave balance
-            let unpaidLeaves = Math.max(0, fullLeaves.length - rec.leaveBalance);
-            let halfDayDeductionDays = totalHalfDays * 0.5;
-
-            let totalDeductionDays = unpaidLeaves + halfDayDeductionDays;
-            let totalDeductionAmount = Math.round(totalDeductionDays * perDaySalary);
-            let netPayout = Math.max(0, rec.baseNum - totalDeductionAmount);
+            let totalHalfDays = rec.halfDays || 0;
 
             return {
                 deductionStr: totalDeductionAmount > 0 ? "-" + formatINR(totalDeductionAmount) : "₹0",
                 netStr: formatINR(netPayout),
-                fullLeavesCount: fullLeaves.length,
+                fullLeavesCount: rec.leaveBalance !== undefined ? (rec.earnedLeaves - rec.leaveBalance) : fullLeaves.length,
                 halfDaysCount: totalHalfDays,
                 deductionNum: totalDeductionAmount,
                 netNum: netPayout
             };
         }
-
         function renderPayrollTable() {
             let tbody = document.getElementById('payrollTableBody');
             tbody.innerHTML = "";
@@ -819,9 +801,11 @@
             e.preventDefault();
             let id = parseInt(document.getElementById('manualLeaveEmpId').value);
             let date = document.getElementById('manualLeaveDate').value;
-            let type = document.getElementById('manualLeaveType').value;
             let reason = document.getElementById('manualLeaveReason').value;
-            let isHalfDay = type === 'Half-Day Absence';
+            
+            // Default type ko automated leave set kar diya hai (dropdown hatane ke baad)
+            let type = 'Leave'; 
+            let isHalfDay = false;
 
             let dObj = new Date(date);
             let dayName = dObj.toLocaleDateString('en-US', { weekday: 'long' });
@@ -842,7 +826,6 @@
                 console.error('Error recording manual leave:', err);
             }
         }
-
         function openPayslipModal(id) {
             let rec = payrollRecords.find(r => r.id === id);
             let metrics = calculatePayrollMetrics(rec);
