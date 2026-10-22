@@ -1708,33 +1708,45 @@ app.get('/employee/holidaycalendar', (req, res) => {
 
 app.get('/api/current-user', async (req, res) => {
     try {
-        const dbData = await readDb();
-        const users = dbData.users || [];
-       
-        let activeName = (req.session.user && req.session.user.name) ? req.session.user.name : (req.query.name || "Pranchal Rajpal");
-        let activeEmail = (req.session.user && req.session.user.email) ? req.session.user.email : "";
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not logged in'
+            });
+        }
 
-        let currentUser = users.find(u =>
-            (activeEmail && u.email && u.email.toLowerCase() === activeEmail.toLowerCase()) ||
-            (u.name && u.name.toLowerCase() === activeName.toLowerCase())
-        ) || users[0];
+        const db = await readDb();
+        const email = req.session.user.email.trim().toLowerCase();
 
-        res.json({
+        const user = (db.users || []).find(
+            u => u.email &&
+                 u.email.trim().toLowerCase() === email
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        return res.json({
             success: true,
-            _id: currentUser._id || "",
-            name: currentUser.name || "Employee",
-            email: currentUser.email || "",
-            role: currentUser.role || "employee",
-            department: currentUser.department || "Engineering",
-            designation: currentUser.designation || "Staff",
-            avatar: currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces"
+            user: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department || user.dept || ''
+            }
         });
     } catch (err) {
-        console.error("Error fetching current user:", err);
-        res.status(500).json({ success: false, error: "Failed to fetch user profile" });
+        console.error('Current-user error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to load current user'
+        });
     }
 });
-
 app.get('/employee/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_settings.html'));
 });
