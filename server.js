@@ -699,23 +699,37 @@ app.get('/api/leaves', async (req, res) => {
     }
 });
 
+
 app.get('/api/employee/leaves', async (req, res) => {
     try {
-        const db = await readDb();
-        if (!db.leaves) db.leaves = [];
-       
-        let currentUserName = req.query.name || "Pranchal Rajpal";
-       
-        let userLeaves = db.leaves.filter(l =>
-            l.name && l.name.toLowerCase() === currentUserName.toLowerCase()
-        );
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                myLeaves: []
+            });
+        }
 
-        res.json({ success: true, myLeaves: userLeaves });
+        const db = await readDb();
+        const email = req.session.user.email.trim().toLowerCase();
+
+        const userLeaves = (Array.isArray(db.leaves) ? db.leaves : [])
+            .filter(leave =>
+                leave.email &&
+                leave.email.trim().toLowerCase() === email
+            );
+
+        return res.json({
+            success: true,
+            myLeaves: userLeaves
+        });
     } catch (err) {
-        res.status(500).json({ success: false, myLeaves: [] });
+        console.error('Error fetching employee leaves:', err);
+        return res.status(500).json({
+            success: false,
+            myLeaves: []
+        });
     }
 });
-
 app.get('/api/hr/leaves', async (req, res) => {
     try {
         const db = await readDb();
