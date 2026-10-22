@@ -1128,37 +1128,29 @@
 function calculatePayrollMetrics(rec) {
     const baseSalary = Number(rec.baseNum) || 0;
     const perDaySalary = baseSalary / 30;
-    const perHalfDaySalary = baseSalary / 60;
 
-    // Leave figures calculated by server.js from approved requests.
-    const approvedLeaveDays = Number(rec.leavesUsedThisMonth) || 0;
-    const paidLeavesUsed = Number(rec.paidLeavesUsed) || 0;
-    const unpaidLeaves = Number(rec.unpaidLeaves) || 0;
-    const leaveBalance = Number(rec.calculatedLeaveBalance) || 0;
-    const earnedLeaves = Number(rec.earnedLeaves) || 0;
+    const approvedLeaveDays =
+        Number(rec.leavesUsedThisMonth) || 0;
 
-    // Keep manually recorded half-day logs separate.
-    const allLogs = Array.isArray(rec.leaveLogs)
-        ? rec.leaveLogs
-        : [];
+    const paidLeavesUsed =
+        Number(rec.paidLeavesUsed) || 0;
 
-    const halfDayLogs = allLogs.filter(log =>
-        /half-day|half day/i.test(String(log.type || ""))
-    );
+    const unpaidLeaves =
+        Number(rec.unpaidLeaves) || 0;
 
-    const halfDaysCount = halfDayLogs.length;
-    const halfDayDeduction = Math.round(
-        halfDaysCount * perHalfDaySalary
-    );
+    const leaveBalance =
+        Number(rec.calculatedLeaveBalance) || 0;
 
-    // Approved full-day leave deductions are calculated server-side.
-    // Do not count the same approved requests again from leaveLogs.
-    const unpaidLeaveDeduction = Math.round(
+    const earnedLeaves =
+        Number(rec.earnedLeaves) || 0;
+
+    // Use the server-calculated unpaid leave only.
+    // Do not add manual half-day logs again.
+    const halfDaysCount = 0;
+
+    const totalDeductionAmount = Math.round(
         unpaidLeaves * perDaySalary
     );
-
-    const totalDeductionAmount =
-        unpaidLeaveDeduction + halfDayDeduction;
 
     const netPayout = Math.max(
         0,
@@ -1183,8 +1175,7 @@ function calculatePayrollMetrics(rec) {
         unpaidLeaves: unpaidLeaves,
         leaveBalance: leaveBalance
     };
-}
-        function renderPayrollTable() {
+}        function renderPayrollTable() {
 
             let tbody = document.getElementById('payrollTableBody');
 
