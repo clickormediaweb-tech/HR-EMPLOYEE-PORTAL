@@ -606,24 +606,35 @@ app.get('/api/hr/attendance-today', async (req, res) => {
     }
 });
 // --- API: Get Employee Specific Attendance Logs ---
+
 app.get('/api/employee/attendance', async (req, res) => {
     try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                attendance: []
+            });
+        }
+
+        const email = req.session.user.email.trim().toLowerCase();
         const db = await readDb();
-        if (!db.attendance) db.attendance = [];
+        const attendance = Array.isArray(db.attendance) ? db.attendance : [];
 
-        let currentUserName = req.query.name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
-        let currentUserEmail = req.query.email || (req.session.user ? req.session.user.email : "pranchal@clickormedia.co.in");
-
-        // Is user ke saare attendance logs filter karke bhejein
-        let userLogs = db.attendance.filter(log =>
-            (log.name && log.name.toLowerCase() === currentUserName.toLowerCase()) ||
-            (log.email && log.email.toLowerCase() === currentUserEmail.toLowerCase())
+        const userLogs = attendance.filter(log =>
+            log.email &&
+            log.email.trim().toLowerCase() === email
         );
 
-        res.json({ success: true, attendance: userLogs });
+        return res.json({
+            success: true,
+            attendance: userLogs
+        });
     } catch (err) {
         console.error('Error fetching employee attendance:', err);
-        res.status(500).json({ success: false, attendance: [] });
+        return res.status(500).json({
+            success: false,
+            attendance: []
+        });
     }
 });
 // 9. API: Get Settings / Office Timings
@@ -1464,102 +1475,184 @@ app.get('/employee/attendance', (req, res) => {
 });
 
 // --- API: Employee Punch-In / Punch-Out Sync with HR Portal ---
+
 app.post('/api/employee/punch', async (req, res) => {
     try {
-        const { name, email, action, time, location } = req.body;
+        // Always identify the employee from the server session.
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please log in again.'
+            });
+        }
+
+        const action = String(req.body.action || '').toUpperCase();
+
+        if (!['IN', 'OUT'].includes(action)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid punch action.'
+            });
+        }
+
         const db = await readDb();
-        if (!db.attendance) db.attendance = [];
-        if (!db.users) db.users = [];
+        if (!Array.isArray(db.attendance)) db.attendance = [];
+        if (!Array.isArray(db.users)) db.users = [];
 
-        // Database se employee ka real data find karein
-        let dbUser = db.users.find(u => u.email && email && u.email.toLowerCase() === email.toLowerCase()) ||
-                     db.users.find(u => u.name && name && u.name.toLowerCase() === name.toLowerCase());
+        const email = req.session.user.email.trim().toLowerCase();
 
-        let empName = dbUser ? dbUser.name : (name || "Employee");
-        let empEmail = dbUser ? dbUser.email : (email || "employee@clickormedia.co.in");
-        let empDept = dbUser ? dbUser.department : "Engineering";
-        let empRole = dbUser ? dbUser.designation : "Staff";
-        let empAvatar = dbUser ? dbUser.avatar : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=faces";
+        const dbUser = db.users.find(u =>
+            u.email &&
+            u.email.trim().toLowerCase() === email
+        );
 
-        const todayDate = new Date().toISOString().split('T')[0];
-        let existingLog = db.attendance.find(log =>
-            log.email && log.email.toLowerCase() === empEmail.toLowerCase() && log.date === todayDate
+        if (!dbUser || dbUser.role === 'former') {
+            return res.status(403).json({
+                success: false,
+                message: 'Employee account not found or inactive.'
+            });
+        }
+
+        const empName = dbUser.name;
+        const empEmail = dbUser.email;
+        const empDept = dbUser.department || 'Engineering';
+        const empRole = dbUser.designation || 'Staff';
+        const empAvatar = dbUser.avatar || '';
+
+        // Use local calendar date, not UTC date, for the employee's workday.
+        const now = new Date();
+        const todayDate = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const existingLog = db.attendance.find(log =>
+            log.email &&
+            log.email.trim().toLowerCase() === empEmail.toLowerCase() &&
+            log.date === todayDate
         );
 
         if (action === 'IN') {
-            if (!existingLog) {
-                db.attendance.unshift({
-                    name: empName,
-                    email: empEmail,
-                    dept: empDept,
-                    role: empRole,
-                    date: todayDate,
-                    checkInTime: time,
-                    checkInLoc: location,
-                    checkOutTime: "--:--",
-                    checkOutLoc: "Pending",
-                    status: "On Time",
-                    avatar: empAvatar
-                });
-            } else {
-                existingLog.checkInTime = time;
-                existingLog.checkInLoc = location;
-                existingLog.role = empRole;
-                existingLog.dept = empDept;
-            }
-        } else if (action === 'OUT') {
+            // Never overwrite the original punch-in time for this day.
             if (existingLog) {
-                existingLog.checkOutTime = time;
-                existingLog.checkOutLoc = location;
-            } else {
-                db.attendance.unshift({
-                    name: empName,
-                    email: empEmail,
-                    dept: empDept,
-                    role: empRole,
-                    date: todayDate,
-                    checkInTime: "09:00 AM",
-                    checkInLoc: "Office HQ",
-                    checkOutTime: time,
-                    checkOutLoc: location,
-                    status: "On Time",
-                    avatar: empAvatar
+                return res.status(409).json({
+                    success: false,
+                    message: 'A punch-in record already exists for today.',
+                    attendance: existingLog
                 });
             }
+
+            db.attendance.unshift({
+                name: empName,
+                email: empEmail,
+                dept: empDept,
+                role: empRole,
+                date: todayDate,
+                checkInTime: req.body.time || now.toLocaleTimeString(
+                    'en-IN',
+                    { hour: '2-digit', minute: '2-digit', hour12: true }
+                ),
+                checkInLoc: req.body.location || 'Office Headquarters',
+                checkOutTime: '--:--',
+                checkOutLoc: 'Pending',
+                status: 'On Time',
+                avatar: empAvatar
+            });
+        } else {
+            // Punch-out must update an existing open shift only.
+            if (!existingLog) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'No punch-in record exists for today.'
+                });
+            }
+
+            if (
+                existingLog.checkOutTime &&
+                !['--:--', 'Pending'].includes(existingLog.checkOutTime)
+            ) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'You have already punched out today.'
+                });
+            }
+
+            existingLog.checkOutTime = req.body.time || now.toLocaleTimeString(
+                'en-IN',
+                { hour: '2-digit', minute: '2-digit', hour12: true }
+            );
+            existingLog.checkOutLoc =
+                req.body.location || 'Office Headquarters';
         }
 
         await writeDb(db);
-        console.log(`--- PUNCH ${action} SAVED FROM DB FOR ${empName} (${empRole}) ---`);
-        res.json({ success: true, message: `Punch ${action} recorded using database profile successfully!` });
+
+        return res.json({
+            success: true,
+            action,
+            message: `Punch ${action} saved successfully.`,
+            attendance: db.attendance.find(log =>
+                log.email &&
+                log.email.trim().toLowerCase() === empEmail.toLowerCase() &&
+                log.date === todayDate
+            )
+        });
     } catch (err) {
         console.error('Error recording punch:', err);
-        res.status(500).json({ success: false, message: 'Server error during punch recording' });
-    }
-});// --- API: Get Today's Punch Status for Employee ---
-app.get('/api/employee/punch-status', async (req, res) => {
-    try {
-        const email = req.query.email || (req.session.user ? req.session.user.email : "");
-        const db = await readDb();
-        const todayDate = new Date().toISOString().split('T')[0];
-
-        if (!db.attendance) db.attendance = [];
-       
-        let todayLog = db.attendance.find(log =>
-            log.email.toLowerCase() === email.toLowerCase() &&
-            log.date === todayDate &&
-            (!log.checkOutTime || log.checkOutTime === "--:--" || log.checkOutTime === "Pending")
-        );
-
-        if (todayLog) {
-            res.json({ success: true, isPunchedIn: true, time: todayLog.checkInTime, location: todayLog.checkInLoc });
-        } else {
-            res.json({ success: true, isPunchedIn: false });
-        }
-    } catch (err) {
-        res.status(500).json({ success: false, isPunchedIn: false });
+        return res.status(500).json({
+            success: false,
+            message: 'Server error during punch recording.'
+        });
     }
 });
+// --- API: Get Today's Punch Status for Employee ---
+app.get('/api/employee/punch-status', async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                isPunchedIn: false,
+                message: 'Please log in again.'
+            });
+        }
 
+        const email = req.session.user.email.trim().toLowerCase();
+        const db = await readDb();
+        const now = new Date();
+
+        const todayDate = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const attendance = Array.isArray(db.attendance) ? db.attendance : [];
+
+        const todayLog = attendance.find(log =>
+            log.email &&
+            log.email.trim().toLowerCase() === email &&
+            log.date === todayDate
+        );
+
+        const isOpen = todayLog &&
+            (!todayLog.checkOutTime ||
+             ['--:--', 'Pending'].includes(todayLog.checkOutTime));
+
+        return res.json({
+            success: true,
+            isPunchedIn: Boolean(isOpen),
+            time: isOpen ? todayLog.checkInTime : null,
+            location: isOpen ? todayLog.checkInLoc : null
+        });
+    } catch (err) {
+        console.error('Error fetching punch status:', err);
+        return res.status(500).json({
+            success: false,
+            isPunchedIn: false
+        });
+    }
+});
 // Employee Specific Payroll API Route
 app.get('/api/employee/payroll', async (req, res) => {
     try {
