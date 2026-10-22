@@ -20,8 +20,155 @@ const storeSchema = new mongoose.Schema({
 }, { strict: false });
 
 const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
+// --- SHARED MONTHLY LEAVE CALCULATION ---
+function getLeaveMonthDates(year, month) {
+    return {
+        start: `${year}-${String(month).padStart(2, '0')}-01`,
+        end: `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`
+    };
+}
 
-// Safe Reader
+function parseJoiningDate(value) {
+    if (!value) return null;
+
+    // Handles dates such as "01 September 2026"
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function countApprovedLeaveDays(leave, monthStart, monthEnd) {
+    if (!leave.startDate || !leave.endDate) return 0;
+
+    const start = leave.startDate;
+    const end = leave.endDate;
+
+    if (end < monthStart || start > monthEnd) return 0;
+
+    const effectiveStart = start > monthStart ? start : monthStart;
+    const effectiveEnd = end < monthEnd ? end : monthEnd;
+
+    const startDate = new Date(`${effectiveStart}T00:00:00Z`);
+    const endDate = new Date(`${effectiveEnd}T00:00:00Z`);
+
+    return Math.floor((endDate - startDate) / 86400000) + 1;
+}
+
+
+function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
+    const joiningDate = parseJoiningDate(payrollRec.joiningDate);
+
+    const emptyResult = {
+        earned: 0,
+        used: 0,
+        paidUsed: 0,
+        unpaid: 0,
+        balance: 0
+    };
+
+    if (!joiningDate) return emptyResult;
+
+    const joiningYear = joiningDate.getFullYear();
+    const joiningMonth = joiningDate.getMonth() + 1;
+
+    if (
+        year < joiningYear ||
+        (year === joiningYear && month < joiningMonth)
+    ) {
+        return emptyResult;
+    }
+
+    const earned =
+        (year - joiningYear) * 12 +
+        (month - joiningMonth) + 1;
+
+    const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
+    const monthEnd = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+
+    function countWorkingDays(start, end) {
+        if (!start || !end) return 0;
+
+        const from = new Date(`${start}T12:00:00`);
+        const to = new Date(`${end}T12:00:00`);
+
+        if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+            return 0;
+        }
+
+        let count = 0;
+
+        for (
+            let date = new Date(from);
+            date <= to;
+            date.setDate(date.getDate() + 1)
+        ) {
+            // Sunday is the weekly off.
+            if (date.getDay() !== 0) count++;
+        }
+
+        return count;
+    }
+
+    const employeeLeaves = (allLeaves || []).filter(leave =>
+        leave.status === 'APPROVED' &&
+        leave.name &&
+        payrollRec.name &&
+        leave.name.toLowerCase() === payrollRec.name.toLowerCase()
+    );
+
+    function getDaysForMonth(leave, start, end) {
+        if (!leave.startDate || !leave.endDate) return 0;
+
+        const overlapStart =
+            leave.startDate > start ? leave.startDate : start;
+
+        const overlapEnd =
+            leave.endDate < end ? leave.endDate : end;
+
+        if (overlapStart > overlapEnd) return 0;
+
+        return countWorkingDays(overlapStart, overlapEnd);
+    }
+
+    let used = 0;
+
+    for (const leave of employeeLeaves) {
+        used += getDaysForMonth(leave, monthStart, monthEnd);
+    }
+
+    let usedBeforeMonth = 0;
+
+    for (
+        let y = joiningYear, m = joiningMonth;
+        y < year || (y === year && m < month);
+    ) {
+        const start = `${y}-${String(m).padStart(2, '0')}-01`;
+        const end = `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate()}`;
+
+        for (const leave of employeeLeaves) {
+            usedBeforeMonth += getDaysForMonth(leave, start, end);
+        }
+
+        m++;
+
+        if (m > 12) {
+            m = 1;
+            y++;
+        }
+    }
+
+    const availableBeforeMonth = Math.max(0, earned - usedBeforeMonth);
+    const paidUsed = Math.min(availableBeforeMonth, used);
+    const unpaid = Math.max(0, used - paidUsed);
+    const balance = Math.max(0, earned - usedBeforeMonth - paidUsed);
+
+    return {
+        earned,
+        used,
+        paidUsed,
+        unpaid,
+        balance
+    };
+}   // Safe Reader
 async function readDb() {
     try {
         let record = await Store.findOne({ key: "main_singleton_store" });
@@ -811,10 +958,34 @@ app.get('/api/payroll', async (req, res) => {
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
        
-    const filteredPayroll = db.payroll.filter(rec => activeEmails.includes(rec.email.toLowerCase()) && rec.name.toLowerCase() !== 'robin');
+  const filteredPayroll = db.payroll
+    .filter(rec =>
+        activeEmails.includes((rec.email || '').toLowerCase()) &&
+        (rec.name || '').toLowerCase() !== 'robin'
+    )
+    .map(rec => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
 
-       
-        res.json({ success: true, payroll: filteredPayroll });
+        const leave = calculateMonthlyLeave(
+            rec,
+            db.leaves || [],
+            year,
+            month
+        );
+
+        return {
+            ...rec,
+            earnedLeaves: leave.earned,
+            leavesUsedThisMonth: leave.used,
+            paidLeavesUsed: leave.paidUsed,
+            unpaidLeaves: leave.unpaid,
+            calculatedLeaveBalance: leave.balance
+        };
+    });
+
+res.json({ success: true, payroll: filteredPayroll });
     } catch (err) {
         res.status(500).json({ success: false, payroll: [] });
     }
@@ -1284,16 +1455,30 @@ app.get('/api/employee/payroll', async (req, res) => {
             userPayroll = db.payroll.find(p => p.name && p.name.toLowerCase().includes("pranchal")) || db.payroll[1] || db.payroll[0];
         }
 
-        let nameLower = currentUserName.toLowerCase();
-        let userLeaves = db.leaves ? db.leaves.filter(l => l.name && l.name.toLowerCase() === nameLower && l.status === 'APPROVED') : [];
-        let totalAllLeavesUsed = userLeaves.length;
-       
-        let maxAllowedEarned = nameLower.includes('pranchal') ? 1 : 0;
-        let extraLeaves = Math.max(0, totalAllLeavesUsed - maxAllowedEarned);
+       const payrollRecord = userPayroll;
 
-        let payrollObj = { ...userPayroll, extraLeaves: extraLeaves };
+const now = new Date();
+const year = now.getFullYear();
+const month = now.getMonth() + 1;
 
-        res.json({ success: true, payroll: payrollObj });
+const leave = calculateMonthlyLeave(
+    payrollRecord,
+    db.leaves || [],
+    year,
+    month
+);
+
+const payrollObj = {
+    ...payrollRecord,
+    earnedLeaves: leave.earned,
+    leavesUsedThisMonth: leave.used,
+    paidLeavesUsed: leave.paidUsed,
+    unpaidLeaves: leave.unpaid,
+    calculatedLeaveBalance: leave.balance,
+    extraLeaves: leave.unpaid
+};
+
+res.json({ success: true, payroll: payrollObj });
     } catch (err) {
         console.error('Error fetching employee payroll:', err);
         res.status(500).json({ success: false, payroll: null });
