@@ -302,9 +302,9 @@
 
 <div onclick="toggleProfileDropdown(event)" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all whitespace-nowrap">                       <div class="text-right">
 
-    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Pranchal Rajpal</h4>
+    <h4 id="empProfileName" class="text-sm font-bold text-[#222222] group-hover:text-blue-600 transition-colors">Loading...</h4>
 
-    <p id="headerDesignation" class="text-xs text-blue-600 font-medium">Software Engineering</p>
+    <p id="headerDesignation" class="text-xs text-blue-600 font-medium">Loading...</p>
 
 </div>
 
@@ -326,9 +326,9 @@
 
                             <div>
 
-                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Pranchal Rajpal</p>
+                                <p id="empDropdownName" class="font-black text-[#222222] text-sm">Loading...</p>
 
-<p id="dropdownDept" class="text-[11px] text-blue-600 font-bold">Software Engineering Dept.</p>                            </div>
+<p id="dropdownDept" class="text-[11px] text-blue-600 font-bold">Loading...</p>                            </div>
 
                         </div>
 
@@ -642,7 +642,7 @@
 
                         <p class="text-gray-400 font-bold uppercase">Employee Name</p>
 
-                        <p class="font-bold text-sm text-[#222222]" id="modalEmpName">Pranchal Rajpal</p>
+                        <p class="font-bold text-sm text-[#222222]" id="modalEmpName">Loading...</p>
 
                     </div>
 
@@ -650,7 +650,7 @@
 
                         <p class="text-gray-400 font-bold uppercase">Department</p>
 
-                        <p class="font-bold text-sm text-[#222222]">Software Engineering</p>
+                        <p class="font-bold text-sm text-[#222222]">Loading...</p>
 
                     </div>
 
@@ -785,57 +785,65 @@
     <!-- Script for Backend Payroll Sync & Expense Claims -->
 
     <script>
-let loggedInUser = 'Pranchal Rajpal';
-        let currentBaseSalary = 16000;
-        let calculatedDeductions = 0;
-        let calculatedNetPayout = 16000;
-        let totalExpenses = 0;
+let loggedInUser = '';
+let loggedInEmail = '';
+let currentBaseSalary = 16000;
+let calculatedDeductions = 0;
+let calculatedNetPayout = 16000;
+let totalExpenses = 0;
 
-        window.onload = function() {
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        loggedInUser = user.name || 'Pranchal Rajpal';
-                        let userDesig = user.designation || user.department || 'UI/UX Designer'; 
-                        let userDept = user.department || 'Software Engineering';
+window.onload = function() {
+    fetch('/api/current-user', { credentials: 'same-origin' })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Unable to identify employee. Please log in again.');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success || !data.user) {
+                throw new Error('Employee details were not returned.');
+            }
 
-                        document.getElementById('empProfileName').innerText = loggedInUser;
-                        document.getElementById('empDropdownName').innerText = loggedInUser;
-                        
-                        // Yahan header designation database se fetch ho kar set hogi
-                        if(document.getElementById('headerDesignation')) {
-                            document.getElementById('headerDesignation').innerText = userDesig;
-                        }
+            const user = data.user;
+            loggedInUser = user.name || '';
+            loggedInEmail = user.email || '';
 
-                        let headerSpan = document.getElementById('headerDeptDisplay');
-                        if (headerSpan) {
-                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
+            document.getElementById('empProfileName').innerText = loggedInUser;
+            document.getElementById('empDropdownName').innerText = loggedInUser;
 
-                        let dropdownDeptP = document.getElementById('dropdownDept');
-                        if (dropdownDeptP) {
-                            dropdownDeptP.innerText = `${userDept} Dept.`;
-                        }
-                    }
+            const userDept = user.department || 'Employee';
+            const userDesig = user.designation || user.department || 'Employee';
 
-                    let savedExpenses = localStorage.getItem('emp_total_expenses');
-                    if (savedExpenses) {
-                        totalExpenses = parseInt(savedExpenses);
-                        document.getElementById('totalExpenseDisplay').innerText = `₹${totalExpenses.toLocaleString()}`;
-                    }
+            const designation = document.getElementById('headerDesignation');
+            if (designation) designation.innerText = userDesig;
 
-                    fetchEmployeePayroll();
-                })
-                .catch(err => {
-                    console.error("Error fetching current user:", err);
-                    fetchEmployeePayroll();
-                });
-        };
+            const headerSpan = document.getElementById('headerDeptDisplay');
+            if (headerSpan) {
+                headerSpan.innerHTML =
+                    `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+            }
+
+            const dropdownDept = document.getElementById('dropdownDept');
+            if (dropdownDept) dropdownDept.innerText = `${userDept} Dept.`;
+
+            const savedExpenses = localStorage.getItem('emp_total_expenses');
+            if (savedExpenses) {
+                totalExpenses = parseInt(savedExpenses, 10) || 0;
+                document.getElementById('totalExpenseDisplay').innerText =
+                    `₹${totalExpenses.toLocaleString('en-IN')}`;
+            }
+
+            fetchEmployeePayroll();
+        })
+        .catch(err => {
+            console.error('Error fetching current user:', err);
+        });
+};
 
         function fetchEmployeePayroll() {
-            fetch(`/api/employee/payroll?name=${encodeURIComponent(loggedInUser)}`)
-                .then(res => res.json())
+fetch('/api/employee/payroll', { credentials: 'same-origin' })      
+    .then(res => res.json())
                 .then(data => {
                     if (data.success && data.payroll) {
                         let record = data.payroll;
