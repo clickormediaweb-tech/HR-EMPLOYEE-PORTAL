@@ -854,12 +854,22 @@ let loggedInUser = 'Pranchal Rajpal';
                         if (headerSpan) {
                             headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
                         }
+// --- LEAVE DEDUCTION CALCULATION ---
+const perDaySalary = currentBaseSalary / 30;
+const perHalfDaySalary = currentBaseSalary / 60;
 
-                        // --- EXACT PER-DAY DEDUCTION CALCULATION ---
-                        let perDaySalary = currentBaseSalary / 30;
-                        let extraLeavesCount = record.extraLeaves || 0; 
-                        calculatedDeductions = Math.round(extraLeavesCount * perDaySalary);
-                        calculatedNetPayout = Math.max(0, currentBaseSalary - calculatedDeductions);
+const unpaidLeaves = Number(record.unpaidLeaves ?? record.extraLeaves ?? 0);
+const unpaidHalfDays = Number(record.unpaidHalfDays ?? 0);
+
+calculatedDeductions = Math.round(
+    (unpaidLeaves * perDaySalary) +
+    (unpaidHalfDays * perHalfDaySalary)
+);
+
+calculatedNetPayout = Math.max(
+    0,
+    currentBaseSalary - calculatedDeductions
+);
 
                         let tableBody = document.getElementById('payslipTableBody');
                         tableBody.innerHTML = `
