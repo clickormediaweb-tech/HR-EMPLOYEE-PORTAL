@@ -1021,6 +1021,43 @@ res.json({ success: true, payroll: filteredPayroll });
         res.status(500).json({ success: false, payroll: [] });
     }
 });
+app.get('/api/debug/employee-leaves', async (req, res) => {
+    try {
+        const db = await readDb();
+
+        const employeeName = String(req.query.name || "Tanya Dua")
+            .trim()
+            .toLowerCase();
+
+        const leaves = (Array.isArray(db.leaves) ? db.leaves : [])
+            .filter(leave =>
+                String(leave.name || "").trim().toLowerCase() === employeeName
+            )
+            .map(leave => ({
+                id: leave.id,
+                name: leave.name,
+                type: leave.type,
+                duration: leave.duration,
+                dayType: leave.dayType,
+                startDate: leave.startDate,
+                endDate: leave.endDate,
+                status: leave.status
+            }));
+
+        res.json({
+            success: true,
+            employee: employeeName,
+            totalRecords: leaves.length,
+            leaves
+        });
+    } catch (err) {
+        console.error("Debug employee leaves error:", err);
+        res.status(500).json({
+            success: false,
+            message: "Could not read leave records"
+        });
+    }
+});
 
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
