@@ -1516,7 +1516,7 @@ const payrollObj = {
     unpaidHalfDays: leave.unpaidHalfDays,
     calculatedLeaveBalance: leave.balance,
     extraLeaves: leave.unpaid
-};
+};  
 
 res.json({ success: true, payroll: payrollObj });
     } catch (err) {
