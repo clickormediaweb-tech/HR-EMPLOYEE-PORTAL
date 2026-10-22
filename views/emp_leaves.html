@@ -279,51 +279,64 @@
     <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
     <!-- Script with Real-Time Polling, Toast Popups & Strict Isolation -->
     <script>
-        let loggedInUser = "Pranchal Rajpal";
-        let lastSeenStatuses = {};
+       let loggedInUser = '';
+let loggedInEmail = '';
+let lastSeenStatuses = {};
 
-        window.onload = function() {
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        let userName = user.name || 'Pranchal Rajpal';
-                        loggedInUser = userName;
-                        let userDesig = user.designation || 'Software Engineer';
-                        let userDept = user.department || 'Software Engineering';
+window.onload = function() {
+    fetch('/api/current-user', { credentials: 'same-origin' })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Unable to identify logged-in employee. Please log in again.');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success || !data.user) {
+                throw new Error('Logged-in employee details were not returned.');
+            }
 
-                        if(document.getElementById('empProfileName')) document.getElementById('empProfileName').innerText = userName;
-                        if(document.getElementById('empDropdownName')) document.getElementById('empDropdownName').innerText = userName;
-                        if(document.getElementById('headerDesignation')) document.getElementById('headerDesignation').innerText = userDesig;
+            const user = data.user;
 
-                        let headerSpan = document.getElementById('headerDeptDisplay');
-                        if (headerSpan) {
-                            headerSpan.innerHTML = `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
-                        }
+            loggedInUser = user.name || '';
+            loggedInEmail = user.email || '';
 
-                        let dropdownDeptP = document.getElementById('dropdownDept');
-                        if (dropdownDeptP) {
-                            dropdownDeptP.innerText = `${userDept} Dept.`;
-                        }
-
-                        let sidebarDeptP = document.getElementById('sidebarDept');
-                        if (sidebarDeptP) {
-                            sidebarDeptP.innerText = `Department: ${userDept}`;
-                        }
-                    }
-                    fetchEmployeeLeaves();
-                })
-                .catch(err => {
-                    console.error("Error fetching user profile:", err);
-                    fetchEmployeeLeaves();
+            document.querySelectorAll('#empProfileName, #empDropdownName')
+                .forEach(el => {
+                    el.innerText = loggedInUser;
                 });
 
+            const userDept = user.department || 'Employee';
+            const userDesig = user.designation || user.department || 'Employee';
+
+            const designation = document.getElementById('headerDesignation');
+            if (designation) designation.innerText = userDesig;
+
+            const headerSpan = document.getElementById('headerDeptDisplay');
+            if (headerSpan) {
+                headerSpan.innerHTML =
+                    `<i class="fa-solid fa-laptop-code mr-1"></i> ${userDept}`;
+            }
+
+            const dropdownDept = document.getElementById('dropdownDept');
+            if (dropdownDept) dropdownDept.innerText = `${userDept} Dept.`;
+
+            const sidebarDept = document.getElementById('sidebarDept');
+            if (sidebarDept) {
+                sidebarDept.innerText = `Department: ${userDept}`;
+            }
+
+            fetchEmployeeLeaves();
             setInterval(fetchEmployeeLeaves, 2000);
-        };
+        })
+        .catch(err => {
+            console.error('Error fetching user profile:', err);
+        });
+};
 
        function fetchEmployeeLeaves() {
     // Server se dynamic balance fetch karne ke liye yeh call hona zaroori hai
-    fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInUser)}`)
+  fetch('/api/employee/stats', { credentials: 'same-origin' })
         .then(res => res.json())
         .then(data => {
             if (data.success && data.employee) {
