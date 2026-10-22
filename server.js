@@ -775,22 +775,6 @@ app.get('/api/analytics', async (req, res) => {
 app.get('/hr/analytics', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'analytics.html'));
 });
-app.get('/api/payroll', async (req, res) => {
-    try {
-        const db = await readDb();
-        if (!db.payroll) db.payroll = [];
-        if (!db.leaves) db.leaves = [];
-
-        // Agar payroll khali hai, toh default records turant daal dein
-        if (db.payroll.length === 0) {
-            db.payroll = [
-                { id: 1, name: "Tanya Dua", email: "tanya@clickormedia.co.in", dept: "UI/UX Designer", baseNum: 16000, status: "PAID" },
-                { id: 2, name: "Pranchal Rajpal", email: "pranchal@clickormedia.co.in", dept: "Engineering", baseNum: 23000, status: "PAID" },
-                { id: 3, name: "Anshdeep", email: "anshdeep@clickormedia.co.in", dept: "Design", baseNum: 16000, status: "PAID" },
-                { id: 4, name: "Sukhi", email: "sukhi@clickormedia.co.in", dept: "Design", baseNum: 25000, status: "PAID" }
-            ];
-            await writeDb(db);
-        }
 // --- PAYROLL PERSISTENCE API (Robin removed) ---
 app.get('/api/payroll', async (req, res) => {
     try {
