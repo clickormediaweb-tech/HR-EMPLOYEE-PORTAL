@@ -783,13 +783,23 @@ app.get('/api/payroll', async (req, res) => {
         if (!db.payroll) db.payroll = [];
         if (!db.leaves) db.leaves = [];
 
-        const employeeDetails = {
-            "Tanya Dua": { joiningDate: "01 July 2026", baseNum: 16000, dept: "HR & Finance" },
-            "Pranchal Rajpal": { joiningDate: "01 September 2026", baseNum: 23000, dept: "Engineering" },
-            "Anshdeep": { joiningDate: "18 September 2026", baseNum: 16000, dept: "Engineering" },
-            "Sukhi": { joiningDate: "04 September 2026", baseNum: 25000, dept: "Operations" }
-        };
-
+        // Forcefully ensure default employees exist in payroll table
+        const requiredEmployees = ["Tanya Dua", "Pranchal Rajpal", "Anshdeep", "Sukhi"];
+        requiredEmployees.forEach(empName => {
+            let exists = db.payroll.find(p => p.name && p.name.toLowerCase() === empName.toLowerCase());
+            if (!exists) {
+                let defaultSalary = empName === "Pranchal Rajpal" ? 23000 : (empName === "Sukhi" ? 25000 : 16000);
+                let defaultDept = empName === "Tanya Dua" ? "HR & Finance" : (empName === "Pranchal Rajpal" || empName === "Anshdeep" ? "Engineering" : "Operations");
+                db.payroll.push({
+                    id: Date.now() + Math.random(),
+                    name: empName,
+                    email: `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
+                    dept: defaultDept,
+                    baseNum: defaultSalary,
+                    status: "PENDING"
+                });
+            }
+        });
         let currentYear = 2026;
         let currentMonth = 10; // October cycle
 
