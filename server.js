@@ -1021,6 +1021,7 @@ res.json({ success: true, payroll: filteredPayroll });
         res.status(500).json({ success: false, payroll: [] });
     }
 });
+
 app.get('/api/debug/employee-leaves', async (req, res) => {
     try {
         const db = await readDb();
@@ -1029,44 +1030,51 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
             .trim()
             .toLowerCase();
 
-        function findRecords(records, source) {
-            return (Array.isArray(records) ? records : [])
-                .filter(leave =>
-                    String(leave.name || "")
-                        .trim()
-                        .toLowerCase() === employeeName
-                )
-                .map(leave => ({
-                    source,
-                    id: leave.id,
-                    name: leave.name,
-                    type: leave.type,
-                    duration: leave.duration,
-                    dayType: leave.dayType,
-                    startDate: leave.startDate,
-                    endDate: leave.endDate,
-                    status: leave.status
-                }));
-        }
+        const payrollRecords = (
+            Array.isArray(db.payroll) ? db.payroll : []
+        ).filter(record =>
+            String(record.name || "").trim().toLowerCase() === employeeName
+        );
 
-        const leaves = [
-            ...findRecords(db.leaves, "leaves"),
-            ...findRecords(db.myLeaves, "myLeaves")
-        ];
+        const allLeaveArrays = Object.keys(db)
+            .filter(key => /leave/i.test(key))
+            .map(key => ({
+                key,
+                count: Array.isArray(db[key]) ? db[key].length : null,
+                records: Array.isArray(db[key])
+                    ? db[key].filter(item =>
+                        String(item.name || "")
+                            .trim().toLowerCase() === employeeName
+                    ).map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        startDate: item.startDate,
+                        endDate: item.endDate,
+                        duration: item.duration,
+                        dayType: item.dayType,
+                        status: item.status
+                    }))
+                    : []
+            }));
 
         res.json({
             success: true,
+            databaseKeys: Object.keys(db),
             employee: employeeName,
-            leavesCount: Array.isArray(db.leaves) ? db.leaves.length : 0,
-            myLeavesCount: Array.isArray(db.myLeaves) ? db.myLeaves.length : 0,
-            matchingRecords: leaves.length,
-            leaves
+            payrollRecords: payrollRecords.map(record => ({
+                name: record.name,
+                email: record.email,
+                joiningDate: record.joiningDate,
+                leaveBalance: record.leaveBalance,
+                leaveLogs: record.leaveLogs
+            })),
+            leaveArrays: allLeaveArrays
         });
     } catch (err) {
         console.error("Debug employee leaves error:", err);
         res.status(500).json({
             success: false,
-            message: "Could not read leave records"
+            message: "Could not inspect employee records"
         });
     }
 });
