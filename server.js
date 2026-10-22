@@ -54,6 +54,7 @@ function countApprovedLeaveDays(leave, monthStart, monthEnd) {
 }
 
 
+
 function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
     const joiningDate = parseJoiningDate(payrollRec.joiningDate);
 
@@ -62,6 +63,7 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
         used: 0,
         paidUsed: 0,
         unpaid: 0,
+        unpaidHalfDays: 0,
         balance: 0
     };
 
@@ -81,58 +83,87 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
         (year - joiningYear) * 12 +
         (month - joiningMonth) + 1;
 
-    const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
-    const monthEnd = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+    const pad = value => String(value).padStart(2, '0');
 
-    function countWorkingDays(start, end) {
-        if (!start || !end) return 0;
+    function monthRange(y, m) {
+        return {
+            start: `${y}-${pad(m)}-01`,
+            end: `${y}-${pad(m)}-${new Date(Date.UTC(y, m, 0)).getUTCDate()}`
+        };
+    }
 
-        const from = new Date(`${start}T12:00:00`);
-        const to = new Date(`${end}T12:00:00`);
+    function workingDays(start, end) {
+        if (!start || !end || start > end) return 0;
 
-        if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+        const from = new Date(`${start}T00:00:00Z`);
+        const to = new Date(`${end}T00:00:00Z`);
+
+        if (
+            Number.isNaN(from.getTime()) ||
+            Number.isNaN(to.getTime())
+        ) {
             return 0;
         }
 
-        let count = 0;
+        let total = 0;
 
         for (
             let date = new Date(from);
             date <= to;
-            date.setDate(date.getDate() + 1)
+            date.setUTCDate(date.getUTCDate() + 1)
         ) {
-            // Sunday is the weekly off.
-            if (date.getDay() !== 0) count++;
+            if (date.getUTCDay() !== 0) total++;
         }
 
-        return count;
+        return total;
     }
 
-    const employeeLeaves = (allLeaves || []).filter(leave =>
-        leave.status === 'APPROVED' &&
-        leave.name &&
-        payrollRec.name &&
-        leave.name.toLowerCase() === payrollRec.name.toLowerCase()
-    );
-
-    function getDaysForMonth(leave, start, end) {
+    function leaveDaysInRange(leave, rangeStart, rangeEnd) {
         if (!leave.startDate || !leave.endDate) return 0;
 
-        const overlapStart =
-            leave.startDate > start ? leave.startDate : start;
+        const start = String(leave.startDate).slice(0, 10);
+        const end = String(leave.endDate).slice(0, 10);
 
-        const overlapEnd =
-            leave.endDate < end ? leave.endDate : end;
+        const overlapStart = start > rangeStart ? start : rangeStart;
+        const overlapEnd = end < rangeEnd ? end : rangeEnd;
 
         if (overlapStart > overlapEnd) return 0;
 
-        return countWorkingDays(overlapStart, overlapEnd);
+        const days = workingDays(overlapStart, overlapEnd);
+        const isHalfDay = /half.?day/i.test(String(leave.duration || leave.type || ''));
+
+        return isHalfDay ? Math.min(0.5, days) : days;
     }
 
-    let used = 0;
+    const approvedLeaves = (Array.isArray(allLeaves) ? allLeaves : [])
+        .filter(leave =>
+            leave &&
+            String(leave.status || '').toUpperCase() === 'APPROVED' &&
+            leave.name &&
+            payrollRec.name &&
+            leave.name.trim().toLowerCase() ===
+                payrollRec.name.trim().toLowerCase()
+        );
 
-    for (const leave of employeeLeaves) {
-        used += getDaysForMonth(leave, monthStart, monthEnd);
+    function leaveUsageForMonth(y, m) {
+        const range = monthRange(y, m);
+        let fullDays = 0;
+        let halfDays = 0;
+
+        for (const leave of approvedLeaves) {
+            const days = leaveDaysInRange(leave, range.start, range.end);
+            const isHalfDay = /half.?day/i.test(
+                String(leave.duration || leave.type || '')
+            );
+
+            if (isHalfDay) {
+                halfDays += days > 0 ? 0.5 : 0;
+            } else {
+                fullDays += days;
+            }
+        }
+
+        return { fullDays, halfDays, total: fullDays + halfDays };
     }
 
     let usedBeforeMonth = 0;
@@ -141,31 +172,38 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
         let y = joiningYear, m = joiningMonth;
         y < year || (y === year && m < month);
     ) {
-        const start = `${y}-${String(m).padStart(2, '0')}-01`;
-        const end = `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate()}`;
-
-        for (const leave of employeeLeaves) {
-            usedBeforeMonth += getDaysForMonth(leave, start, end);
-        }
+        usedBeforeMonth += leaveUsageForMonth(y, m).total;
 
         m++;
-
         if (m > 12) {
             m = 1;
             y++;
         }
     }
 
+    const currentUsage = leaveUsageForMonth(year, month);
+    const used = currentUsage.total;
+
     const availableBeforeMonth = Math.max(0, earned - usedBeforeMonth);
     const paidUsed = Math.min(availableBeforeMonth, used);
     const unpaid = Math.max(0, used - paidUsed);
-    const balance = Math.max(0, earned - usedBeforeMonth - paidUsed);
+
+    const unpaidHalfDays = Math.min(
+        currentUsage.halfDays,
+        unpaid * 2
+    );
+
+    const balance = Math.max(
+        0,
+        earned - usedBeforeMonth - paidUsed
+    );
 
     return {
         earned,
         used,
         paidUsed,
         unpaid,
+        unpaidHalfDays,
         balance
     };
 }   // Safe Reader
