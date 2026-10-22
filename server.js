@@ -88,7 +88,7 @@ function calculateEmployeeLeaveSummary(employeeName, joiningDateStr, monthlySala
     // Sirf APPROVED leaves ko chronologically process karenge
     let empLeaves = (approvedLeaves || []).filter(l => 
         l.name && l.name.toLowerCase() === employeeName.toLowerCase() && 
-        (l.status === 'APPROVED' /ii/ l.status === 'Approved')
+        (l.status === 'APPROVED' || l.status === 'Approved')
     );
 
     // Chronological sorting taaki pehle ki leaves pehle consume ho (Carry Forward & Usage tracking)
