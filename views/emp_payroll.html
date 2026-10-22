@@ -856,14 +856,11 @@ let loggedInUser = 'Pranchal Rajpal';
                         }
 // --- LEAVE DEDUCTION CALCULATION ---
 const perDaySalary = currentBaseSalary / 30;
-const perHalfDaySalary = currentBaseSalary / 60;
 
 const unpaidLeaves = Number(record.unpaidLeaves ?? record.extraLeaves ?? 0);
-const unpaidHalfDays = Number(record.unpaidHalfDays ?? 0);
 
 calculatedDeductions = Math.round(
-    (unpaidLeaves * perDaySalary) +
-    (unpaidHalfDays * perHalfDaySalary)
+    unpaidLeaves * perDaySalary
 );
 
 calculatedNetPayout = Math.max(
