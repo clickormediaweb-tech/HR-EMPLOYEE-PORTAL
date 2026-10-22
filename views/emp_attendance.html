@@ -275,8 +275,8 @@
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
 <script>
         let allEmployeeLogs = [];
-        let loggedInName = 'Pranchal Rajpal';
-        let loggedInEmail = 'pranchal@clickormedia.co.in';
+      let loggedInName = '';
+let loggedInEmail = '';
 
         window.onload = function() {
             // 1. Fetch current user details
@@ -291,7 +291,7 @@
                         document.querySelectorAll('#headerDesignation').forEach(el => { el.innerText = user.designation || 'Software Engineer'; });
                     }
                     // 2. Fetch attendance logs from the server
-                    return fetch('/api/attendance');
+return fetch('/api/employee/attendance');
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -367,14 +367,7 @@
                 return matchesUser && matchesMonth && matchesStatus;
             });
 
-            // Fallback: Agar strict match me 0 aaye lekin logs maujood hon, toh user ki sari entries dikhayein
-            if (filteredLogs.length === 0 && allEmployeeLogs.length > 0) {
-                filteredLogs = allEmployeeLogs.filter(log => {
-                    let logDate = new Date(log.date);
-                    return !isNaN(logDate.getTime()) && logDate.getMonth() === selectedMonthIndex;
-                });
-            }
-
+            
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
             if (filteredLogs.length === 0) {
