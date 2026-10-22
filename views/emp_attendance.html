@@ -278,42 +278,62 @@
       let loggedInName = '';
 let loggedInEmail = '';
 
-        window.onload = function() {
-            // 1. Fetch current user details
-            fetch('/api/current-user')
-                .then(res => res.json())
-                .then(user => {
-                    if (user && user.success) {
-                        loggedInName = user.name || loggedInName;
-                        loggedInEmail = user.email || loggedInEmail;
-                       
-                        document.querySelectorAll('#empProfileName, #empDropdownName').forEach(el => { el.innerText = loggedInName; });
-                        document.querySelectorAll('#headerDesignation').forEach(el => { el.innerText = user.designation || 'Software Engineer'; });
-                    }
-                    // 2. Fetch attendance logs from the server
-return fetch('/api/employee/attendance');
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.attendance) {
-                        allEmployeeLogs = data.attendance;
-                        filterTable();
-                    }
-                })
-                .catch(err => console.error("Error loading attendance records:", err));
+      window.onload = function() {
+    fetch('/api/current-user', { credentials: 'same-origin' })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Login session missing. Please log in again.');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success || !data.user) {
+                throw new Error('Unable to identify the logged-in employee.');
+            }
 
-            // 3. Fetch stats for leaves count
-            fetch(`/api/employee/stats?name=${encodeURIComponent(loggedInName)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.employee) {
-                        let leavesArr = data.employee.recentLeaves || [];
-                        document.getElementById('leavesTakenCount').innerText = `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
-                    }
-                })
-                .catch(err => console.error("Error fetching stats:", err));
-        };
+            const user = data.user;
+            loggedInName = user.name || '';
+            loggedInEmail = user.email || '';
 
+            document.querySelectorAll('#empProfileName, #empDropdownName').forEach(el => {
+                el.innerText = loggedInName;
+            });
+
+            document.querySelectorAll('#headerDesignation').forEach(el => {
+                el.innerText = user.designation || user.department || 'Employee';
+            });
+
+            return fetch('/api/employee/attendance', {
+                credentials: 'same-origin'
+            });
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Unable to load attendance records.');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success && data.attendance) {
+                allEmployeeLogs = data.attendance;
+                filterTable();
+            }
+        })
+        .catch(err => {
+            console.error('Error loading employee attendance:', err);
+        });
+
+    fetch('/api/employee/stats', { credentials: 'same-origin' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.employee) {
+                const leavesArr = data.employee.recentLeaves || [];
+                document.getElementById('leavesTakenCount').innerText =
+                    `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
+            }
+        })
+        .catch(err => console.error('Error fetching stats:', err));
+};
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); 
@@ -414,14 +434,18 @@ return fetch('/api/employee/attendance');
             if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
         }
 
-        function logoutUser() {
-            if (confirm("Are you sure you want to log out of the Employee Portal?")) {
-                localStorage.removeItem('hr_logged_in');
-                localStorage.removeItem('hr_user');
-                window.location.href = "/";
-            }
-        }
-
+ function logoutUser() {
+    if (confirm("Are you sure you want to log out of the Employee Portal?")) {
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        }).finally(() => {
+            localStorage.removeItem('hr_logged_in');
+            localStorage.removeItem('hr_user');
+            window.location.href = "/";
+        });
+    }
+}
         function calculateDuration(inTime, outTime) {
             if (!inTime || !outTime || outTime === '--:--') return 'Active';
             try {
