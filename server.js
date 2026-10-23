@@ -1,4 +1,5 @@
-
+require('dotenv').config();
+const { pool } = require('./mysql');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -7,19 +8,6 @@ const session = require('express-session'); // <-- Added for session management
 
 const app = express();
 
-const mongoose = require('mongoose');
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://clickormediaweb_db_user:Clickormedia123@cluster0.uqgeway.mongodb.net/hr_portal?retryWrites=true&w=majority&appName=Cluster0";
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("--- CONNECTED TO MONGODB ATLAS SUCCESSFULLY ---"))
-    .catch(err => console.error("MongoDB connection error:", err));
-
-// --- MONGODB SAFE STORE SCHEMA (Without Index Crash) ---
-const storeSchema = new mongoose.Schema({
-    key: { type: String, default: "main_singleton_store" },
-    data: { type: Object, default: {} }
-}, { strict: false });
-
-const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
 // --- SHARED MONTHLY LEAVE CALCULATION ---
 function getLeaveMonthDates(year, month) {
     return {
@@ -199,66 +187,81 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
         balance
     };
 } // Safe Reader
+
 async function readDb() {
-    try {
-        let record = await Store.findOne({ key: "main_singleton_store" });
-        if (!record) {
-            record = await Store.findOne({}); // Fallback to any existing record if key isn't set yet
-        }
-        if (record && record.data) {
-            return record.data;
-        }
-        let defaultData = { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
-        await Store.create({ key: "main_singleton_store", data: defaultData });
-        return defaultData;
-    } catch (err) {
-        console.error("Error reading from MongoDB:", err);
-        return { users: [], attendance: [], leaves: [], myLeaves: [], holidays: [], payroll: [], departments: [], settings: {} };
+    const [rows] = await pool.execute(
+        'SELECT data FROM hr_portal_store WHERE id = 1'
+    );
+
+    if (!rows.length) {
+        throw new Error('HR Portal data row is missing from MySQL.');
     }
+
+    const data = typeof rows[0].data === 'string'
+        ? JSON.parse(rows[0].data)
+        : rows[0].data;
+
+    if (!data || typeof data !== 'object' || !Array.isArray(data.users)) {
+        throw new Error('Invalid HR Portal data in MySQL.');
+    }
+
+    return {
+        users: [],
+        attendance: [],
+        leaves: [],
+        myLeaves: [],
+        holidays: [],
+        payroll: [],
+        departments: [],
+        settings: {},
+        ...data
+    };
 }
 
-// Atomic Safe Writer with Safety Lock
 async function writeDb(newData) {
+    const connection = await pool.getConnection();
+
     try {
-        let record = await Store.findOne({ key: "main_singleton_store" });
-        if (!record) {
-            record = await Store.findOne({});
+        await connection.beginTransaction();
+
+        const [rows] = await connection.execute(
+            'SELECT data FROM hr_portal_store WHERE id = 1 FOR UPDATE'
+        );
+
+        if (!rows.length) {
+            throw new Error('HR Portal MySQL data row is missing.');
         }
-       
-        if (record && record.data) {
-            // Attendance Protection
-            if (record.data.attendance && Array.isArray(record.data.attendance) && record.data.attendance.length > 0) {
-                if (!newData.attendance || newData.attendance.length < record.data.attendance.length) {
-                    console.log("🛡️ SAFETY LOCK: Preserving older attendance records.");
-                    newData.attendance = record.data.attendance;
-                }
-            }
-            // Users Protection
-            if (record.data.users && Array.isArray(record.data.users) && record.data.users.length > 0) {
-                if (!newData.users || newData.users.length < record.data.users.length) {
-                    newData.users = record.data.users;
-                }
-            }
-            // Payroll Protection
-            if (record.data.payroll && Array.isArray(record.data.payroll) && record.data.payroll.length > 0) {
-                if (!newData.payroll || newData.payroll.length < record.data.payroll.length) {
-                    newData.payroll = record.data.payroll;
-                }
+
+        const existing = typeof rows[0].data === 'string'
+            ? JSON.parse(rows[0].data)
+            : rows[0].data;
+
+        // Protect existing records against accidental removal.
+        for (const field of ['users', 'attendance', 'payroll']) {
+            if (
+                Array.isArray(existing[field]) &&
+                existing[field].length > 0 &&
+                (!Array.isArray(newData[field]) ||
+                 newData[field].length < existing[field].length)
+            ) {
+                console.warn(`Safety lock: preserving ${field} records.`);
+                newData[field] = existing[field];
             }
         }
 
-        if (record) {
-            record.key = "main_singleton_store";
-            record.set('data', newData);
-            record.markModified('data');
-            await record.save();
-        } else {
-            await Store.create({ key: "main_singleton_store", data: newData });
-        }
-       
-        console.log("--- DATABASE SAFELY PERSISTED & PROTECTED ---");
-    } catch (err) {
-        console.error("Error writing to MongoDB:", err);
+        await connection.execute(
+            'UPDATE hr_portal_store SET data = ? WHERE id = 1',
+            [JSON.stringify(newData)]
+        );
+
+        await connection.commit();
+        console.log('HR Portal data saved to MySQL successfully.');
+    } catch (error) {
+        await connection.rollback();
+        console.error('MySQL write failed:', error.message);
+        throw error;
+    } finally {
+        connection.release();
     }
 }
 
