@@ -550,7 +550,7 @@
 
                                 <th class="py-3 px-4 font-semibold">Status</th>
 
-                                <th class="py-3 px-4 font-semibold rounded-r-xl text-right">Actions</th>
+                               
 
                             </tr>
 
@@ -1125,6 +1125,7 @@
 
 
        
+
 function calculatePayrollMetrics(rec) {
     const baseSalary = Number(rec.baseNum) || 0;
     const perDaySalary = baseSalary / 30;
@@ -1138,19 +1139,27 @@ function calculatePayrollMetrics(rec) {
     const unpaidLeaves =
         Number(rec.unpaidLeaves) || 0;
 
+    const absentDays =
+        Number(rec.absentDays) || 0;
+
     const leaveBalance =
         Number(rec.calculatedLeaveBalance) || 0;
 
     const earnedLeaves =
         Number(rec.earnedLeaves) || 0;
 
-    // Use the server-calculated unpaid leave only.
-    // Do not add manual half-day logs again.
     const halfDaysCount = 0;
 
-    const totalDeductionAmount = Math.round(
+    const unpaidLeaveDeduction = Math.round(
         unpaidLeaves * perDaySalary
     );
+
+    const absenceDeduction = Math.round(
+        absentDays * perDaySalary
+    );
+
+    const totalDeductionAmount =
+        unpaidLeaveDeduction + absenceDeduction;
 
     const netPayout = Math.max(
         0,
@@ -1165,17 +1174,20 @@ function calculatePayrollMetrics(rec) {
         netStr: formatINR(netPayout),
 
         fullLeavesCount: approvedLeaveDays,
-        halfDaysCount: halfDaysCount,
+        halfDaysCount,
 
         deductionNum: totalDeductionAmount,
         netNum: netPayout,
 
-        earnedLeaves: earnedLeaves,
-        paidLeavesUsed: paidLeavesUsed,
-        unpaidLeaves: unpaidLeaves,
-        leaveBalance: leaveBalance
+        earnedLeaves,
+        paidLeavesUsed,
+        unpaidLeaves,
+        absenceDeduction,
+        absentDays,
+        leaveBalance
     };
-}        function renderPayrollTable() {
+}
+       function renderPayrollTable() {
 
             let tbody = document.getElementById('payrollTableBody');
 
@@ -1207,7 +1219,7 @@ function calculatePayrollMetrics(rec) {
 
             if (filtered.length === 0) {
 
-                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-gray-400 text-xs">No payroll records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-400 text-xs">No payroll records found.</td></tr>`;
 
                 return;
 
@@ -1221,20 +1233,15 @@ function calculatePayrollMetrics(rec) {
 
 
 
-                let badge = rec.status === 'PAID'
+                let normalizedStatus = String(rec.status || 'PENDING').toUpperCase();
 
-                    ? `<span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">PAID</span>`
+let badge = normalizedStatus === 'PAID'
+    ? `<span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">PAID</span>`
+    : `<span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">${normalizedStatus}</span>`;
 
-                    : `<span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">PENDING</span>`;
 
 
-
-                let actionBtn = rec.status === 'PAID'
-
-                    ? `<button onclick="openPayslipModal(${rec.id})" class="px-3 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer"><i class="fa-solid fa-download mr-1"></i> Payslip</button>`
-
-                    : `<button onclick="initiatePayment(${rec.id})" class="px-3 py-1.5 text-xs font-bold text-amber-800 bg-amber-100 border border-amber-200 rounded-xl hover:bg-amber-200 transition-all cursor-pointer"><i class="fa-solid fa-paper-plane mr-1"></i> Pay Now</button>`;
-
+               
 
 
                 let leaveDisplay = `${metrics.fullLeavesCount} Leaves`;
@@ -1297,23 +1304,21 @@ function calculatePayrollMetrics(rec) {
 
                         <td class="py-4 px-4 text-rose-600 font-medium">
 
-                            ${metrics.deductionStr} <span class="text-[10px] text-gray-400 block font-normal">(${metrics.halfDaysCount} half-days)</span>
-
+${metrics.deductionStr} <span class="text-[10px] text-gray-400 block font-normal">(${metrics.absentDays} absent days)</span>
                         </td>
 
                         <td class="py-4 px-4 text-emerald-700 font-extrabold">${metrics.netStr}</td>
 
-                        <td class="py-4 px-4">${badge}</td>
-
-                        <td class="py-4 px-4 text-right whitespace-nowrap">
-
-                            <div class="inline-flex items-center justify-end gap-1.5">
-
-                                ${actionBtn}
-
-                            </div>
-
-                        </td>
+<td class="py-4 px-4">
+    <div class="inline-flex items-center gap-2">
+        ${badge}
+        <button
+            onclick="editPayrollStatus(${rec.id})"
+            class="px-3 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer">
+            <i class="fa-solid fa-pen mr-1"></i> Edit
+        </button>
+    </div>
+</td>
 
                     </tr>
 
@@ -1331,6 +1336,51 @@ function calculatePayrollMetrics(rec) {
 
         }
 
+
+async function editPayrollStatus(id) {
+    const rec = payrollRecords.find(r => r.id === id);
+    if (!rec) {
+        alert("Payroll record not found.");
+        return;
+    }
+
+    const currentStatus = String(rec.status || "PENDING").toUpperCase();
+
+    const newStatus = prompt(
+        `Update payroll status for ${rec.name}.\nEnter PAID or PENDING:`,
+        currentStatus
+    );
+
+    if (newStatus === null) return;
+
+    const status = newStatus.trim().toUpperCase();
+
+    if (!["PAID", "PENDING"].includes(status)) {
+        alert("Please enter only PAID or PENDING.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/payroll/update-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            alert(data.message || "Could not update payroll status.");
+            return;
+        }
+
+        await fetchPayrollData();
+        alert(`Payroll status updated to ${status}.`);
+    } catch (err) {
+        console.error("Error updating payroll status:", err);
+        alert("Unable to update status. Please try again.");
+    }
+}
 
 
         function initiatePayment(id) {
@@ -1702,6 +1752,10 @@ function calculatePayrollMetrics(rec) {
                 <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Leaves Taken:</span> <span class="font-bold text-[#222222]">${metrics.fullLeavesCount} recorded</span></div>
 
                 <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Half-Days / Early Outs:</span> <span class="font-bold text-[#222222]">${metrics.halfDaysCount} recorded</span></div>
+<div class="flex justify-between border-b border-gray-100 pb-2">
+    <span class="text-gray-500">Absent Days:</span>
+    <span class="font-bold text-[#222222]">${metrics.absentDays} days</span>
+</div>
 
                 <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Attendance Deductions:</span> <span class="font-bold text-rose-600">${metrics.deductionStr}</span></div>
 

@@ -188,6 +188,169 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
     };
 } // Safe Reader
 
+function calculateMonthlyAbsences(
+    employee,
+    attendanceRecords,
+    approvedLeaves,
+    holidays,
+    settings,
+    year,
+    month
+) {
+    const pad = value => String(value).padStart(2, "0");
+
+    const today = new Date();
+    const todayDate =
+        `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+    const monthStart = `${year}-${pad(month)}-01`;
+    const monthEnd =
+        `${year}-${pad(month)}-${new Date(year, month, 0).getDate()}`;
+
+    const shiftEnd = String(
+        settings?.shiftEndTime || "06:00 PM"
+    ).trim();
+
+    function getShiftEndMinutes(value) {
+        const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+        if (!match) return 18 * 60;
+
+        let hours = Number(match[1]);
+        const minutes = Number(match[2]);
+        const period = match[3].toUpperCase();
+
+        if (hours === 12) hours = 0;
+        if (period === "PM") hours += 12;
+
+        return hours * 60 + minutes;
+    }
+
+    function shiftHasEnded(dateString) {
+        if (dateString < todayDate) return true;
+        if (dateString > todayDate) return false;
+
+        const currentMinutes =
+            today.getHours() * 60 + today.getMinutes();
+
+        return currentMinutes >= getShiftEndMinutes(shiftEnd);
+    }
+
+    const employeeEmail =
+        String(employee.email || "").trim().toLowerCase();
+
+    const employeeName =
+        String(employee.name || "").trim().toLowerCase();
+
+    const attendance = Array.isArray(attendanceRecords)
+        ? attendanceRecords
+        : [];
+
+    const leaveList = Array.isArray(approvedLeaves)
+        ? approvedLeaves
+        : [];
+
+    const holidayDates = new Set(
+        (Array.isArray(holidays) ? holidays : [])
+            .map(item => String(item.date || "").slice(0, 10))
+    );
+
+    const approvedLeaveDates = new Set();
+
+    for (const leave of leaveList) {
+        if (
+            String(leave.status || "").toUpperCase() !== "APPROVED" ||
+            String(leave.name || "").trim().toLowerCase() !== employeeName ||
+            !leave.startDate ||
+            !leave.endDate
+        ) {
+            continue;
+        }
+
+        const start = String(leave.startDate).slice(0, 10);
+        const end = String(leave.endDate).slice(0, 10);
+
+        const isHalfDay = /half.?day/i.test(
+            `${leave.duration || ""} ${leave.dayType || ""} ${leave.type || ""}`
+        );
+
+        for (
+            let date = new Date(`${start}T00:00:00Z`);
+            date <= new Date(`${end}T00:00:00Z`);
+            date.setUTCDate(date.getUTCDate() + 1)
+        ) {
+            const dateString = date.toISOString().slice(0, 10);
+
+            if (
+                dateString >= monthStart &&
+                dateString <= monthEnd &&
+                !isHalfDay
+            ) {
+                approvedLeaveDates.add(dateString);
+            }
+        }
+    }
+
+    const absentDates = [];
+
+    for (
+        let date = new Date(`${monthStart}T00:00:00Z`);
+        date <= new Date(`${monthEnd}T00:00:00Z`);
+        date.setUTCDate(date.getUTCDate() + 1)
+    ) {
+        const dateString = date.toISOString().slice(0, 10);
+        const weekday = date.getUTCDay();
+
+        // Sunday is the weekly off.
+        if (weekday === 0) continue;
+
+        // Do not mark a future date or today's unfinished shift absent.
+        if (!shiftHasEnded(dateString)) continue;
+
+        // Holidays and approved full-day leaves are not absences.
+        if (holidayDates.has(dateString)) continue;
+        if (approvedLeaveDates.has(dateString)) continue;
+
+        // Do not count days before the employee joined.
+        const joiningDate = parseJoiningDate(employee.joiningDate);
+        if (joiningDate) {
+            const joined = new Date(joiningDate);
+            const joinedDate =
+                `${joined.getFullYear()}-${pad(joined.getMonth() + 1)}-${pad(joined.getDate())}`;
+
+            if (dateString < joinedDate) continue;
+        }
+
+        const record = attendance.find(item =>
+            String(item.email || "").trim().toLowerCase() === employeeEmail &&
+            String(item.date || "").slice(0, 10) === dateString
+        );
+
+        const checkIn = String(record?.checkInTime || "").trim();
+        const checkOut = String(record?.checkOutTime || "").trim();
+
+        const validCheckIn =
+            checkIn !== "" &&
+            checkIn !== "--:--" &&
+            checkIn.toLowerCase() !== "pending";
+
+        const validCheckOut =
+            checkOut !== "" &&
+            checkOut !== "--:--" &&
+            checkOut.toLowerCase() !== "pending";
+
+        // Missing either punch means absent.
+        if (!validCheckIn || !validCheckOut) {
+            absentDates.push(dateString);
+        }
+    }
+
+    return {
+        absentDays: absentDates.length,
+        absentDates
+    };
+}
+
 async function readDb() {
     const [rows] = await pool.execute(
         'SELECT data FROM hr_portal_store WHERE id = 1'
@@ -1044,6 +1207,7 @@ app.get('/api/payroll', async (req, res) => {
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
 
+    
         const leave = calculateMonthlyLeave(
             rec,
             db.leaves || [],
@@ -1051,15 +1215,30 @@ app.get('/api/payroll', async (req, res) => {
             month
         );
 
+        const absence = calculateMonthlyAbsences(
+            rec,
+            db.attendance || [],
+            db.leaves || [],
+            db.holidays || [],
+            db.settings || {},
+            year,
+            month
+        );
+
+
   return {
     ...rec,
     earnedLeaves: leave.earned,
     leavesUsedThisMonth: leave.used,
     paidLeavesUsed: leave.paidUsed,
     unpaidLeaves: leave.unpaid,
+    
     unpaidHalfDays: leave.unpaidHalfDays,
-    calculatedLeaveBalance: leave.balance
+    calculatedLeaveBalance: leave.balance,
+    absentDays: absence.absentDays,
+    absentDates: absence.absentDates
 };
+
     });
 
 res.json({ success: true, payroll: filteredPayroll });
@@ -1127,23 +1306,60 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
         const { id, status } = req.body;
+
+        const allowedStatuses = ['PAID', 'PENDING'];
+
+        if (!allowedStatuses.includes(String(status || '').toUpperCase())) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid payroll status.'
+            });
+        }
+
         const db = await readDb();
-        if (!db.payroll) db.payroll = [];
+        if (!Array.isArray(db.payroll)) db.payroll = [];
+
+        const normalizedStatus = String(status).toUpperCase();
+        const changedAt = new Date().toISOString();
 
         if (id === 'all') {
-            db.payroll.forEach(r => r.status = status);
+            db.payroll.forEach(record => {
+                record.status = normalizedStatus;
+                record.statusUpdatedAt = changedAt;
+                record.statusUpdatedBy =
+                    req.session?.user?.email || 'HR';
+            });
         } else {
-            let rec = db.payroll.find(r => r.id == id);
-            if (rec) rec.status = status;
+            const record = db.payroll.find(item => item.id == id);
+
+            if (!record) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Payroll record not found.'
+                });
+            }
+
+            record.status = normalizedStatus;
+            record.statusUpdatedAt = changedAt;
+            record.statusUpdatedBy =
+                req.session?.user?.email || 'HR';
         }
 
         await writeDb(db);
-        res.json({ success: true, message: 'Payroll status updated successfully!' });
+
+        res.json({
+            success: true,
+            message: 'Payroll status updated successfully!'
+        });
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Error updating payroll status:', err);
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error while updating payroll status.'
+        });
     }
 });
-
 app.post('/api/payroll/update-attendance', async (req, res) => {
     try {
         const { id, leaveBalance, halfDays } = req.body;
