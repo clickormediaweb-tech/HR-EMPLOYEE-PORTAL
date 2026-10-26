@@ -193,7 +193,7 @@
                     </button>
                     <button onclick="switchTab('audit', this)" id="btnAudit" class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-[#222222] font-semibold text-xs transition-all cursor-pointer">
                         <i class="fa-solid fa-shield-halved w-4 text-center"></i>
-                        <span>Security & Audit Logs</span>
+                       <span>Change HR Password</span>
                     </button>
                 </div>
 
@@ -273,82 +273,57 @@
                         </div>
                     </div>
 
-                    <!-- Tab 4: Security & Audit Logs -->
-                    <div id="tabAudit" class="hidden space-y-6">
-                        <div class="border-b border-[#EAEAEA] pb-4">
-                            
-<div class="mb-8 border-b border-[#EAEAEA] pb-8">
-    <h3 class="text-lg font-black text-[#222222]">Change HR Password</h3>
-    <p class="text-xs text-gray-500 mt-1">
-        Update your HR account password securely.
-    </p>
+                    
+<!-- Tab 4: Change HR Password -->
+<div id="tabAudit" class="space-y-6">
+    <div class="mb-8 border-b border-[#EAEAEA] pb-8">
+        <h3 class="text-lg font-black text-[#222222]">Change HR Password</h3>
+        <p class="text-xs text-gray-500 mt-1">
+            Update your HR account password securely.
+        </p>
 
-    <form id="hrPasswordForm" class="mt-5 space-y-4 max-w-xl">
-        <div>
-            <label for="currentPassword"
-                class="block font-bold text-gray-700 text-xs mb-2">
-                Current Password
-            </label>
-            <input type="password" id="currentPassword"
-                autocomplete="current-password" required
-                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
-        </div>
+        <form id="hrPasswordForm" class="mt-5 space-y-4 max-w-xl">
+            <div>
+                <label for="currentPassword"
+                    class="block font-bold text-gray-700 text-xs mb-2">
+                    Current Password
+                </label>
+                <input type="password" id="currentPassword"
+                    autocomplete="current-password" required
+                    class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+            </div>
 
-        <div>
-            <label for="newPassword"
-                class="block font-bold text-gray-700 text-xs mb-2">
-                New Password
-            </label>
-            <input type="password" id="newPassword"
-                autocomplete="new-password" minlength="8" required
-                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
-        </div>
+            <div>
+                <label for="newPassword"
+                    class="block font-bold text-gray-700 text-xs mb-2">
+                    New Password
+                </label>
+                <input type="password" id="newPassword"
+                    autocomplete="new-password" minlength="8" required
+                    class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+            </div>
 
-        <div>
-            <label for="confirmPassword"
-                class="block font-bold text-gray-700 text-xs mb-2">
-                Confirm New Password
-            </label>
-            <input type="password" id="confirmPassword"
-                autocomplete="new-password" minlength="8" required
-                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
-        </div>
+            <div>
+                <label for="confirmPassword"
+                    class="block font-bold text-gray-700 text-xs mb-2">
+                    Confirm New Password
+                </label>
+                <input type="password" id="confirmPassword"
+                    autocomplete="new-password" minlength="8" required
+                    class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+            </div>
 
-        <p id="passwordMessage" class="text-sm" role="status" aria-live="polite"></p>
+            <p id="passwordMessage" class="text-sm" role="status" aria-live="polite"></p>
 
-        <button type="submit"
-            class="px-5 py-3 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm hover:bg-[#fbc512] transition-all">
-            Update Password
-        </button>
-    </form>
+            <button type="submit"
+                class="px-5 py-3 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm hover:bg-[#fbc512] transition-all">
+                Update Password
+            </button>
+        </form>
+    </div>
 </div>
 
-                            <h3 class="text-lg font-black text-[#222222]">Administrative Audit Trail</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Secure chronological log of sensitive actions performed in portal.</p>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-[#F3F4F6] text-gray-600 uppercase tracking-wider">
-                                        <th class="py-3 px-4 font-semibold rounded-l-xl">Action Performed</th>
-                                        <th class="py-3 px-4 font-semibold">User</th>
-                                        <th class="py-3 px-4 font-semibold">Timestamp</th>
-                                        <th class="py-3 px-4 font-semibold rounded-r-xl">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-[#EAEAEA]">
-                                    <tr>
-                                        <td class="py-3 px-4 font-bold text-[#222222]">Batch Payroll Disbursed (September 2026)</td>
-                                        <td class="py-3 px-4 text-gray-600">Tanya Dua (HR)</td>
-                                        <td class="py-3 px-4 text-gray-500">Sep 28, 2026 - 10:30 AM</td>
-                                        <td class="py-3 px-4"><span class="px-2 py-0.5 font-bold text-emerald-700 bg-emerald-50 rounded">Success</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3 px-4 font-bold text-[#222222]">New Employee Added (Dhiraj Sareen)</td>
-                                        <td class="py-3 px-4 text-gray-600">Tanya Dua (HR)</td>
-                                        <td class="py-3 px-4 text-gray-500">Sep 25, 2026 - 02:15 PM</td>
-                                        <td class="py-3 px-4"><span class="px-2 py-0.5 font-bold text-emerald-700 bg-emerald-50 rounded">Success</span></td>
-                                    </tr>
+                            
                                 </tbody>
                             </table>
                         </div>
