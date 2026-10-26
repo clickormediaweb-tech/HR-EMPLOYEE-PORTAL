@@ -276,6 +276,53 @@
                     <!-- Tab 4: Security & Audit Logs -->
                     <div id="tabAudit" class="hidden space-y-6">
                         <div class="border-b border-[#EAEAEA] pb-4">
+                            
+<div class="mb-8 border-b border-[#EAEAEA] pb-8">
+    <h3 class="text-lg font-black text-[#222222]">Change HR Password</h3>
+    <p class="text-xs text-gray-500 mt-1">
+        Update your HR account password securely.
+    </p>
+
+    <form id="hrPasswordForm" class="mt-5 space-y-4 max-w-xl">
+        <div>
+            <label for="currentPassword"
+                class="block font-bold text-gray-700 text-xs mb-2">
+                Current Password
+            </label>
+            <input type="password" id="currentPassword"
+                autocomplete="current-password" required
+                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+        </div>
+
+        <div>
+            <label for="newPassword"
+                class="block font-bold text-gray-700 text-xs mb-2">
+                New Password
+            </label>
+            <input type="password" id="newPassword"
+                autocomplete="new-password" minlength="8" required
+                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+        </div>
+
+        <div>
+            <label for="confirmPassword"
+                class="block font-bold text-gray-700 text-xs mb-2">
+                Confirm New Password
+            </label>
+            <input type="password" id="confirmPassword"
+                autocomplete="new-password" minlength="8" required
+                class="w-full bg-[#F9FAFB] border border-[#EAEAEA] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FFD134]">
+        </div>
+
+        <p id="passwordMessage" class="text-sm" role="status" aria-live="polite"></p>
+
+        <button type="submit"
+            class="px-5 py-3 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm hover:bg-[#fbc512] transition-all">
+            Update Password
+        </button>
+    </form>
+</div>
+
                             <h3 class="text-lg font-black text-[#222222]">Administrative Audit Trail</h3>
                             <p class="text-xs text-gray-500 mt-0.5">Secure chronological log of sensitive actions performed in portal.</p>
                         </div>
@@ -370,6 +417,58 @@
                 alert("Failed to save settings.");
             }
         }
+
+document.getElementById('hrPasswordForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const message = document.getElementById('passwordMessage');
+    const submitButton = this.querySelector('button[type="submit"]');
+
+    message.textContent = '';
+    message.className = 'text-sm';
+
+    if (newPassword !== confirmPassword) {
+        message.textContent = 'New passwords do not match.';
+        message.classList.add('text-red-600');
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'Updating...';
+
+    try {
+        const response = await fetch('/api/hr/update-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                confirmPassword
+            })
+        });
+
+        const data = await response.json();
+
+        message.textContent = data.message || (
+            data.success ? 'Password updated.' : 'Unable to update password.'
+        );
+        message.classList.add(data.success ? 'text-green-600' : 'text-red-600');
+
+        if (data.success) {
+            document.getElementById('hrPasswordForm').reset();
+        }
+    } catch (error) {
+        console.error('Password update error:', error);
+        message.textContent = 'Server connection failed. Please try again.';
+        message.classList.add('text-red-600');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Update Password';
+    }
+});
 
         function switchTab(tabId, btnElement) {
             // Hide all tabs

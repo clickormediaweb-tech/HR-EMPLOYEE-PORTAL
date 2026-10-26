@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');    
 const session = require('express-session'); // <-- Added for session management
-
+const bcrypt = require('bcryptjs');
 const app = express();
 
 // --- SHARED MONTHLY LEAVE CALCULATION ---
@@ -506,7 +506,96 @@ app.post('/api/employee/update-password', async (req, res) => {
         console.error('Critical error updating password:', err);
         res.status(500).json({ success: false, message: "Server error while updating password." });
     }
-});// 2. Strict Login Verification Route with Role-Based Redirection
+});
+// HR-only password change route
+app.post('/api/hr/update-password', async (req, res) => {
+    try {
+        // Only a logged-in HR/admin user can change their password.
+        if (!req.session.user || req.session.user.role !== 'admin') {
+            return res.status(401).json({
+                success: false,
+                message: 'Please log in with your HR account.'
+            });
+        }
+
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please fill in all password fields.'
+            });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: 'Your new password must be at least 8 characters long.'
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password and confirmation do not match.'
+            });
+        }
+
+        if (currentPassword === newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Your new password must be different from your current password.'
+            });
+        }
+
+        const db = await readDb();
+
+        const email = req.session.user.email.trim().toLowerCase();
+
+        const user = db.users.find(
+            u => u.email && u.email.trim().toLowerCase() === email
+        );
+
+        if (!user || user.role !== 'admin') {
+            return res.status(404).json({
+                success: false,
+                message: 'HR account not found.'
+            });
+        }
+
+        const storedPassword = String(user.password || '');
+        const isBcryptHash = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
+
+        const passwordIsCorrect = isBcryptHash
+            ? await bcrypt.compare(currentPassword, storedPassword)
+            : storedPassword === currentPassword;
+
+        if (!passwordIsCorrect) {
+            return res.status(400).json({
+                success: false,
+                message: 'Your current password is incorrect.'
+            });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 12);
+
+        await writeDb(db);
+
+        return res.json({
+            success: true,
+            message: 'Password changed successfully.'
+        });
+
+    } catch (err) {
+        console.error('HR password update failed:', err);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to change password. Please try again.'
+        });
+    }
+});
+// 2. Strict Login Verification Route with Role-Based Redirection
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -521,16 +610,27 @@ const user = Array.isArray(db.users)
       )
     : null;
 
+const storedPassword = String(user?.password || '');
+const isBcryptHash = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
+
+const passwordMatches = user
+    ? (
+        isBcryptHash
+            ? await bcrypt.compare(password || '', storedPassword)
+            : storedPassword === password
+      )
+    : false;
+
 console.log("[LOGIN DIAGNOSTIC]", {
     usersArrayExists: Array.isArray(db.users),
     usersCount: Array.isArray(db.users) ? db.users.length : 0,
     emailFound: Boolean(user),
-    passwordMatches: Boolean(user && user.password === password),
+    passwordMatches,
     role: user ? user.role : null
 });
 
-if (user && user.password === password) {
-    req.session.user = { name: user.name, email: user.email, role: user.role };
+if (user && passwordMatches) {
+        req.session.user = { name: user.name, email: user.email, role: user.role };
            
             let redirectUrl = "/employee/dashboard";
             if (user.role === 'admin') {
