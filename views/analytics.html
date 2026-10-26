@@ -151,16 +151,62 @@
 
                 <div class="h-6 w-[1px] bg-[#EAEAEA]"></div>
 
-                <!-- User Profile Dropdown Simulator -->
-                <div onclick="alert('Admin (HR Manager)')" class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
-                    <div class="text-right">
-                        <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
-                        <p class="text-xs text-gray-500">HR Manager</p>
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
-                </div>
-            </div>
+                <!-- User Profile Dropdown Simulator --><!-- User Profile Dropdown -->
+<div class="relative">
+    <div onclick="toggleProfileDropdown(event)"
+         class="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-gray-50 transition-all">
+        <div class="text-right">
+            <h4 class="text-sm font-bold text-[#222222] group-hover:text-amber-600 transition-colors">Admin</h4>
+            <p class="text-xs text-gray-500">HR Manager</p>
+        </div>
+
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces"
+             alt="Admin"
+             class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md transform group-hover:scale-105 transition-all">
+
+        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+    </div>
+
+    <!-- Profile Menu -->
+    <div id="profileDropdown"
+         class="hidden absolute right-0 mt-3 w-56 bg-white border border-[#EAEAEA] rounded-2xl shadow-xl py-2 z-50">
+
+        <div class="px-4 py-3">
+            <p class="text-xs font-bold text-[#222222]">Admin</p>
+            <p class="text-[11px] text-gray-500 truncate">admin@clickormedia.co.in</p>
+        </div>
+
+        <div class="border-t border-[#EAEAEA] pt-1">
+            <button type="button"
+                    onclick="openModal('profileModal')"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
+                <i class="fa-regular fa-user w-4"></i>
+                <span>My Profile</span>
+            </button>
+
+            <a href="/hr/settings"
+               class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
+                <i class="fa-solid fa-gear w-4"></i>
+                <span>Account Settings</span>
+            </a>
+
+            <button type="button"
+                    onclick="openModal('securityModal')"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
+                <i class="fa-solid fa-shield-halved w-4"></i>
+                <span>Privacy &amp; Security</span>
+            </button>
+        </div>
+
+        <div class="border-t border-[#EAEAEA] pt-1">
+            <a href="#" onclick="logoutUser(); return false;"
+               class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-4 text-rose-500"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+</div>
         </header>
 
         <!-- PAGE CONTENT CONTAINER -->
@@ -388,6 +434,39 @@
         window.onload = function() {
             fetchAnalyticsData();
         };
+        function toggleProfileDropdown(event) {
+    event.stopPropagation();
+
+    const dropdown = document.getElementById('profileDropdown');
+
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+}
+
+window.addEventListener('click', function () {
+    const dropdown = document.getElementById('profileDropdown');
+
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+    }
+});
+
+async function logoutUser() {
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (err) {
+        console.error('Logout error:', err);
+    }
+
+    localStorage.clear();
+    window.location.replace('/');
+}
     </script>
 </body>
 </html>
