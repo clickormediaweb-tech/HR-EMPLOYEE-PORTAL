@@ -379,44 +379,54 @@
 document.getElementById('empHeaderDesignation').innerText = emp.designation || "Employee";
 
                     // --- LOCALSTORAGE & SERVER SE CHECK KAREIN KI PUNCHED-IN HAI YA NAHI ---
-                    let savedPunchState = localStorage.getItem('is_punched_in');
-                    let savedPunchTime = localStorage.getItem('punch_in_time');
-                    let savedLocation = localStorage.getItem('punch_location');
+                   // Always load punch status for the employee in the active session.
+isPunchedIn = false;
+punchInTimeString = "";
+currentLiveLocation = "Office Headquarters";
 
-                    if (savedPunchState === 'true') {
-                        isPunchedIn = true;
-                        punchInTimeString = savedPunchTime || "Earlier";
-                        currentLiveLocation = savedLocation || "Office Headquarters";
+const badge = document.getElementById('punchStatusBadge');
+const btn = document.getElementById('punchBtn');
 
-                        let badge = document.getElementById('punchStatusBadge');
-                        let btn = document.getElementById('punchBtn');
-                        badge.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md";
-                        badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] mr-1.5"></i> Punched In at ${currentLiveLocation} (${punchInTimeString})`;
-                        btn.innerHTML = `<i class="fa-solid fa-sign-out-alt mr-2"></i> Punch Out`;
-                        btn.className = "px-6 py-3 rounded-2xl bg-rose-500 text-white font-extrabold text-sm shadow-xl hover:bg-rose-600 transition-all cursor-pointer whitespace-nowrap";
-                    } else {
-                        fetch(`/api/employee/punch-status?email=${encodeURIComponent(emp.email)}`)
-                            .then(r => r.json())
-                            .then(statusData => {
-                                if (statusData.success && statusData.isPunchedIn) {
-                                    isPunchedIn = true;
-                                    punchInTimeString = statusData.time || "Earlier";
-                                    currentLiveLocation = statusData.location || "Office Headquarters";
+badge.className =
+    "bg-amber-400 text-[#222222] px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md text-center";
+badge.innerHTML =
+    '<i class="fa-solid fa-circle text-[8px] mr-1.5"></i> Not Punched In';
 
-                                    localStorage.setItem('is_punched_in', 'true');
-                                    localStorage.setItem('punch_in_time', punchInTimeString);
-                                    localStorage.setItem('punch_location', currentLiveLocation);
+btn.innerHTML = '<i class="fa-solid fa-sign-in-alt mr-2"></i> Punch In';
+btn.className =
+    "px-6 py-3 rounded-2xl bg-white text-blue-700 font-extrabold text-sm shadow-xl hover:bg-blue-50 transition-all cursor-pointer whitespace-nowrap";
 
-                                    let badge = document.getElementById('punchStatusBadge');
-                                    let btn = document.getElementById('punchBtn');
-                                    badge.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md";
-                                    badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] mr-1.5"></i> Punched In at ${currentLiveLocation} (${punchInTimeString})`;
-                                    btn.innerHTML = `<i class="fa-solid fa-sign-out-alt mr-2"></i> Punch Out`;
-                                    btn.className = "px-6 py-3 rounded-2xl bg-rose-500 text-white font-extrabold text-sm shadow-xl hover:bg-rose-600 transition-all cursor-pointer whitespace-nowrap";
-                                }
-                            });
-                    }
+fetch('/api/employee/punch-status', {
+    credentials: 'same-origin'
+})
+.then(res => {
+    if (!res.ok) {
+        throw new Error('Unable to load punch status.');
+    }
+    return res.json();
+})
+.then(statusData => {
+    if (!statusData.success) return;
 
+    isPunchedIn = Boolean(statusData.isPunchedIn);
+
+    if (isPunchedIn) {
+        punchInTimeString = statusData.time || "Earlier";
+        currentLiveLocation =
+            statusData.location || "Office Headquarters";
+
+        badge.className =
+            "bg-emerald-600 text-white px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md";
+        badge.innerHTML =
+            `<i class="fa-solid fa-circle text-[8px] mr-1.5"></i> Punched In at ${currentLiveLocation} (${punchInTimeString})`;
+
+        btn.innerHTML =
+            '<i class="fa-solid fa-sign-out-alt mr-2"></i> Punch Out';
+        btn.className =
+            "px-6 py-3 rounded-2xl bg-rose-500 text-white font-extrabold text-sm shadow-xl hover:bg-rose-600 transition-all cursor-pointer whitespace-nowrap";
+    }
+})
+.catch(err => console.error('Punch status error:', err));
                     // Render recent leaves
                     let leaveList = document.getElementById('recentLeavesList');
                     leaveList.innerHTML = "";
@@ -498,16 +508,15 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
             let punchOutTimestamp = new Date();
             let punchOutTimeString = currentTime;
 
-            let savedPunchTimeMillis = localStorage.getItem('punch_in_millis');
-            let savedInTimeStr = localStorage.getItem('punch_in_time') || "Earlier";
-            let diffMs = savedPunchTimeMillis ? (punchOutTimestamp - new Date(parseInt(savedPunchTimeMillis))) : (15 * 60000);
-           
-            // Math.round ka use kiya taaki exact minutes properly calculate ho sakein
-            let diffMins = Math.max(1, Math.round(diffMs / 60000));
-            let hours = Math.floor(diffMins / 60);
-            let mins = diffMins % 60;
-            let totalDurationStr = `${hours} Hours ${mins} Mins`;
+            let savedInTimeStr = punchInTimeString || "Earlier";
+let diffMs = punchInTimestamp
+    ? punchOutTimestamp - punchInTimestamp
+    : 15 * 60000;
 
+let diffMins = Math.max(1, Math.round(diffMs / 60000));
+let hours = Math.floor(diffMins / 60);
+let mins = diffMins % 60;
+let totalDurationStr = `${hours} Hours ${mins} Mins`;
             document.getElementById('summaryTimings').innerText = `${savedInTimeStr} - ${punchOutTimeString}`;
             document.getElementById('summaryDuration').innerText = totalDurationStr;
             document.getElementById('summaryLocation').innerText = currentLiveLocation;
@@ -519,11 +528,7 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
             btn.innerHTML = `<i class="fa-solid fa-fingerprint mr-2"></i> Punch In Again`;
             btn.className = "px-6 py-3 rounded-2xl bg-white text-blue-700 font-extrabold text-sm shadow-xl hover:bg-blue-50 transition-all cursor-pointer whitespace-nowrap";
            
-            localStorage.removeItem('is_punched_in');
-            localStorage.removeItem('punch_in_time');
-            localStorage.removeItem('punch_location');
-            localStorage.removeItem('punch_in_millis');
-
+           
             fetch('/api/employee/punch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -545,11 +550,7 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
         punchInTimestamp = new Date();
         punchInTimeString = currentTime;
 
-        localStorage.setItem('is_punched_in', 'true');
-        localStorage.setItem('punch_in_time', currentTime);
-        localStorage.setItem('punch_location', currentLiveLocation);
-        localStorage.setItem('punch_in_millis', punchInTimestamp.getTime().toString());
-
+       
         document.getElementById('shiftReportBox').classList.add('hidden');
 
         let badge = document.getElementById('punchStatusBadge');
@@ -603,16 +604,22 @@ document.getElementById('empHeaderDesignation').innerText = emp.designation || "
     }
 
     function logoutUser() {
-        if (confirm("Are you sure you want to log out of the Employee Portal?")) {
-            localStorage.removeItem('hr_logged_in');
-            localStorage.removeItem('hr_user');
-            localStorage.removeItem('is_punched_in');
-            localStorage.removeItem('punch_in_time');
-            localStorage.removeItem('punch_location');
-            localStorage.removeItem('punch_in_millis');
-            window.location.href = "/";
-        }
+    if (!confirm("Are you sure you want to log out of the Employee Portal?")) {
+        return;
     }
+
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    })
+    .then(() => {
+        window.location.replace('/');
+    })
+    .catch(err => {
+        console.error('Logout failed:', err);
+        alert('Unable to log out. Please try again.');
+    });
+}
        function toggleMobileSidebar() {
     let sidebar = document.getElementById('mobileSidebar');
     sidebar.classList.toggle('-translate-x-full');

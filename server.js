@@ -1726,28 +1726,47 @@ app.get('/api/employee/stats', async (req, res) => {
     try {
         const db = await readDb();
 
-        const empName =
-            (req.session.user && req.session.user.name)
-                ? req.session.user.name
-                : (req.query.name || "Pranchal Rajpal");
+       const sessionUser = req.session.user;
 
-        if (!Array.isArray(db.payroll)) {
-            db.payroll = [];
-        }
+if (!sessionUser || !sessionUser.email) {
+    return res.status(401).json({
+        success: false,
+        message: 'Please log in again.'
+    });
+}
 
-        const record =
-            db.payroll.find(p =>
-                p.name &&
-                p.name.toLowerCase() === empName.toLowerCase()
-            ) ||
-            db.payroll[0] ||
-            {
-                name: empName,
-                baseNum: 25000,
-                leaveBalance: 0,
-                leaveLogs: []
-            };
 
+
+if (!Array.isArray(db.users)) db.users = [];
+if (!Array.isArray(db.payroll)) db.payroll = [];
+
+const sessionEmail = sessionUser.email.trim().toLowerCase();
+
+const dbUser = db.users.find(user =>
+    user.email &&
+    user.email.trim().toLowerCase() === sessionEmail &&
+    user.role !== 'former'
+);
+
+if (!dbUser) {
+    return res.status(403).json({
+        success: false,
+        message: 'Employee account not found or inactive.'
+    });
+}
+
+const empName = dbUser.name;
+
+const record = db.payroll.find(payroll =>
+    payroll.email &&
+    payroll.email.trim().toLowerCase() === sessionEmail
+) || {
+    name: dbUser.name,
+    email: dbUser.email,
+    dept: dbUser.department || dbUser.dept || '',
+    baseNum: 0,
+    leaveLogs: []
+};
         // Use the current calendar month and shared HR leave calculation.
         const currentDate = new Date();
         const year = currentDate.getFullYear();
@@ -1782,10 +1801,11 @@ app.get('/api/employee/stats', async (req, res) => {
         res.json({
             success: true,
             employee: {
-                name: record.name || empName,
-                email: record.email ||
-                    `${empName.toLowerCase().replace(/\s+/g, '')}@clickormedia.co.in`,
-                dept: record.dept || "Software Engineering",
+               name: dbUser.name,
+email: dbUser.email,
+dept: dbUser.department || dbUser.dept ||
+    record.dept || "Software Engineering",
+designation: dbUser.designation || "Employee",
 
                 // Values come from the shared leave calculation.
                 leaveBalance: leave.balance,
