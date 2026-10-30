@@ -811,21 +811,83 @@ app.get('/api/attendance', async (req, res) => {
         res.status(500).json({ success: false, attendance: [] });
     }
 });// 8. API: Save Manual Attendance Log
+
 app.post('/api/attendance/add', async (req, res) => {
     try {
-        const { name, email, dept, role, date, checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar } = req.body;
-        const db = await readDb();
-        if (!db.attendance) db.attendance = [];
+        const {
+            name, email, dept, role, date,
+            checkInTime, checkInLoc,
+            checkOutTime, checkOutLoc,
+            status, avatar
+        } = req.body;
 
-        const newLog = { name, email, dept, role, date: date || '2026-09-28', checkInTime, checkInLoc, checkOutTime, checkOutLoc, status, avatar };
-        db.attendance.unshift(newLog);
+        if (!email || !date) {
+            return res.status(400).json({
+                success: false,
+                message: 'Employee email and attendance date are required.'
+            });
+        }
+
+        const db = await readDb();
+
+        if (!Array.isArray(db.attendance)) {
+            db.attendance = [];
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Find an existing record for this employee on this date
+        const existingIndex = db.attendance.findIndex(log =>
+            log.email &&
+            log.email.trim().toLowerCase() === normalizedEmail &&
+            log.date === date
+        );
+
+        const attendanceData = {
+            name,
+            email: normalizedEmail,
+            dept,
+            role,
+            date,
+            checkInTime,
+            checkInLoc,
+            checkOutTime,
+            checkOutLoc,
+            status,
+            avatar
+        };
+
+        if (existingIndex !== -1) {
+            // Update the existing record instead of creating a duplicate
+            db.attendance[existingIndex] = {
+                ...db.attendance[existingIndex],
+                ...attendanceData
+            };
+
+            console.log(`--- ATTENDANCE UPDATED FOR ${name} ON ${date} ---`);
+        } else {
+            // Create a new record only if one does not exist
+            db.attendance.unshift(attendanceData);
+
+            console.log(`--- ATTENDANCE RECORDED FOR ${name} ON ${date} ---`);
+        }
+
         await writeDb(db);
 
-        console.log(`--- ATTENDANCE LOG RECORDED FOR ${name} ON ${date} ---`);
-        res.json({ success: true, message: 'Attendance recorded successfully!' });
+        res.json({
+            success: true,
+            message: existingIndex !== -1
+                ? 'Attendance updated successfully!'
+                : 'Attendance recorded successfully!'
+        });
+
     } catch (err) {
         console.error('Error saving attendance:', err);
-        res.status(500).json({ success: false, message: 'Server error while saving attendance' });
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error while saving attendance'
+        });
     }
 });
 // --- API: Get Today's Attendance Summary for HR Dashboard ---
@@ -1797,6 +1859,73 @@ const record = db.payroll.find(payroll =>
             0,
             baseSalary - totalDeductions
         );
+        // Calculate actual monthly attendance percentage
+const attendanceRecords = Array.isArray(db.attendance)
+    ? db.attendance
+    : [];
+
+const employeeAttendance = attendanceRecords.filter(log =>
+    log.email &&
+    log.email.trim().toLowerCase() === sessionEmail &&
+    log.date &&
+    log.date.startsWith(`${year}-${String(month).padStart(2, '0')}`) &&
+    ['on time', 'late'].includes(
+        String(log.status || '').toLowerCase()
+    )
+);
+
+const presentDays = new Set(
+    employeeAttendance.map(log => log.date)
+).size;
+
+const holidayDates = new Set(
+    (Array.isArray(db.holidays) ? db.holidays : [])
+        .map(h => String(h.date || '').slice(0, 10))
+);
+
+const approvedLeaveDates = new Set();
+
+(db.leaves || []).forEach(leave => {
+    if (
+        String(leave.status || '').toUpperCase() !== 'APPROVED' ||
+        String(leave.name || '').trim().toLowerCase() !==
+            dbUser.name.trim().toLowerCase() ||
+        !leave.startDate ||
+        !leave.endDate ||
+        /half.?day/i.test(
+            `${leave.duration || ''} ${leave.dayType || ''} ${leave.type || ''}`
+        )
+    ) return;
+
+    for (
+        let date = new Date(`${String(leave.startDate).slice(0, 10)}T00:00:00Z`);
+        date <= new Date(`${String(leave.endDate).slice(0, 10)}T00:00:00Z`);
+        date.setUTCDate(date.getUTCDate() + 1)
+    ) {
+        approvedLeaveDates.add(date.toISOString().slice(0, 10));
+    }
+});
+
+let workingDaysElapsed = 0;
+
+for (let day = 1; day <= currentDate.getDate(); day++) {
+    const dateString =
+        `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const weekday = new Date(year, month - 1, day).getDay();
+
+    if (
+        weekday !== 0 &&
+        !holidayDates.has(dateString) &&
+        !approvedLeaveDates.has(dateString)
+    ) {
+        workingDaysElapsed++;
+    }
+}
+
+const attendancePercentage = workingDaysElapsed > 0
+    ? `${Math.round((presentDays / workingDaysElapsed) * 100)}%`
+    : '0%';
 
         res.json({
             success: true,
@@ -1816,7 +1945,7 @@ designation: dbUser.designation || "Employee",
                 extraLeaves: unpaidLeaves,
                 unpaidHalfDays: leave.unpaidHalfDays,
 
-                attendancePercentage: "96.5%",
+                attendancePercentage: attendancePercentage,
                 lastPayout: "₹" +
                     Math.round(netPayout).toLocaleString('en-IN'),
 

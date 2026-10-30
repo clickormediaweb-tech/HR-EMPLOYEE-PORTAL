@@ -282,12 +282,13 @@
                         <span id="logCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">0 Total</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="statusFilter" onchange="filterAttendance()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-                            <option value="">All Status</option>
-                            <option value="On Time">On Time</option>
-                            <option value="Late">Late</option>
-                            <option value="Absent">Absent</option>
-                        </select>
+<select id="statusFilter" onchange="filterAttendance()" class="bg-gray-50 border border-[#EAEAEA] text-xs font-semibold rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-[#FFD134] cursor-pointer">
+    <option value="">All Status</option>
+    <option value="On Time">On Time</option>
+    <option value="Late">Late</option>
+    <option value="Absent">Absent</option>
+    <option value="Leave">Leave</option>
+</select>
                     </div>
                 </div>
 
@@ -482,6 +483,7 @@
     <!-- Script for interactive data & backend connection & strict filtering -->
     <script>
         let attendanceLogs = [];
+        let leaveLogs = [];
         let activeEmployees = [];
         let selectedLogIndex = null;
 
@@ -497,6 +499,23 @@
                 console.error('Error loading attendance logs:', err);
             }
         }
+
+        async function fetchLeaveLogs() {
+    try {
+        const response = await fetch('/api/hr/leaves');
+        const data = await response.json();
+
+        if (response.ok) {
+            leaveLogs = Array.isArray(data) ? data : (data.leaves || []);
+            renderAttendanceTable();
+        } else {
+            leaveLogs = [];
+        }
+    } catch (error) {
+        console.error('Error fetching leave records:', error);
+        leaveLogs = [];
+    }
+}
 
         async function loadSettings() {
             try {
@@ -526,106 +545,226 @@
             }
         }
 
-        async function fetchActiveEmployeesForDropdown() {
-            try {
-                const res = await fetch('/api/employees/active');
-                const data = await res.json();
-                if (data.success) {
-                    activeEmployees = data.employees;
-                    let dropdown = document.getElementById('manualEmpSelect');
-                    dropdown.innerHTML = "";
-                    activeEmployees.forEach(emp => {
-                        dropdown.innerHTML += `<option value="${emp.name}|${emp.department}|${emp.designation}|${emp.email}|${emp.avatar}">${emp.name} (${emp.department})</option>`;
-                    });
-                }
-            } catch (err) {
-                console.error('Error fetching active employees:', err);
-            }
-        }
+       
+async function fetchActiveEmployeesForDropdown() {
+    try {
+        const res = await fetch('/api/employees/active');
+        const data = await res.json();
 
-        function renderAttendanceTable() {
-            let tbody = document.getElementById('attendanceTableBody');
-            tbody.innerHTML = "";
+        if (data.success) {
+            activeEmployees = data.employees || [];
 
-            let searchInput = document.getElementById('attendanceSearch').value.toLowerCase();
-            let statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-            let selectedDateInput = document.getElementById('selectedDate').value; // Strict Date Picker Filter
+            let dropdown = document.getElementById('manualEmpSelect');
 
-            let filtered = attendanceLogs.filter(log => {
-                let matchesSearch = log.name.toLowerCase().includes(searchInput) || log.dept.toLowerCase().includes(searchInput);
-                let matchesStatus = statusFilter === "" || log.status.toLowerCase() === statusFilter;
-               
-                let logDate = log.date || '2026-10-06';
-                let matchesDate = (logDate === selectedDateInput);
+            if (dropdown) {
+                dropdown.innerHTML = "";
 
-                return matchesSearch && matchesStatus && matchesDate;
-            });
-
-            // --- CARDS COUNT DYNAMIC UPDATE FOR SELECTED DATE ---
-            let dateLogs = attendanceLogs.filter(log => (log.date || '2026-10-06') === selectedDateInput);
-            let totalActiveStaff = 5; // Total active employees count (aapke active staff ke hisab se)
-            let presentCount = dateLogs.length;
-            let onTimeCount = dateLogs.filter(l => l.status === "On Time").length;
-            let lateCount = dateLogs.filter(l => l.status === "Late").length;
-            let absentCount = Math.max(0, totalActiveStaff - presentCount);
-            
-            let attendancePercentage = totalActiveStaff > 0 ? Math.round((presentCount / totalActiveStaff) * 100) : 0;
-
-            // DOM mein cards update karein
-            // Note: HTML mein cards ke numbers ke paas id honi chahiye, niche diye gaye HTML update ko bhi check karein
-            document.getElementById('cardOverallPercent').innerText = attendancePercentage + "%";
-            document.getElementById('cardOnTimeCount').innerText = onTimeCount;
-            document.getElementById('cardLateCount').innerText = lateCount;
-            document.getElementById('cardAbsentCount').innerText = absentCount;
-            // ----------------------------------------------------
-
-            document.getElementById('logCountBadge').innerText = `${filtered.length} Total`;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance records found for ${selectedDateInput}.</td></tr>`;
-                return;
+                activeEmployees.forEach(emp => {
+                    dropdown.innerHTML += `
+                        <option value="${emp.name}|${emp.department || ''}|${emp.designation || ''}|${emp.email}|${emp.avatar || ''}">
+                            ${emp.name} (${emp.department || 'No Department'})
+                        </option>`;
+                });
             }
 
-            filtered.forEach((log) => {
-                let badge = "";
-                if (log.status === "On Time") {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm whitespace-nowrap">ON TIME</span>`;
-                } else if (log.status === "Late") {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm whitespace-nowrap">LATE</span>`;
-                } else {
-                    badge = `<span class="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg shadow-sm whitespace-nowrap">ABSENT</span>`;
-                }
-
-                let origIndex = attendanceLogs.indexOf(log);
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-amber-50/40 transition-all duration-200">
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-3">
-                                <img src="${log.avatar}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0" alt="${log.name}">
-                                <div>
-                                    <h5 class="font-bold text-[#222222]">${log.name}</h5>
-                                    <p class="text-xs text-gray-500">${log.email}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 text-gray-600 font-medium">${log.dept}</td>
-                        <td class="py-3.5 px-4 text-gray-700">
-                            <span class="font-bold block">${log.checkInTime}</span>
-                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500"></i> ${log.checkInLoc}</span>
-                        </td>
-                        <td class="py-3.5 px-4 text-gray-700">
-                            <span class="font-bold block">${log.checkOutTime}</span>
-                            <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5"><i class="fa-solid fa-location-dot text-amber-500">EN</i> ${log.checkOutLoc}</span>
-                        </td>
-                        <td class="py-3.5 px-4">${badge}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <button onclick="openModal(${origIndex})" class="px-3.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer whitespace-nowrap">View Log</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            // Refresh attendance cards using the actual employee count.
+            renderAttendanceTable();
         }
+    } catch (err) {
+        console.error('Error fetching active employees:', err);
+    }
+}
+
+       
+function renderAttendanceTable() {
+    const tbody = document.getElementById('attendanceTableBody');
+    tbody.innerHTML = "";
+
+    const searchInput = (document.getElementById('attendanceSearch').value || '').toLowerCase();
+    const statusFilter = (document.getElementById('statusFilter').value || '').toLowerCase();
+    const selectedDateInput = document.getElementById('selectedDate').value;
+
+    // Remove duplicate records for the same employee and date.
+    // The first record is retained.
+    const uniqueMap = new Map();
+
+    attendanceLogs.forEach(log => {
+        const email = (log.email || '').trim().toLowerCase();
+        const logDate = log.date || '';
+
+        const key = email
+            ? `${email}_${logDate}`
+            : `${(log.name || '').toLowerCase()}_${logDate}`;
+
+        if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, log);
+        }
+    });
+
+    const uniqueLogs = Array.from(uniqueMap.values());
+
+    const dateLogs = uniqueLogs.filter(log =>
+    log.date === selectedDateInput
+);
+
+// Add approved leaves for employees who have no attendance record.
+const approvedLeaveLogs = activeEmployees
+    .filter(emp => {
+        const empEmail = (emp.email || '').trim().toLowerCase();
+        const empName = (emp.name || '').trim().toLowerCase();
+
+        const hasAttendance = dateLogs.some(log =>
+            (log.email || '').trim().toLowerCase() === empEmail ||
+            (!log.email && (log.name || '').trim().toLowerCase() === empName)
+        );
+
+        if (hasAttendance) return false;
+
+        return leaveLogs.some(leave => {
+            const status = (leave.status || '').toUpperCase();
+            const leaveEmail = (leave.email || leave.employeeEmail || '').trim().toLowerCase();
+            const leaveName = (leave.name || leave.employeeName || '').trim().toLowerCase();
+
+            const matchesEmployee = leaveEmail
+                ? leaveEmail === empEmail
+                : leaveName === empName;
+
+            return status === 'APPROVED' &&
+                matchesEmployee &&
+                selectedDateInput >= (leave.startDate || '') &&
+                selectedDateInput <= (leave.endDate || '');
+        });
+    })
+    .map(emp => ({
+        name: emp.name,
+        email: emp.email,
+        dept: emp.department,
+        avatar: emp.avatar,
+        date: selectedDateInput,
+        status: 'Leave'
+    }));
+
+const displayLogs = [...dateLogs, ...approvedLeaveLogs];
+
+    const filtered = displayLogs.filter(log => {
+        const name = (log.name || '').toLowerCase();
+        const dept = (log.dept || '').toLowerCase();
+        const status = (log.status || '').toLowerCase();
+
+        const matchesSearch =
+            name.includes(searchInput) ||
+            dept.includes(searchInput);
+
+        const matchesStatus =
+            statusFilter === '' || status === statusFilter;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    // Calculate attendance using the actual active employee list.
+    const totalActiveStaff = activeEmployees.length;
+
+    const presentLogs = dateLogs.filter(log =>
+        ['on time', 'late'].includes((log.status || '').toLowerCase())
+    );
+
+    const onTimeCount = dateLogs.filter(log =>
+        (log.status || '').toLowerCase() === 'on time'
+    ).length;
+
+    const lateCount = dateLogs.filter(log =>
+        (log.status || '').toLowerCase() === 'late'
+    ).length;
+
+    const presentCount = new Set(
+        presentLogs.map(log => (log.email || log.name || '').trim().toLowerCase())
+    ).size;
+
+const leaveCount = approvedLeaveLogs.length;
+
+const absentCount = Math.max(
+    0,
+    totalActiveStaff - presentCount - leaveCount
+);
+    const attendancePercentage = totalActiveStaff > 0
+        ? Math.round((presentCount / totalActiveStaff) * 100)
+        : 0;
+
+    document.getElementById('cardOverallPercent').innerText =
+        attendancePercentage + '%';
+
+    document.getElementById('cardOnTimeCount').innerText = onTimeCount;
+    document.getElementById('cardLateCount').innerText = lateCount;
+    document.getElementById('cardAbsentCount').innerText = absentCount;
+    
+
+    document.getElementById('logCountBadge').innerText =
+        `${filtered.length} Total`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr>
+            <td colspan="6" class="py-8 text-center text-gray-400 text-xs">
+                No attendance records found for ${selectedDateInput}.
+            </td>
+        </tr>`;
+        return;
+    }
+
+    filtered.forEach(log => {
+        let badge = '';
+        const status = (log.status || '').toLowerCase();
+
+        if (status === 'on time') {
+    badge = `<span class="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm whitespace-nowrap">ON TIME</span>`;
+} else if (status === 'late') {
+    badge = `<span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg shadow-sm whitespace-nowrap">LATE</span>`;
+} else if (status === 'leave') {
+    badge = `<span class="px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg shadow-sm whitespace-nowrap">LEAVE</span>`;
+} else {
+    badge = `<span class="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg shadow-sm whitespace-nowrap">${(log.status || 'ABSENT').toUpperCase()}</span>`;
+}
+
+        const origIndex = attendanceLogs.indexOf(log);
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-amber-50/40 transition-all duration-200">
+                <td class="py-3.5 px-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${log.avatar || ''}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0" alt="${log.name || 'Employee'}">
+                        <div>
+                            <h5 class="font-bold text-[#222222]">${log.name || '-'}</h5>
+                            <p class="text-xs text-gray-500">${log.email || '-'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3.5 px-4 text-gray-600 font-medium">${log.dept || '-'}</td>
+                <td class="py-3.5 px-4 text-gray-700">
+                    <span class="font-bold block">${log.checkInTime || '--:--'}</span>
+                    <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                        <i class="fa-solid fa-location-dot text-amber-500"></i>
+                        ${log.checkInLoc || '-'}
+                    </span>
+                </td>
+                <td class="py-3.5 px-4 text-gray-700">
+                    <span class="font-bold block">${log.checkOutTime || '--:--'}</span>
+                    <span class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                        <i class="fa-solid fa-location-dot text-amber-500"></i>
+                        ${log.checkOutLoc || '-'}
+                    </span>
+                </td>
+                <td class="py-3.5 px-4">${badge}</td>
+                <td class="py-3.5 px-4 text-right">
+                    ${status === 'leave' ? '' : `
+    <button onclick="openModal(${origIndex})"
+        class="px-3.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-[#EAEAEA] rounded-xl hover:bg-[#FFD134] transition-all cursor-pointer whitespace-nowrap">
+        View Log
+    </button>
+`}
+                </td>
+            </tr>
+        `;
+    });
+}
 
         function filterAttendance() {
             renderAttendanceTable();
@@ -663,24 +802,39 @@
             historyBody.innerHTML = "";
 
             // --- STRICT MONTH & YEAR FILTERING FOR VAULT ---
-            let empHistory = attendanceLogs.filter(l => {
-                if (l.email.toLowerCase() !== log.email.toLowerCase()) return false;
-                if (!l.date) return false;
-               
-                let logDate = new Date(l.date);
-                return logDate.getMonth() === monthIndex && logDate.getFullYear() === year;
-            });
+     let selectedEmail = (log.email || '').trim().toLowerCase();
+
+let empHistory = attendanceLogs.filter(l => {
+    const currentEmail = (l.email || '').trim().toLowerCase();
+
+    if (!selectedEmail || currentEmail !== selectedEmail) return false;
+    if (!l.date) return false;
+
+    const logDate = new Date(l.date + 'T00:00:00');
+
+    return !isNaN(logDate.getTime()) &&
+        logDate.getMonth() === monthIndex &&
+        logDate.getFullYear() === year;
+});
 
             if (empHistory.length === 0) {
                 historyBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No punch records found for ${monthNames[monthIndex]} ${year}.</td></tr>`;
                 return;
             }
 
-            empHistory.forEach(item => {
-                let statusSpan = item.status === "On Time"
-                    ? `<span class="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 rounded">ON TIME</span>`
-                    : `<span class="px-2 py-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 rounded">LATE</span>`;
+           let itemStatus = (item.status || 'Absent').toLowerCase();
 
+let statusSpan = '';
+
+if (itemStatus === 'on time') {
+    statusSpan = `<span class="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 rounded">ON TIME</span>`;
+} else if (itemStatus === 'late') {
+    statusSpan = `<span class="px-2 py-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 rounded">LATE</span>`;
+} else if (itemStatus === 'absent') {
+    statusSpan = `<span class="px-2 py-0.5 text-[10px] font-bold text-rose-700 bg-rose-50 rounded">ABSENT</span>`;
+} else {
+    statusSpan = `<span class="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 rounded">${itemStatus.toUpperCase()}</span>`;
+}
                 historyBody.innerHTML += `
                     <tr>
                         <td class="p-3 font-semibold text-gray-700">${item.date}</td>
@@ -689,8 +843,8 @@
                         <td class="p-3">${statusSpan}</td>
                     </tr>
                 `;
-            });
-        }
+                }
+        
 
         function closeModal() {
             document.getElementById('attendanceModal').classList.add('hidden');
@@ -777,6 +931,7 @@
                 if (response.ok && data.success) {
                     closeManualModal();
                     fetchAttendanceLogs();
+                    fetchLeaveLogs();
                     alert(`Manual attendance successfully recorded for ${name} on ${logDate}!`);
                 }
             } catch (err) {
@@ -798,7 +953,11 @@
             }
 
             loadSettings();       // Pehle settings load hongi
-            fetchAttendanceLogs();// Phir logs load honge
+            fetchAttendanceLogs();
+            
+            fetchActiveEmployeesForDropdown();
+            fetchLeaveLogs();
+            // Phir logs load honge
         };  function toggleProfileDropdown(event) {
     event.stopPropagation();
     let dropdown = document.getElementById('profileDropdown');

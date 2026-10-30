@@ -265,7 +265,7 @@
                 <div onclick="window.location.href='emp_attendance.html'" class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer flex items-center justify-between group">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Monthly Attendance</p>
-                        <h3 class="text-3xl font-black text-emerald-600 mt-1" id="statAttendance">96.5%</h3>
+                        <h3 class="text-3xl font-black text-emerald-600 mt-1" id="statAttendance">--</h3>
                         <a href="/employee/attendance" class="text-[11px] text-gray-400 mt-1 font-semibold group-hover:underline">Click for time log details</a>
 
                     </div>
@@ -374,7 +374,7 @@
                 document.getElementById('modalEmpDept').innerText = emp.dept;
                
                 document.getElementById('statLeaveBalance').innerText = `${emp.leaveBalance} Days`;
-                document.getElementById('statAttendance').innerText = emp.attendancePercentage;
+                document.getElementById('statAttendance').innerText = data.employee.attendancePercentage;
                 document.getElementById('statNetPayout').innerText = emp.lastPayout;
 document.getElementById('empHeaderDesignation').innerText = emp.designation || "Employee";
 

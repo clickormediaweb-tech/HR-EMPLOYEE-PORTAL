@@ -367,8 +367,7 @@ let loggedInEmail = '';
                 let curName = (loggedInName || "").trim().toLowerCase();
                 let curEmail = (loggedInEmail || "").trim().toLowerCase();
 
-                let matchesUser = (curEmail && logEmail === curEmail) || 
-                                  (curName && (logName === curName || logName.includes(curName) || curName.includes(logName)));
+                let matchesUser = curEmail && logEmail === curEmail;
                 
                 let logDate = new Date(log.date);
                 if (isNaN(logDate.getTime()) && typeof log.date === 'string') {
@@ -387,6 +386,10 @@ let loggedInEmail = '';
                 return matchesUser && matchesMonth && matchesStatus;
             });
 
+            // Remove duplicate attendance entries for the same date
+filteredLogs = [
+    ...new Map(filteredLogs.map(log => [log.date, log])).values()
+];
             
             document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
 
@@ -396,9 +399,18 @@ let loggedInEmail = '';
             }
 
             filteredLogs.forEach(log => {
-                let statusBadge = (log.status && log.status.toUpperCase().includes('LATE'))
-                    ? `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`
-                    : `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
+                let currentStatus = (log.status || 'Absent').toLowerCase();
+let statusBadge = '';
+
+if (currentStatus === 'late') {
+    statusBadge = `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
+} else if (currentStatus === 'on time') {
+    statusBadge = `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
+} else if (currentStatus === 'absent') {
+    statusBadge = `<span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">ABSENT</span>`;
+} else {
+    statusBadge = `<span class="px-3 py-1 bg-gray-50 text-gray-700 font-bold rounded-lg border border-gray-200 text-[10px]">${currentStatus.toUpperCase()}</span>`;
+}
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition-colors">
