@@ -835,20 +835,14 @@ app.post('/api/attendance/add', async (req, res) => {
         }
 
         const normalizedEmail = email.trim().toLowerCase();
-
-        // Find an existing record for this employee on this date
-        const existingIndex = db.attendance.findIndex(log =>
-            log.email &&
-            log.email.trim().toLowerCase() === normalizedEmail &&
-            log.date === date
-        );
+        const normalizedDate = String(date).slice(0, 10);
 
         const attendanceData = {
             name,
             email: normalizedEmail,
             dept,
             role,
-            date,
+            date: normalizedDate,
             checkInTime,
             checkInLoc,
             checkOutTime,
@@ -857,34 +851,37 @@ app.post('/api/attendance/add', async (req, res) => {
             avatar
         };
 
-        if (existingIndex !== -1) {
-            // Update the existing record instead of creating a duplicate
-            db.attendance[existingIndex] = {
-                ...db.attendance[existingIndex],
-                ...attendanceData
-            };
+        // Remove all existing records for this employee and date.
+        db.attendance = db.attendance.filter(log =>
+            !(
+                log.email &&
+                log.email.trim().toLowerCase() === normalizedEmail &&
+                String(log.date || '').slice(0, 10) === normalizedDate
+            )
+        );
 
-            console.log(`--- ATTENDANCE UPDATED FOR ${name} ON ${date} ---`);
-        } else {
-            // Create a new record only if one does not exist
-            db.attendance.unshift(attendanceData);
-
-            console.log(`--- ATTENDANCE RECORDED FOR ${name} ON ${date} ---`);
-        }
+        // Save the HR-corrected record as the final record.
+        db.attendance.unshift({
+            ...attendanceData,
+            updatedByHR: true,
+            updatedAt: new Date().toISOString()
+        });
 
         await writeDb(db);
 
-        res.json({
+        console.log(
+            `--- HR ATTENDANCE FINALIZED FOR ${name} ON ${normalizedDate} ---`
+        );
+
+        return res.json({
             success: true,
-            message: existingIndex !== -1
-                ? 'Attendance updated successfully!'
-                : 'Attendance recorded successfully!'
+            message: 'Attendance updated successfully!'
         });
 
     } catch (err) {
         console.error('Error saving attendance:', err);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Server error while saving attendance'
         });
@@ -2036,7 +2033,13 @@ app.post('/api/employee/punch', async (req, res) => {
             log.email.trim().toLowerCase() === empEmail.toLowerCase() &&
             log.date === todayDate
         );
-
+// Never allow employee punches to overwrite HR-corrected attendance.
+if (existingLog && existingLog.updatedByHR === true) {
+    return res.status(409).json({
+        success: false,
+        message: 'Your attendance for today has already been updated by HR.'
+    });
+}
         if (action === 'IN') {
             // Never overwrite the original punch-in time for this day.
             if (existingLog) {
@@ -2060,7 +2063,7 @@ app.post('/api/employee/punch', async (req, res) => {
                 checkInLoc: req.body.location || 'Office Headquarters',
                 checkOutTime: '--:--',
                 checkOutLoc: 'Pending',
-                status: 'On Time',
+                status: 'Absent',
                 avatar: empAvatar
             });
         } else {
@@ -2088,6 +2091,7 @@ app.post('/api/employee/punch', async (req, res) => {
             );
             existingLog.checkOutLoc =
                 req.body.location || 'Office Headquarters';
+                existingLog.status = 'On Time';
         }
 
         await writeDb(db);

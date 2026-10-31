@@ -391,23 +391,42 @@ filteredLogs = [
     ...new Map(filteredLogs.map(log => [log.date, log])).values()
 ];
             
-            document.getElementById('presentCount').innerText = `${filteredLogs.length} Days`;
+const presentDays = filteredLogs.filter(log => {
+    const status = String(log.status || '').toLowerCase();
+    const hasCheckIn = log.checkInTime &&
+        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
+    const hasCheckOut = log.checkOutTime &&
+        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
 
+    return hasCheckIn && hasCheckOut &&
+        (status === 'on time' || status === 'late');
+}).length;
+
+document.getElementById('presentCount').innerText = `${presentDays} Days`;
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
                 return;
             }
 
             filteredLogs.forEach(log => {
-                let currentStatus = (log.status || 'Absent').toLowerCase();
+               let currentStatus = (log.status || 'Absent').toLowerCase();
+
+const hasCheckIn =
+    log.checkInTime &&
+    !['--:--', 'pending'].includes(log.checkInTime.trim().toLowerCase());
+
+const hasCheckOut =
+    log.checkOutTime &&
+    !['--:--', 'pending'].includes(log.checkOutTime.trim().toLowerCase());
+
 let statusBadge = '';
 
-if (currentStatus === 'late') {
+if (currentStatus === 'absent' || !hasCheckIn || !hasCheckOut) {
+    statusBadge = `<span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">ABSENT</span>`;
+} else if (currentStatus === 'late') {
     statusBadge = `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
 } else if (currentStatus === 'on time') {
     statusBadge = `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
-} else if (currentStatus === 'absent') {
-    statusBadge = `<span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">ABSENT</span>`;
 } else {
     statusBadge = `<span class="px-3 py-1 bg-gray-50 text-gray-700 font-bold rounded-lg border border-gray-200 text-[10px]">${currentStatus.toUpperCase()}</span>`;
 }
