@@ -387,9 +387,33 @@ let loggedInEmail = '';
             });
 
             // Remove duplicate attendance entries for the same date
-filteredLogs = [
-    ...new Map(filteredLogs.map(log => [log.date, log])).values()
-];
+const attendanceByDate = new Map();
+
+filteredLogs.forEach(log => {
+    const existing = attendanceByDate.get(log.date);
+
+    const hasCheckIn = log.checkInTime &&
+        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
+
+    const hasCheckOut = log.checkOutTime &&
+        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
+
+    const isComplete = hasCheckIn && hasCheckOut;
+
+    const existingHasCheckIn = existing?.checkInTime &&
+        !['--:--', 'pending'].includes(String(existing.checkInTime).trim().toLowerCase());
+
+    const existingHasCheckOut = existing?.checkOutTime &&
+        !['--:--', 'pending'].includes(String(existing.checkOutTime).trim().toLowerCase());
+
+    const existingIsComplete = existingHasCheckIn && existingHasCheckOut;
+
+    if (!existing || (isComplete && !existingIsComplete)) {
+        attendanceByDate.set(log.date, log);
+    }
+});
+
+filteredLogs = [...attendanceByDate.values()];
             
 const presentDays = filteredLogs.filter(log => {
     const status = String(log.status || '').toLowerCase();
