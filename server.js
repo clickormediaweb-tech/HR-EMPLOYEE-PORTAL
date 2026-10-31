@@ -1859,24 +1859,10 @@ const record = db.payroll.find(payroll =>
             0,
             baseSalary - totalDeductions
         );
-        // Calculate actual monthly attendance percentage
+ // Calculate actual monthly attendance percentage
 const attendanceRecords = Array.isArray(db.attendance)
     ? db.attendance
     : [];
-
-const employeeAttendance = attendanceRecords.filter(log =>
-    log.email &&
-    log.email.trim().toLowerCase() === sessionEmail &&
-    log.date &&
-    log.date.startsWith(`${year}-${String(month).padStart(2, '0')}`) &&
-    ['on time', 'late'].includes(
-        String(log.status || '').toLowerCase()
-    )
-);
-
-const presentDays = new Set(
-    employeeAttendance.map(log => log.date)
-).size;
 
 const holidayDates = new Set(
     (Array.isArray(db.holidays) ? db.holidays : [])
@@ -1906,7 +1892,8 @@ const approvedLeaveDates = new Set();
     }
 });
 
-let workingDaysElapsed = 0;
+// Count only eligible working days up to today.
+const eligibleWorkingDates = new Set();
 
 for (let day = 1; day <= currentDate.getDate(); day++) {
     const dateString =
@@ -1919,12 +1906,29 @@ for (let day = 1; day <= currentDate.getDate(); day++) {
         !holidayDates.has(dateString) &&
         !approvedLeaveDates.has(dateString)
     ) {
-        workingDaysElapsed++;
+        eligibleWorkingDates.add(dateString);
     }
 }
 
+// Count unique attendance dates that match eligible working days.
+const presentDays = new Set(
+    attendanceRecords
+        .filter(log =>
+            log.email &&
+            log.email.trim().toLowerCase() === sessionEmail &&
+            log.date &&
+            ['on time', 'late'].includes(
+                String(log.status || '').toLowerCase()
+            )
+        )
+        .map(log => String(log.date).slice(0, 10))
+        .filter(date => eligibleWorkingDates.has(date))
+).size;
+
+const workingDaysElapsed = eligibleWorkingDates.size;
+
 const attendancePercentage = workingDaysElapsed > 0
-    ? `${Math.round((presentDays / workingDaysElapsed) * 100)}%`
+    ? `${Math.min(100, Math.round((presentDays / workingDaysElapsed) * 100))}%`
     : '0%';
 
         res.json({
