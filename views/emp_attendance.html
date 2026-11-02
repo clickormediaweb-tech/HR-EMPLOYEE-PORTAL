@@ -433,7 +433,7 @@ document.getElementById('presentCount').innerText = `${presentDays} Days`;
             }
 
             filteredLogs.forEach(log => {
-               let currentStatus = (log.status || 'Absent').toLowerCase();
+              let currentStatus = (log.status || 'Absent').toLowerCase();
 
 const hasCheckIn =
     log.checkInTime &&
@@ -445,7 +445,20 @@ const hasCheckOut =
 
 let statusBadge = '';
 
-if (currentStatus === 'absent' || !hasCheckIn || !hasCheckOut) {
+const today = new Date();
+const logDate = String(log.date).slice(0, 10);
+
+const isToday =
+    logDate === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+const shiftEndMinutes = 18 * 60;
+const currentMinutes = today.getHours() * 60 + today.getMinutes();
+
+const shiftIsInProgress = isToday && currentMinutes < shiftEndMinutes;
+
+if (shiftIsInProgress && (!hasCheckIn || !hasCheckOut)) {
+    statusBadge = `<span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 text-[10px]">IN PROGRESS</span>`;
+} else if (!hasCheckIn || !hasCheckOut || currentStatus === 'absent') {
     statusBadge = `<span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">ABSENT</span>`;
 } else if (currentStatus === 'late') {
     statusBadge = `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;

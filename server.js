@@ -896,28 +896,54 @@ app.get('/api/hr/attendance-today', async (req, res) => {
         const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
         const totalEmployees = activeUsers.length > 0 ? activeUsers.length : 5; // Total active employees (Jaise dashboard pe 5 hain)
 
-        // Aaj ki date (YYYY-MM-DD format)
-        const todayDate = new Date().toISOString().split('T')[0];
+      // Get today's date using local time.
+const now = new Date();
+const pad = value => String(value).padStart(2, '0');
 
-        // Sabse latest date find karein jo database me available ho (taaki agar aaj entry na mile toh latest wali dikhe)
-        let targetDate = todayDate;
-        if (attendanceList.length > 0) {
-            // Agar aaj ki date ka koi log nahi hai, toh list ka sabse pehla/latest date utha lo
-            const hasTodayLogs = attendanceList.some(log => log.date === todayDate);
-            if (!hasTodayLogs) {
-                targetDate = attendanceList[0].date;
-            }
-        }
+const todayDate =
+    `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-        // Us target date ke saare attendance logs filter karein
-        const todayLogs = attendanceList.filter(log => log.date === targetDate);
+// Use only today's attendance records.
+const todayLogs = attendanceList.filter(log =>
+    String(log.date || '').slice(0, 10) === todayDate
+);
 
-        let presentCount = todayLogs.length;
-        let lateCount = todayLogs.filter(log => log.status && log.status.toLowerCase().includes('late')).length;
-        let absentCount = Math.max(0, totalEmployees - presentCount);
+// Shift ends at 6:00 PM.
+const currentMinutes = now.getHours() * 60 + now.getMinutes();
+const shiftHasEnded = currentMinutes >= (18 * 60);
 
-        // Percentage calculate karein
-        let percentage = totalEmployees > 0 ? Math.round((presentCount / totalEmployees) * 100) : 100;
+// Count only employees with both punches completed.
+const completedLogs = todayLogs.filter(log => {
+    const hasCheckIn =
+        log.checkInTime &&
+        !['--:--', 'pending'].includes(
+            String(log.checkInTime).trim().toLowerCase()
+        );
+
+    const hasCheckOut =
+        log.checkOutTime &&
+        !['--:--', 'pending'].includes(
+            String(log.checkOutTime).trim().toLowerCase()
+        );
+
+    return hasCheckIn && hasCheckOut;
+});
+
+const presentCount = completedLogs.filter(log =>
+    String(log.status || '').toLowerCase() === 'on time'
+).length;
+
+const lateCount = completedLogs.filter(log =>
+    String(log.status || '').toLowerCase() === 'late'
+).length;
+
+const absentCount = shiftHasEnded
+    ? Math.max(0, totalEmployees - completedLogs.length)
+    : 0;
+
+const percentage = totalEmployees > 0
+    ? Math.round((completedLogs.length / totalEmployees) * 100)
+    : 0;
 
         res.json({
             success: true,
@@ -1889,41 +1915,38 @@ const approvedLeaveDates = new Set();
     }
 });
 
-// Count only eligible working days up to today.
-const eligibleWorkingDates = new Set();
-
-for (let day = 1; day <= currentDate.getDate(); day++) {
-    const dateString =
-        `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-    const weekday = new Date(year, month - 1, day).getDay();
-
-    if (
-        weekday !== 0 &&
-        !holidayDates.has(dateString) &&
-        !approvedLeaveDates.has(dateString)
-    ) {
-        eligibleWorkingDates.add(dateString);
-    }
-}
-
-// Count unique attendance dates that match eligible working days.
+// Count only completed attendance records on eligible working days.
 const presentDays = new Set(
     attendanceRecords
-        .filter(log =>
-            log.email &&
-            log.email.trim().toLowerCase() === sessionEmail &&
-            log.date &&
-            ['on time', 'late'].includes(
-                String(log.status || '').toLowerCase()
-            )
-        )
+        .filter(log => {
+            const hasCheckIn =
+                log.checkInTime &&
+                !['--:--', 'pending'].includes(
+                    String(log.checkInTime).trim().toLowerCase()
+                );
+
+            const hasCheckOut =
+                log.checkOutTime &&
+                !['--:--', 'pending'].includes(
+                    String(log.checkOutTime).trim().toLowerCase()
+                );
+
+            return (
+                log.email &&
+                log.email.trim().toLowerCase() === sessionEmail &&
+                log.date &&
+                hasCheckIn &&
+                hasCheckOut &&
+                ['on time', 'late'].includes(
+                    String(log.status || '').toLowerCase()
+                )
+            );
+        })
         .map(log => String(log.date).slice(0, 10))
         .filter(date => eligibleWorkingDates.has(date))
 ).size;
 
 const workingDaysElapsed = eligibleWorkingDates.size;
-
 const attendancePercentage = workingDaysElapsed > 0
     ? `${Math.min(100, Math.round((presentDays / workingDaysElapsed) * 100))}%`
     : '0%';
@@ -2091,7 +2114,10 @@ if (existingLog && existingLog.updatedByHR === true) {
             );
             existingLog.checkOutLoc =
                 req.body.location || 'Office Headquarters';
-                existingLog.status = 'On Time';
+              // Preserve the employee's original attendance status.
+if (String(existingLog.status || '').toLowerCase() !== 'late') {
+    existingLog.status = 'On Time';
+}
         }
 
         await writeDb(db);
