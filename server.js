@@ -9,6 +9,39 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const app = express();
 
+
+// --- EMPLOYEE PROFILE PHOTO STORAGE ---
+const uploadDir = '/home/u515746947/employee-uploads';
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' +
+            Math.round(Math.random() * 1E9) +
+            path.extname(file.originalname).toLowerCase();
+
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only JPG, PNG and WEBP images are allowed.'));
+        }
+    }
+});
+
 // --- SHARED MONTHLY LEAVE CALCULATION ---
 function getLeaveMonthDates(year, month) {
     return {
@@ -441,6 +474,7 @@ async function saveAttendanceSafely(newAttendance) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views'), { index: false }));
+app.use('/employee-uploads', express.static(uploadDir));
 
 // --- SESSION CONFIGURATION ---
 app.use(session({
@@ -2039,6 +2073,75 @@ designation: dbUser.designation || "Employee",
             message: 'Server error'
         });
     }
+});
+
+
+// --- API: Employee Profile Photo Upload ---
+app.post('/api/employee/upload-photo', (req, res) => {
+    upload.single('photo')(req, res, async function (err) {
+        try {
+            if (err) {
+                return res.status(400).json({
+                    success: false,
+                    message: err.message
+                });
+            }
+
+            if (!req.session.user || !req.session.user.email) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Please log in again.'
+                });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please select a photo.'
+                });
+            }
+
+            const db = await readDb();
+
+            const email = req.session.user.email.trim().toLowerCase();
+
+            const employee = db.users.find(user =>
+                user.email &&
+                user.email.trim().toLowerCase() === email &&
+                user.role !== 'former'
+            );
+
+            if (!employee) {
+                fs.unlink(req.file.path, () => {});
+                return res.status(404).json({
+                    success: false,
+                    message: 'Employee account not found.'
+                });
+            }
+
+            employee.avatar = '/employee-uploads/' + req.file.filename;
+
+            await writeDb(db);
+
+            return res.json({
+                success: true,
+                message: 'Profile photo updated successfully.',
+                avatar: employee.avatar
+            });
+
+        } catch (error) {
+            console.error('Profile photo upload error:', error);
+
+            if (req.file) {
+                fs.unlink(req.file.path, () => {});
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: 'Unable to upload profile photo.'
+            });
+        }
+    });
 });
 
 // --- API: Employee Updates Own Phone Number ---
