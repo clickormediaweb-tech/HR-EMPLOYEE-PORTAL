@@ -496,6 +496,35 @@ fetch('/api/employee/punch-status', {
             .catch(err => console.error("Error loading employee stats:", err));
     };
 
+       // Show phone number edit mode
+function editEmployeePhone() {
+
+    const currentPhone =
+        document.getElementById('modalEmpPhoneDisplay').innerText;
+
+    document.getElementById('modalEmpPhone').value =
+        currentPhone === '-' ? '' : currentPhone;
+
+    document.getElementById('modalEmpPhoneDisplay').classList.add('hidden');
+    document.getElementById('editPhoneBtn').classList.add('hidden');
+
+    document.getElementById('phoneEditSection').classList.remove('hidden');
+
+    document.getElementById('phoneMessage').innerText = '';
+}
+
+
+// Cancel phone number editing
+function cancelEmployeePhoneEdit() {
+
+    document.getElementById('phoneEditSection').classList.add('hidden');
+
+    document.getElementById('modalEmpPhoneDisplay').classList.remove('hidden');
+    document.getElementById('editPhoneBtn').classList.remove('hidden');
+
+    document.getElementById('phoneMessage').innerText = '';
+}
+
     function openProfileModal(event) {
         event.stopPropagation();
         document.getElementById('profileDropdown').classList.add('hidden');
