@@ -416,6 +416,7 @@
                 document.getElementById('empDropdownEmail').innerText = emp.email;
                 document.getElementById('modalEmpEmail').innerText = emp.email;
                 document.getElementById('modalEmpDept').innerText = emp.dept;
+                document.getElementById('modalEmpPhoneDisplay').innerText = emp.phone || '-';
                 document.getElementById('modalEmpPhone').value = emp.phone || '';
                
                 document.getElementById('statLeaveBalance').innerText = `${emp.leaveBalance} Days`;
