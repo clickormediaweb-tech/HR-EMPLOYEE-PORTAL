@@ -1915,6 +1915,58 @@ const approvedLeaveDates = new Set();
     }
 });
 
+// Count only working days whose shifts have ended.
+const eligibleWorkingDates = new Set();
+
+const shiftEndTime = String(
+    db.settings?.shiftEndTime || "06:00 PM"
+).trim();
+
+function getTimeInMinutes(value) {
+    const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+    if (!match) return 18 * 60;
+
+    let hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    const period = match[3].toUpperCase();
+
+    if (hours === 12) hours = 0;
+    if (period === "PM") hours += 12;
+
+    return hours * 60 + minutes;
+}
+
+const currentMinutes =
+    currentDate.getHours() * 60 + currentDate.getMinutes();
+
+const shiftHasEndedToday =
+    currentMinutes >= getTimeInMinutes(shiftEndTime);
+
+for (let day = 1; day <= currentDate.getDate(); day++) {
+    const dateString =
+        `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const weekday = new Date(year, month - 1, day).getDay();
+
+    if (
+        weekday === 0 ||
+        holidayDates.has(dateString) ||
+        approvedLeaveDates.has(dateString)
+    ) {
+        continue;
+    }
+
+    if (
+        day === currentDate.getDate() &&
+        !shiftHasEndedToday
+    ) {
+        continue;
+    }
+
+    eligibleWorkingDates.add(dateString);
+}
+
 // Count only completed attendance records on eligible working days.
 const presentDays = new Set(
     attendanceRecords
