@@ -6,6 +6,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');    
 const session = require('express-session'); // <-- Added for session management
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const app = express();
 
 // --- SHARED MONTHLY LEAVE CALCULATION ---
