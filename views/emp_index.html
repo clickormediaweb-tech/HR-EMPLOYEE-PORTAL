@@ -422,7 +422,8 @@
                 document.getElementById('statLeaveBalance').innerText = `${emp.leaveBalance} Days`;
                 document.getElementById('statAttendance').innerText = data.employee.attendancePercentage;
                 document.getElementById('statNetPayout').innerText = emp.lastPayout;
-document.getElementById('modalEmpRole').innerText = emp.designation || '-';
+                document.getElementById('modalEmpRole').innerText = emp.designation || '-';
+                document.getElementById('empHeaderDesignation').innerText = emp.designation || '-';
                     // --- LOCALSTORAGE & SERVER SE CHECK KAREIN KI PUNCHED-IN HAI YA NAHI ---
                    // Always load punch status for the employee in the active session.
 isPunchedIn = false;
