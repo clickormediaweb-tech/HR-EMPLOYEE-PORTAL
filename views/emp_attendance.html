@@ -171,7 +171,7 @@
                             <i class="fa-solid fa-house w-4 text-center text-gray-400"></i>
                             <span>My Dashboard</span>
                         </a>
-                        <buttontype="button" onclick="openProfileModal(event)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors cursor-pointer text-left">
+                        <button type="button" onclick="openProfileModal(event)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors cursor-pointer text-left">
     <i class="fa-solid fa-user w-4 text-center text-gray-400"></i>
     <span>View Profile</span>
 </button>
@@ -609,6 +609,17 @@ if (shiftIsInProgress && (!hasCheckIn || !hasCheckOut)) {
             if(notifDropdown) notifDropdown.classList.add('hidden');
             if(profileDropdown) profileDropdown.classList.toggle('hidden');
         }
+
+    function openProfileModal(event) {
+    event.stopPropagation();
+
+    document.getElementById('profileDropdown').classList.add('hidden');
+    document.getElementById('profileModal').classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
 
         function closeAllDropdowns(event) {
             let notifDropdown = document.getElementById('notificationDropdown');
