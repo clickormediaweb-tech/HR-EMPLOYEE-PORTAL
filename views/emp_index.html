@@ -525,6 +525,70 @@ function cancelEmployeePhoneEdit() {
     document.getElementById('phoneMessage').innerText = '';
 }
 
+
+// Save updated phone number to the database
+async function saveEmployeePhone() {
+
+    const phoneInput = document.getElementById('modalEmpPhone');
+    const saveButton = document.getElementById('savePhoneBtn');
+    const message = document.getElementById('phoneMessage');
+
+    const phone = phoneInput.value.trim();
+
+    if (!phone) {
+        message.innerText = 'Please enter your phone number.';
+        message.className = 'mt-1 text-[10px] text-red-600';
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.innerText = 'Saving...';
+
+    try {
+
+        const response = await fetch('/api/employee/update-phone', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phone: phone })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to save phone number.');
+        }
+
+        // Update displayed phone number
+        document.getElementById('modalEmpPhoneDisplay').innerText = data.phone;
+
+        // Close edit mode
+        document.getElementById('phoneEditSection').classList.add('hidden');
+        document.getElementById('modalEmpPhoneDisplay').classList.remove('hidden');
+        document.getElementById('editPhoneBtn').classList.remove('hidden');
+
+        // Show success message
+        message.innerText = 'Changes saved successfully!';
+        message.className = 'mt-1 text-[10px] text-emerald-600';
+
+    } catch (error) {
+
+        console.error('Phone update error:', error);
+
+        message.innerText = error.message;
+        message.className = 'mt-1 text-[10px] text-red-600';
+
+    } finally {
+
+        saveButton.disabled = false;
+        saveButton.innerText = 'Save';
+
+    }
+}
+
+       
     function openProfileModal(event) {
         event.stopPropagation();
         document.getElementById('profileDropdown').classList.add('hidden');
