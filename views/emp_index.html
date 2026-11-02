@@ -164,23 +164,15 @@
                             <!-- Is tarah se id="headerDesignation" jodh dein -->
                             <p id="empHeaderDesignation" class="text-[11px] text-gray-400 font-medium">Software Engineer</p>
                         </div>
-<img
-    id="empHeaderAvatar"
-    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
-    alt="Profile Photo"
-    class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md"
->                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
 
                     <!-- Expanded Profile Dropdown Panel -->
                     <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
                         <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
-<img
-    id="empDropdownAvatar"
-    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
-    alt="Profile Photo"
-    class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100"
->                            <div>
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <div>
                                 <p id="empDropdownName" class="font-black text-[#222222] text-sm">Employee User</p>
                                 <p id="empDropdownEmail" class="text-[11px] text-gray-400 truncate">employee@clickormedia.co.in</p>
                                 <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active Shift</span>
@@ -329,124 +321,31 @@
         </main>
     </div>
 
-   <!-- POPUP MODAL FOR VIEW PROFILE -->
-<div id="profileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] w-full max-w-lg p-6 space-y-5 text-xs">
-
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 class="text-sm font-bold text-[#222222]">Employee Profile Details</h3>
-
-            <button onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <!-- Profile Photo Section -->
-        <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
-
-            <img
-                id="modalEmpAvatar"
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
-                alt="Profile Photo"
-                class="w-16 h-16 rounded-full object-cover ring-2 ring-blue-200"
-            >
-
-            <div class="flex-1">
-                <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
-
-                <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Employee</p>
-
-                <label for="profilePhotoInput"
-                    class="inline-flex items-center gap-2 mt-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg font-bold cursor-pointer hover:bg-blue-100">
-                    <i class="fa-solid fa-camera"></i>
-                    Change Photo
-                </label>
-
-                <input
-                    type="file"
-                    id="profilePhotoInput"
-                    accept="image/png,image/jpeg,image/webp"
-                    class="hidden"
-                    onchange="previewProfilePhoto(event)"
-                >
-
-                <button
-                    type="button"
-                    id="savePhotoBtn"
-                    onclick="saveProfilePhoto()"
-                    class="hidden ml-2 px-3 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700">
-                    Save Photo
-                </button>
-
-                <p id="photoMessage" class="mt-2 text-[10px] text-gray-500"></p>
+    <!-- POPUP MODAL FOR VIEW PROFILE -->
+    <div id="profileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] w-full max-w-lg p-6 space-y-5 text-xs">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 class="text-sm font-bold text-[#222222]">Employee Profile Details</h3>
+                <button onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
-        </div>
-
-        <!-- Employee Details -->
-        <div class="grid grid-cols-2 gap-4">
-
-            <div>
-                <span class="text-gray-400 block mb-1">Name</span>
-                <p id="modalEmpNameDetail" class="font-bold text-gray-800">-</p>
-            </div>
-
-            <div>
-                <span class="text-gray-400 block mb-1">Employee ID</span>
-                <p id="modalEmpId" class="font-bold text-gray-800">-</p>
-            </div>
-
-            <div>
-                <span class="text-gray-400 block mb-1">Email</span>
-                <p id="modalEmpEmail" class="font-bold text-gray-800 break-all">-</p>
-            </div>
-
-            <div>
-                <span class="text-gray-400 block mb-1">Department</span>
-                <p id="modalEmpDept" class="font-bold text-gray-800">-</p>
-            </div>
-
-            <!-- Editable Phone Number -->
-            <div class="col-span-2">
-                <label for="modalEmpPhone" class="text-gray-400 block mb-1">Phone Number</label>
-
-                <div class="flex gap-2">
-                    <input
-                        type="tel"
-                        id="modalEmpPhone"
-                        placeholder="Enter phone number"
-                        class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 outline-none focus:border-blue-500"
-                    >
-
-                    <button
-                        type="button"
-                        id="savePhoneBtn"
-                        onclick="saveEmployeePhone()"
-                        class="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700">
-                        Save
-                    </button>
+            <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-14 h-14 rounded-full object-cover ring-2 ring-blue-200">
+                <div>
+                    <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
+                    <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Software Engineer</p>
+                    <span class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: #COM-2026-042</span>
                 </div>
-
-                <p id="phoneMessage" class="mt-1 text-[10px] text-gray-500"></p>
             </div>
-
-            <div>
-                <span class="text-gray-400 block mb-1">Joining Date</span>
-                <p id="modalEmpJoiningDate" class="font-bold text-gray-800">-</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div><span class="text-gray-400 block">Email</span><span class="font-bold text-gray-800" id="modalEmpEmail">employee@clickormedia.co.in</span></div>
+                <div><span class="text-gray-400 block">Department</span><span class="font-bold text-gray-800" id="modalEmpDept">Software Engineering</span></div>
+                <div><span class="text-gray-400 block">Phone</span><span class="font-bold text-gray-800">+91 98765 43210</span></div>
+                <div><span class="text-gray-400 block">Joining Date</span><span class="font-bold text-gray-800">January 15, 2025</span></div>
             </div>
-
+            <div class="flex justify-end pt-2"><button onclick="closeModal('profileModal')" class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl cursor-pointer">Close</button></div>
         </div>
-
-        <!-- Footer -->
-        <div class="flex justify-end pt-2">
-            <button onclick="closeModal('profileModal')"
-                class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl cursor-pointer">
-                Close
-            </button>
-        </div>
-
     </div>
-</div>
+
     <!-- Script for ESS functionality & Live Geolocation & Persistent State -->
    <script>
     let isPunchedIn = false;
@@ -465,22 +364,6 @@
                 let emp = data.employee;
                 loggedInEmpName = emp.name;
                 loggedInEmpEmail = emp.email;
-                // Load employee profile photo
-const defaultAvatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces";
-
-const employeeAvatar = emp.avatar || defaultAvatar;
-
-document.getElementById('empHeaderAvatar').src = employeeAvatar;
-document.getElementById('empDropdownAvatar').src = employeeAvatar;
-document.getElementById('modalEmpAvatar').src = employeeAvatar;
-
-// Load employee profile details
-document.getElementById('modalEmpNameDetail').innerText = emp.name || '-';
-document.getElementById('modalEmpId').innerText = emp.employeeId || '-';
-document.getElementById('modalEmpPhone').value = emp.phone || '';
-document.getElementById('modalEmpJoiningDate').innerText = emp.joiningDate || '-';
-
-document.getElementById('modalEmpRole').innerText = emp.designation || 'Employee';
 
                 document.getElementById('empHeaderName').innerText = emp.name;
                 document.getElementById('empProfileName').innerText = emp.name;
@@ -566,105 +449,7 @@ fetch('/api/employee/punch-status', {
             })
             .catch(err => console.error("Error loading employee stats:", err));
     };
-// Preview selected profile photo
-function previewProfilePhoto(event) {
 
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    const message = document.getElementById('photoMessage');
-    const saveButton = document.getElementById('savePhotoBtn');
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-
-    if (!allowedTypes.includes(file.type)) {
-        message.innerText = 'Please select JPG, PNG or WEBP image.';
-        message.className = 'mt-2 text-[10px] text-red-600';
-        event.target.value = '';
-        saveButton.classList.add('hidden');
-        return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-        message.innerText = 'Image size must be less than 2 MB.';
-        message.className = 'mt-2 text-[10px] text-red-600';
-        event.target.value = '';
-        saveButton.classList.add('hidden');
-        return;
-    }
-
-    const previewURL = URL.createObjectURL(file);
-
-    document.getElementById('modalEmpAvatar').src = previewURL;
-
-    message.innerText = 'Preview ready. Click Save Photo.';
-    message.className = 'mt-2 text-[10px] text-blue-600';
-
-    saveButton.classList.remove('hidden');
-}
-
-
-// Upload and save profile photo
-async function saveProfilePhoto() {
-
-    const fileInput = document.getElementById('profilePhotoInput');
-    const saveButton = document.getElementById('savePhotoBtn');
-    const message = document.getElementById('photoMessage');
-
-    const file = fileInput.files[0];
-
-    if (!file) {
-        message.innerText = 'Please select a photo first.';
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('profilePhoto', file);
-
-    saveButton.disabled = true;
-    saveButton.innerText = 'Saving...';
-
-    try {
-
-        const response = await fetch('/api/employee/profile-photo', {
-            method: 'POST',
-            credentials: 'same-origin',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Unable to update photo.');
-        }
-
-        const updatedAvatar = data.avatar + '?t=' + Date.now();
-
-        document.getElementById('empHeaderAvatar').src = updatedAvatar;
-        document.getElementById('empDropdownAvatar').src = updatedAvatar;
-        document.getElementById('modalEmpAvatar').src = updatedAvatar;
-
-        message.innerText = 'Profile photo updated successfully!';
-        message.className = 'mt-2 text-[10px] text-emerald-600';
-
-        fileInput.value = '';
-        saveButton.classList.add('hidden');
-
-    } catch (error) {
-
-        console.error('Profile photo update error:', error);
-
-        message.innerText = error.message;
-        message.className = 'mt-2 text-[10px] text-red-600';
-
-    } finally {
-
-        saveButton.disabled = false;
-        saveButton.innerText = 'Save Photo';
-
-    }
-}
     function openProfileModal(event) {
         event.stopPropagation();
         document.getElementById('profileDropdown').classList.add('hidden');
