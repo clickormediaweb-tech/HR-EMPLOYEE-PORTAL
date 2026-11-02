@@ -339,26 +339,51 @@
             <div class="grid grid-cols-2 gap-3">
                 <div><span class="text-gray-400 block">Email</span><span class="font-bold text-gray-800" id="modalEmpEmail">employee@clickormedia.co.in</span></div>
                 <div><span class="text-gray-400 block">Department</span><span class="font-bold text-gray-800" id="modalEmpDept">Software Engineering</span></div>
+
 <div>
-    <label for="modalEmpPhone" class="text-gray-400 block mb-1">Phone</label>
+    <span class="text-gray-400 block mb-1">Phone</span>
 
-    <input
-        type="tel"
-        id="modalEmpPhone"
-        placeholder="Enter phone number"
-        class="w-full border border-gray-200 rounded-lg px-3 py-2 font-bold text-gray-800 outline-none focus:border-blue-500"
-    >
+    <div class="flex items-center gap-2">
+        <span id="modalEmpPhoneDisplay" class="font-bold text-gray-800">-</span>
 
-    <button
-        type="button"
-        id="savePhoneBtn"
-        class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700"
-    >
-        Save
-    </button>
+        <button
+            type="button"
+            id="editPhoneBtn"
+            onclick="editEmployeePhone()"
+            class="text-blue-600 font-bold hover:underline">
+            Edit
+        </button>
+    </div>
+
+    <div id="phoneEditSection" class="hidden mt-2">
+        <input
+            type="tel"
+            id="modalEmpPhone"
+            placeholder="Enter phone number"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 font-bold text-gray-800 outline-none focus:border-blue-500"
+        >
+
+        <div class="flex gap-2 mt-2">
+            <button
+                type="button"
+                id="savePhoneBtn"
+                onclick="saveEmployeePhone()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700">
+                Save
+            </button>
+
+            <button
+                type="button"
+                onclick="cancelEmployeePhoneEdit()"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200">
+                Cancel
+            </button>
+        </div>
+    </div>
 
     <p id="phoneMessage" class="mt-1 text-[10px] text-gray-500"></p>
 </div>
+
                 <div><span class="text-gray-400 block">Joining Date</span><span class="font-bold text-gray-800">January 15, 2025</span></div>
             </div>
             <div class="flex justify-end pt-2"><button onclick="closeModal('profileModal')" class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl cursor-pointer">Close</button></div>
