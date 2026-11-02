@@ -2047,6 +2047,7 @@ phone: dbUser.phone || '',
 dept: dbUser.department || dbUser.dept ||
     record.dept || "Software Engineering",
 designation: dbUser.designation || "Employee",
+                avatar: dbUser.avatar || '',
 
                 // Values come from the shared leave calculation.
                 leaveBalance: leave.balance,
