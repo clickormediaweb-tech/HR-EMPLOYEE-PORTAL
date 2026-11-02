@@ -6,8 +6,8 @@ const path = require('path');
 const nodemailer = require('nodemailer');    
 const session = require('express-session'); // <-- Added for session management
 const bcrypt = require('bcryptjs');
-const multer = require('multer');
 const app = express();
+
 // --- SHARED MONTHLY LEAVE CALCULATION ---
 function getLeaveMonthDates(year, month) {
     return {
@@ -440,68 +440,6 @@ async function saveAttendanceSafely(newAttendance) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views'), { index: false }));
-
-// --- PROFILE PHOTO STORAGE CONFIGURATION ---
-
-const profilePhotoDir = path.join(
-    __dirname,
-    'uploads',
-    'profile-photos'
-);
-
-// Create folder automatically if it does not exist
-fs.mkdirSync(profilePhotoDir, { recursive: true });
-
-// Serve uploaded images
-app.use('/uploads', express.static(
-    path.join(__dirname, 'uploads')
-));
-
-// Configure image storage
-const profilePhotoStorage = multer.diskStorage({
-
-    destination: (req, file, cb) => {
-        cb(null, profilePhotoDir);
-    },
-
-    filename: (req, file, cb) => {
-        const extension = path.extname(file.originalname).toLowerCase();
-
-        const filename =
-            `employee-${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
-
-        cb(null, filename);
-    }
-
-});
-
-// Configure upload restrictions
-const profilePhotoUpload = multer({
-
-    storage: profilePhotoStorage,
-
-    limits: {
-        fileSize: 2 * 1024 * 1024
-    },
-
-    fileFilter: (req, file, cb) => {
-
-        const allowedTypes = [
-            'image/jpeg',
-            'image/png',
-            'image/webp'
-        ];
-
-        if (!allowedTypes.includes(file.mimetype)) {
-            return cb(new Error(
-                'Only JPG, PNG and WEBP images are allowed.'
-            ));
-        }
-
-        cb(null, true);
-    }
-
-});
 
 // --- SESSION CONFIGURATION ---
 app.use(session({
@@ -1868,104 +1806,6 @@ app.get('/hr/settings', (req, res) => {
 });
 
 // --- EMPLOYEE PORTAL API ---
-// --- EMPLOYEE PROFILE PHOTO UPDATE API ---
-
-
-// --- EMPLOYEE PROFILE PHOTO UPDATE API ---
-
-app.post(
-    '/api/employee/profile-photo',
-
-    // Verify employee login
-    (req, res, next) => {
-
-        if (!req.session.user || !req.session.user.email) {
-            return res.status(401).json({
-                success: false,
-                message: 'Please log in again.'
-            });
-        }
-
-        next();
-    },
-
-    // Upload image and handle upload errors
-(req, res, next) => {
-    profilePhotoUpload.single('profilePhoto')(req, res, (err) => {
-        if (err) {
-            return res.status(400).json({
-                success: false,
-                message: err.message
-            });
-        }
-
-        next();
-    });
-},
-
-    async (req, res) => {
-
-        try {
-
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Please select a profile photo.'
-                });
-            }
-
-            const db = await readDb();
-
-            const email = req.session.user.email
-                .trim()
-                .toLowerCase();
-
-            // Find only the currently logged-in employee
-            const employee = db.users.find(user =>
-                user.email &&
-                user.email.trim().toLowerCase() === email &&
-                user.role !== 'former'
-            );
-
-            if (!employee) {
-
-                fs.unlinkSync(req.file.path);
-
-                return res.status(404).json({
-                    success: false,
-                    message: 'Employee account not found.'
-                });
-            }
-
-            // Save image path in database
-            employee.avatar =
-                `/uploads/profile-photos/${req.file.filename}`;
-
-            await writeDb(db);
-
-            return res.json({
-                success: true,
-                message: 'Profile photo updated successfully!',
-                avatar: employee.avatar
-            });
-
-        } catch (error) {
-
-            console.error('Profile photo update error:', error);
-
-            if (req.file && fs.existsSync(req.file.path)) {
-                fs.unlinkSync(req.file.path);
-            }
-
-            return res.status(500).json({
-                success: false,
-                message: 'Unable to update profile photo.'
-            });
-
-        }
-
-    }
-);
 
 app.get('/api/employee/stats', async (req, res) => {
     try {
@@ -2168,12 +2008,10 @@ const attendancePercentage = workingDaysElapsed > 0
             employee: {
                name: dbUser.name,
 email: dbUser.email,
-dept: dbUser.department || dbUser.dept || record.dept || '',
-designation: dbUser.designation || '',
+dept: dbUser.department || dbUser.dept ||
+    record.dept || "Software Engineering",
+designation: dbUser.designation || "Employee",
 
-avatar: dbUser.avatar || '',
-phone: dbUser.phone || '',
-joiningDate: dbUser.joiningDate || record.joiningDate || '',
                 // Values come from the shared leave calculation.
                 leaveBalance: leave.balance,
                 earnedLeaves: leave.earned,
