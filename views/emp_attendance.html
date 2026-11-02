@@ -438,16 +438,37 @@ let loggedInEmail = '';
             console.error('Error loading employee attendance:', err);
         });
 
-    fetch('/api/employee/stats', { credentials: 'same-origin' })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.employee) {
-                const leavesArr = data.employee.recentLeaves || [];
-                document.getElementById('leavesTakenCount').innerText =
-                    `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
-            }
-        })
-        .catch(err => console.error('Error fetching stats:', err));
+    
+fetch('/api/employee/stats', { credentials: 'same-origin' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.employee) {
+            const emp = data.employee;
+
+            // Update Leaves Taken count
+            const leavesArr = emp.recentLeaves || [];
+            document.getElementById('leavesTakenCount').innerText =
+                `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
+
+            // Populate employee profile modal
+            document.getElementById('modalEmpName').innerText = emp.name || '-';
+            document.getElementById('modalEmpRole').innerText = emp.designation || 'Employee';
+            document.getElementById('modalEmpEmail').innerText = emp.email || '-';
+            document.getElementById('modalEmpDept').innerText = emp.dept || '-';
+            document.getElementById('modalEmpPhoneDisplay').innerText = emp.phone || '-';
+            document.getElementById('modalEmpPhone').value = emp.phone || '';
+            document.getElementById('modalEmpJoiningDate').innerText = emp.joiningDate || '-';
+
+            // Load saved profile photo
+            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
+            document.getElementById('modalEmpAvatar').src = emp.avatar || defaultAvatar;
+
+            // Update dropdown email
+            document.getElementById('empDropdownEmail').innerText = emp.email || '';
+        }
+    })
+    .catch(err => console.error('Error fetching stats:', err));
+
 };
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
