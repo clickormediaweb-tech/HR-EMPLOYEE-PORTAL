@@ -6,6 +6,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');    
 const session = require('express-session'); // <-- Added for session management
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const app = express();
 
 // --- SHARED MONTHLY LEAVE CALCULATION ---
@@ -2008,6 +2009,7 @@ const attendancePercentage = workingDaysElapsed > 0
             employee: {
                name: dbUser.name,
 email: dbUser.email,
+phone: dbUser.phone || '',
 dept: dbUser.department || dbUser.dept ||
     record.dept || "Software Engineering",
 designation: dbUser.designation || "Employee",
@@ -2038,6 +2040,73 @@ designation: dbUser.designation || "Employee",
         });
     }
 });
+
+// --- API: Employee Updates Own Phone Number ---
+
+app.put('/api/employee/update-phone', async (req, res) => {
+    try {
+        // Verify employee session
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please log in again.'
+            });
+        }
+
+        const phone = String(req.body.phone || '').trim();
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter your phone number.'
+            });
+        }
+
+        if (!/^[0-9+\-\s()]{7,20}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter a valid phone number.'
+            });
+        }
+
+        const db = await readDb();
+
+        const email = req.session.user.email.trim().toLowerCase();
+
+        const employee = db.users.find(user =>
+            user.email &&
+            user.email.trim().toLowerCase() === email &&
+            user.role !== 'former'
+        );
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee account not found.'
+            });
+        }
+
+        // Update only the phone number
+        employee.phone = phone;
+
+        await writeDb(db);
+
+        return res.json({
+            success: true,
+            message: 'Phone number updated successfully.',
+            phone: employee.phone
+        });
+
+    } catch (error) {
+        console.error('Employee phone update error:', error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to update phone number.'
+        });
+    }
+});
+
 app.get('/employee/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'emp_index.html'));
 });
