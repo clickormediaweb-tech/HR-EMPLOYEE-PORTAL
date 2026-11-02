@@ -328,32 +328,43 @@
                 <h3 class="text-sm font-bold text-[#222222]">Employee Profile Details</h3>
                 <button onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
-                <img id="modalEmpAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-14 h-14 rounded-full object-cover ring-2 ring-blue-200">
-                <div class="flex flex-col gap-2">
-    <label for="profilePhotoInput"
-        class="text-blue-600 font-bold cursor-pointer hover:underline">
-        <i class="fa-solid fa-camera mr-1"></i> Choose Photo
-    </label>
+            
+<div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
+    <div class="flex flex-col items-center gap-1 shrink-0">
+        <div class="relative">
+            <img
+                id="modalEmpAvatar"
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
+                class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-200"
+            >
 
-    <input
-        type="file"
-        id="profilePhotoInput"
-        accept="image/jpeg,image/png,image/webp"
-        class="hidden"
-        onchange="uploadEmployeePhoto()"
-    >
+            <label
+                for="profilePhotoInput"
+                title="Change profile photo"
+                class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer border-2 border-white shadow-md hover:bg-blue-700 transition"
+            >
+                <i class="fa-solid fa-pencil text-xs"></i>
+            </label>
 
-    <p id="photoUploadMessage" class="text-[10px] text-gray-500"></p>
+            <input
+                type="file"
+                id="profilePhotoInput"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                onchange="uploadEmployeePhoto()"
+            >
+        </div>
+
+        <p id="photoUploadMessage" class="text-[10px] text-gray-500 text-center"></p>
+    </div>
+
+    <div class="min-w-0">
+        <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
+        <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Software Engineer</p>
+        <span class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: #COM-2026-042</span>
+    </div>
 </div>
 
-                
-                <div>
-                    <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
-                    <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Software Engineer</p>
-                    <span class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: #COM-2026-042</span>
-                </div>
-            </div>
             <div class="grid grid-cols-2 gap-3">
                 <div><span class="text-gray-400 block">Email</span><span class="font-bold text-gray-800" id="modalEmpEmail">employee@clickormedia.co.in</span></div>
                 <div><span class="text-gray-400 block">Department</span><span class="font-bold text-gray-800" id="modalEmpDept">Software Engineering</span></div>
