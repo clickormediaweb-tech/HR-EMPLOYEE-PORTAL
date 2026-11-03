@@ -1476,16 +1476,6 @@ if (
 
 const monthKey = getPayrollMonthKey(requestedYear, requestedMonth);
 
-const activeUsers = db.users
-    ? db.users.filter(u =>
-        u.role !== 'former' &&
-        (u.name || '').toLowerCase() !== 'robin'
-    )
-    : [];
-
-const activeEmails = activeUsers.map(u =>
-    (u.email || '').toLowerCase()
-);
 
 const filteredPayroll = db.payroll
     .filter(rec =>
