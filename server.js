@@ -1329,6 +1329,38 @@ app.get('/hr/analytics', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'analytics.html'));
 });
 
+// --- PAYROLL SALARY HISTORY HELPERS ---
+
+function getPayrollMonthKey(year, month) {
+    return `${year}-${String(month).padStart(2, '0')}`;
+}
+
+function getSalaryForMonth(record, monthKey) {
+    const history = Array.isArray(record.salaryHistory)
+        ? record.salaryHistory
+        : [];
+
+    const applicableSalary = history
+        .filter(item => item.effectiveFrom <= monthKey)
+        .sort((a, b) =>
+            a.effectiveFrom.localeCompare(b.effectiveFrom)
+        )
+        .pop();
+
+    return applicableSalary
+        ? Number(applicableSalary.amount)
+        : Number(record.baseNum) || 0;
+}
+
+function initializeSalaryHistory(record) {
+    if (!Array.isArray(record.salaryHistory)) {
+        record.salaryHistory = [{
+            effectiveFrom: '1900-01',
+            amount: Number(record.baseNum) || 0
+        }];
+    }
+}
+
 // --- PAYROLL PERSISTENCE API (Robin removed) ---
 app.get('/api/payroll', async (req, res) => {
     try {
@@ -1416,21 +1448,44 @@ app.get('/api/payroll', async (req, res) => {
         if (updatedFlag) {
             await writeDb(db);
         }
-        const activeUsers = db.users ? db.users.filter(u => u.role !== 'former' && u.name.toLowerCase() !== 'robin') : [];
-        const activeEmails = activeUsers.map(u => u.email.toLowerCase());
+        const activeUsers = db.users
+    ? db.users.filter(u =>
+        u.role !== 'former' &&
+        (u.name || '').toLowerCase() !== 'robin'
+    )
+    : [];
 
-       
-  const filteredPayroll = db.payroll
+const activeEmails = activeUsers.map(u =>
+    (u.email || '').toLowerCase()
+);
+
+const now = new Date();
+
+const requestedYear = Number(req.query.year);
+const requestedMonth = Number(req.query.month);
+
+const year = Number.isInteger(requestedYear) &&
+    requestedYear >= 2000 && requestedYear <= 2100
+        ? requestedYear
+        : now.getFullYear();
+
+const month = Number.isInteger(requestedMonth) &&
+    requestedMonth >= 1 && requestedMonth <= 12
+        ? requestedMonth
+        : now.getMonth() + 1;
+
+const monthKey = getPayrollMonthKey(year, month);
+const currentMonthKey = getPayrollMonthKey(
+    now.getFullYear(),
+    now.getMonth() + 1
+);
+
+const filteredPayroll = db.payroll
     .filter(rec =>
         activeEmails.includes((rec.email || '').toLowerCase()) &&
         (rec.name || '').toLowerCase() !== 'robin'
     )
     .map(rec => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-
-   
         const leave = calculateMonthlyLeave(
             rec,
             db.leaves || [],
@@ -1448,20 +1503,30 @@ app.get('/api/payroll', async (req, res) => {
             month
         );
 
+        initializeSalaryHistory(rec);
 
-  return {
-    ...rec,
-    earnedLeaves: leave.earned,
-    leavesUsedThisMonth: leave.used,
-    paidLeavesUsed: leave.paidUsed,
-    unpaidLeaves: leave.unpaid,
-   
-    unpaidHalfDays: leave.unpaidHalfDays,
-    calculatedLeaveBalance: leave.balance,
-    absentDays: absence.absentDays,
-    absentDates: absence.absentDates
-};
+        const monthlyPayment = rec.monthlyStatus?.[monthKey];
 
+        const paymentStatus = monthlyPayment?.status ||
+            (monthKey === currentMonthKey
+                ? rec.status
+                : 'PENDING');
+
+        return {
+            ...rec,
+            baseNum: getSalaryForMonth(rec, monthKey),
+            status: paymentStatus,
+            statusUpdatedAt: monthlyPayment?.updatedAt || null,
+            statusUpdatedBy: monthlyPayment?.updatedBy || null,
+            earnedLeaves: leave.earned,
+            leavesUsedThisMonth: leave.used,
+            paidLeavesUsed: leave.paidUsed,
+            unpaidLeaves: leave.unpaid,
+            unpaidHalfDays: leave.unpaidHalfDays,
+            calculatedLeaveBalance: leave.balance,
+            absentDays: absence.absentDays,
+            absentDates: absence.absentDates
+        };
     });
 
 res.json({ success: true, payroll: filteredPayroll });
@@ -1528,30 +1593,45 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
 });
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
-        const { id, status } = req.body;
+        const { id, status, effectiveFrom } = req.body;
 
         const allowedStatuses = ['PAID', 'PENDING'];
+        const normalizedStatus = String(status || '').toUpperCase();
 
-        if (!allowedStatuses.includes(String(status || '').toUpperCase())) {
+        if (!allowedStatuses.includes(normalizedStatus)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid payroll status.'
             });
         }
 
+        if (!effectiveFrom || !/^\d{4}-\d{2}$/.test(effectiveFrom)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select a valid payroll month.'
+            });
+        }
+
         const db = await readDb();
         if (!Array.isArray(db.payroll)) db.payroll = [];
 
-        const normalizedStatus = String(status).toUpperCase();
         const changedAt = new Date().toISOString();
+        const changedBy = req.session?.user?.email || 'HR';
+
+        const updateRecord = (record) => {
+            if (!record.monthlyStatus || typeof record.monthlyStatus !== 'object') {
+                record.monthlyStatus = {};
+            }
+
+            record.monthlyStatus[effectiveFrom] = {
+                status: normalizedStatus,
+                updatedAt: changedAt,
+                updatedBy: changedBy
+            };
+        };
 
         if (id === 'all') {
-            db.payroll.forEach(record => {
-                record.status = normalizedStatus;
-                record.statusUpdatedAt = changedAt;
-                record.statusUpdatedBy =
-                    req.session?.user?.email || 'HR';
-            });
+            db.payroll.forEach(updateRecord);
         } else {
             const record = db.payroll.find(item => item.id == id);
 
@@ -1562,10 +1642,7 @@ app.post('/api/payroll/update-status', async (req, res) => {
                 });
             }
 
-            record.status = normalizedStatus;
-            record.statusUpdatedAt = changedAt;
-            record.statusUpdatedBy =
-                req.session?.user?.email || 'HR';
+            updateRecord(record);
         }
 
         await writeDb(db);
@@ -1574,6 +1651,7 @@ app.post('/api/payroll/update-status', async (req, res) => {
             success: true,
             message: 'Payroll status updated successfully!'
         });
+
     } catch (err) {
         console.error('Error updating payroll status:', err);
 
@@ -1609,25 +1687,71 @@ app.get('/hr/payroll', (req, res) => {
 
 app.post('/api/payroll/update-salary', async (req, res) => {
     try {
-        const { id, baseNum } = req.body;
+        const { id, baseNum, effectiveFrom } = req.body;
+
+        if (!effectiveFrom || !/^\d{4}-\d{2}$/.test(effectiveFrom)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select a valid effective month.'
+            });
+        }
+
+        const salaryAmount = Number(baseNum);
+
+        if (!Number.isFinite(salaryAmount) || salaryAmount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter a valid salary amount.'
+            });
+        }
+
         const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
-        let rec = db.payroll.find(r => r.id == id);
-        if (rec) {
-            // Agar pehle se salary hai toh use previousSalary mein save kar do
-            if (rec.baseNum && rec.baseNum !== parseFloat(baseNum)) {
-                rec.previousSalary = rec.baseNum;
-            }
-            rec.baseNum = parseFloat(baseNum);
-           
-            await writeDb(db);
-            res.json({ success: true, message: 'Salary updated and history saved successfully!' });
-        } else {
-            res.status(404).json({ success: false, message: 'Record not found' });
+        const rec = db.payroll.find(r => r.id == id);
+
+        if (!rec) {
+            return res.status(404).json({
+                success: false,
+                message: 'Record not found'
+            });
         }
+
+        initializeSalaryHistory(rec);
+
+        const existingEntry = rec.salaryHistory.find(
+            item => item.effectiveFrom === effectiveFrom
+        );
+
+        if (existingEntry) {
+            existingEntry.amount = salaryAmount;
+        } else {
+            rec.salaryHistory.push({
+                effectiveFrom,
+                amount: salaryAmount
+            });
+        }
+
+        rec.salaryHistory.sort((a, b) =>
+            a.effectiveFrom.localeCompare(b.effectiveFrom)
+        );
+
+        rec.previousSalary = rec.baseNum;
+        rec.baseNum = salaryAmount;
+
+        await writeDb(db);
+
+        res.json({
+            success: true,
+            message: 'Salary updated successfully from the selected month!'
+        });
+
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Update salary error:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
     }
 });
 app.post('/api/payroll/add-leave-log', async (req, res) => {
