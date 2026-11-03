@@ -1329,38 +1329,6 @@ app.get('/hr/analytics', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'analytics.html'));
 });
 
-// --- PAYROLL SALARY HISTORY HELPERS ---
-
-function getPayrollMonthKey(year, month) {
-    return `${year}-${String(month).padStart(2, '0')}`;
-}
-
-function getSalaryForMonth(record, monthKey) {
-    const history = Array.isArray(record.salaryHistory)
-        ? record.salaryHistory
-        : [];
-
-    const applicableSalary = history
-        .filter(item => item.effectiveFrom <= monthKey)
-        .sort((a, b) =>
-            a.effectiveFrom.localeCompare(b.effectiveFrom)
-        )
-        .pop();
-
-    return applicableSalary
-        ? Number(applicableSalary.amount)
-        : Number(record.baseNum) || 0;
-}
-
-function initializeSalaryHistory(record) {
-    if (!Array.isArray(record.salaryHistory)) {
-        record.salaryHistory = [{
-            effectiveFrom: '1900-01',
-            amount: Number(record.baseNum) || 0
-        }];
-    }
-}
-
 // --- PAYROLL PERSISTENCE API (Robin removed) ---
 app.get('/api/payroll', async (req, res) => {
     try {
@@ -1452,43 +1420,22 @@ app.get('/api/payroll', async (req, res) => {
         const activeEmails = activeUsers.map(u => u.email.toLowerCase());
 
        
-  const requestedYear = req.query.year
-    ? Number(req.query.year)
-    : new Date().getFullYear();
-
-const requestedMonth = req.query.month
-    ? Number(req.query.month)
-    : new Date().getMonth() + 1;
-
-if (
-    !Number.isInteger(requestedYear) ||
-    requestedYear < 2000 ||
-    requestedYear > 2100 ||
-    !Number.isInteger(requestedMonth) ||
-    requestedMonth < 1 ||
-    requestedMonth > 12
-) {
-    return res.status(400).json({
-        success: false,
-        message: 'Invalid payroll month or year.'
-    });
-}
-
-const monthKey = getPayrollMonthKey(requestedYear, requestedMonth);
-
-
-const filteredPayroll = db.payroll
+  const filteredPayroll = db.payroll
     .filter(rec =>
         activeEmails.includes((rec.email || '').toLowerCase()) &&
         (rec.name || '').toLowerCase() !== 'robin'
     )
     .map(rec => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
 
+   
         const leave = calculateMonthlyLeave(
             rec,
             db.leaves || [],
-            requestedYear,
-            requestedMonth
+            year,
+            month
         );
 
         const absence = calculateMonthlyAbsences(
@@ -1497,41 +1444,32 @@ const filteredPayroll = db.payroll
             db.leaves || [],
             db.holidays || [],
             db.settings || {},
-            requestedYear,
-            requestedMonth
+            year,
+            month
         );
 
-        const salary = getSalaryForMonth(rec, monthKey);
 
-        const monthlyStatus = Array.isArray(rec.monthlyStatus)
-            ? rec.monthlyStatus.find(item => item.monthKey === monthKey)
-            : null;
+  return {
+    ...rec,
+    earnedLeaves: leave.earned,
+    leavesUsedThisMonth: leave.used,
+    paidLeavesUsed: leave.paidUsed,
+    unpaidLeaves: leave.unpaid,
+   
+    unpaidHalfDays: leave.unpaidHalfDays,
+    calculatedLeaveBalance: leave.balance,
+    absentDays: absence.absentDays,
+    absentDates: absence.absentDates
+};
 
-        return {
-            ...rec,
-            baseNum: salary,
-            status: monthlyStatus
-                ? monthlyStatus.status
-                : (rec.status || 'PENDING'),
-
-            earnedLeaves: leave.earned,
-            leavesUsedThisMonth: leave.used,
-            paidLeavesUsed: leave.paidUsed,
-            unpaidLeaves: leave.unpaid,
-            unpaidHalfDays: leave.unpaidHalfDays,
-            calculatedLeaveBalance: leave.balance,
-            absentDays: absence.absentDays,
-            absentDates: absence.absentDates
-        };
     });
 
-res.json({
-    success: true,
-    payroll: filteredPayroll,
-    year: requestedYear,
-    month: requestedMonth,
-    monthKey
+res.json({ success: true, payroll: filteredPayroll });
+    } catch (err) {
+        res.status(500).json({ success: false, payroll: [] });
+    }
 });
+
 app.get('/api/debug/employee-leaves', async (req, res) => {
     try {
         const db = await readDb();
@@ -1590,60 +1528,29 @@ app.get('/api/debug/employee-leaves', async (req, res) => {
 });
 app.post('/api/payroll/update-status', async (req, res) => {
     try {
-        const { id, status, effectiveFrom } = req.body;
+        const { id, status } = req.body;
 
-        const normalizedStatus = String(status || '').toUpperCase();
         const allowedStatuses = ['PAID', 'PENDING'];
 
-        if (!allowedStatuses.includes(normalizedStatus)) {
+        if (!allowedStatuses.includes(String(status || '').toUpperCase())) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid payroll status.'
             });
         }
 
-        if (
-            typeof effectiveFrom !== 'string' ||
-            !/^\d{4}-(0[1-9]|1[0-2])$/.test(effectiveFrom)
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: 'A valid payroll month (YYYY-MM) is required.'
-            });
-        }
-
         const db = await readDb();
         if (!Array.isArray(db.payroll)) db.payroll = [];
 
+        const normalizedStatus = String(status).toUpperCase();
         const changedAt = new Date().toISOString();
-        const changedBy = req.session?.user?.email || 'HR';
-
-        const updateMonthlyStatus = (record) => {
-            if (!Array.isArray(record.monthlyStatus)) {
-                record.monthlyStatus = [];
-            }
-
-            const existing = record.monthlyStatus.find(
-                item => item.monthKey === effectiveFrom
-            );
-
-            const statusEntry = {
-                monthKey: effectiveFrom,
-                status: normalizedStatus,
-                updatedAt: changedAt,
-                updatedBy: changedBy
-            };
-
-            if (existing) {
-                Object.assign(existing, statusEntry);
-            } else {
-                record.monthlyStatus.push(statusEntry);
-            }
-        };
 
         if (id === 'all') {
             db.payroll.forEach(record => {
-                updateMonthlyStatus(record);
+                record.status = normalizedStatus;
+                record.statusUpdatedAt = changedAt;
+                record.statusUpdatedBy =
+                    req.session?.user?.email || 'HR';
             });
         } else {
             const record = db.payroll.find(item => item.id == id);
@@ -1655,18 +1562,18 @@ app.post('/api/payroll/update-status', async (req, res) => {
                 });
             }
 
-            updateMonthlyStatus(record);
+            record.status = normalizedStatus;
+            record.statusUpdatedAt = changedAt;
+            record.statusUpdatedBy =
+                req.session?.user?.email || 'HR';
         }
 
         await writeDb(db);
 
         res.json({
             success: true,
-            message: 'Monthly payroll status saved successfully.',
-            month: effectiveFrom,
-            status: normalizedStatus
+            message: 'Payroll status updated successfully!'
         });
-
     } catch (err) {
         console.error('Error updating payroll status:', err);
 
@@ -1702,88 +1609,25 @@ app.get('/hr/payroll', (req, res) => {
 
 app.post('/api/payroll/update-salary', async (req, res) => {
     try {
-        const { id, baseNum, effectiveFrom } = req.body;
-
-        if (!id || baseNum === undefined || baseNum === null || baseNum === '') {
-            return res.status(400).json({
-                success: false,
-                message: 'Employee ID and salary are required.'
-            });
-        }
-
-        const salary = Number(baseNum);
-
-        if (!Number.isFinite(salary) || salary < 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please enter a valid salary.'
-            });
-        }
-
-        if (
-            typeof effectiveFrom !== 'string' ||
-            !/^\d{4}-(0[1-9]|1[0-2])$/.test(effectiveFrom)
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: 'A valid effective month (YYYY-MM) is required.'
-            });
-        }
-
+        const { id, baseNum } = req.body;
         const db = await readDb();
         if (!db.payroll) db.payroll = [];
 
-        const rec = db.payroll.find(r => r.id == id);
-
-        if (!rec) {
-            return res.status(404).json({
-                success: false,
-                message: 'Payroll record not found.'
-            });
-        }
-
-        initializeSalaryHistory(rec);
-
-        const existingEntry = rec.salaryHistory.find(
-            item => item.effectiveFrom === effectiveFrom
-        );
-
-        const salaryEntry = {
-            effectiveFrom,
-            amount: salary,
-            updatedAt: new Date().toISOString()
-        };
-
-        if (existingEntry) {
-            Object.assign(existingEntry, salaryEntry);
+        let rec = db.payroll.find(r => r.id == id);
+        if (rec) {
+            // Agar pehle se salary hai toh use previousSalary mein save kar do
+            if (rec.baseNum && rec.baseNum !== parseFloat(baseNum)) {
+                rec.previousSalary = rec.baseNum;
+            }
+            rec.baseNum = parseFloat(baseNum);
+           
+            await writeDb(db);
+            res.json({ success: true, message: 'Salary updated and history saved successfully!' });
         } else {
-            rec.salaryHistory.push(salaryEntry);
+            res.status(404).json({ success: false, message: 'Record not found' });
         }
-
-        rec.salaryHistory.sort((a, b) =>
-            a.effectiveFrom.localeCompare(b.effectiveFrom)
-        );
-
-        // Keep baseNum as the latest salary for compatibility
-        const latestEntry = rec.salaryHistory[rec.salaryHistory.length - 1];
-        rec.baseNum = Number(latestEntry.amount);
-
-        await writeDb(db);
-
-        res.json({
-            success: true,
-            message: 'Salary history saved successfully.',
-            effectiveFrom,
-            salary
-        });
-
     } catch (err) {
-        console.error('Payroll salary update error:', err);
-
-        res.status(500).json({
-            success: false,
-            message: 'Server error while updating salary.'
-        });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 app.post('/api/payroll/add-leave-log', async (req, res) => {
