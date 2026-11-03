@@ -1377,7 +1377,11 @@ async function editPayrollStatus(id) {
         const response = await fetch("/api/payroll/update-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, status })
+            body: JSON.stringify({
+    id,
+    status,
+    effectiveFrom: document.getElementById('payrollMonth').value
+})
         });
 
         const data = await response.json();
@@ -1446,7 +1450,11 @@ async function editPayrollStatus(id) {
 
                     headers: { 'Content-Type': 'application/json' },
 
-                    body: JSON.stringify({ id, status: 'PAID' })
+                    body: JSON.stringify({
+    id,
+    status: 'PAID',
+    effectiveFrom: document.getElementById('payrollMonth').value
+})
 
                 });
 
@@ -1484,7 +1492,11 @@ async function editPayrollStatus(id) {
 
                         headers: { 'Content-Type': 'application/json' },
 
-                        body: JSON.stringify({ id: 'all', status: 'PAID' })
+                        body: JSON.stringify({
+    id: 'all',
+    status: 'PAID',
+    effectiveFrom: document.getElementById('payrollMonth').value
+})
 
                     });
 
@@ -1564,7 +1576,11 @@ async function editPayrollStatus(id) {
 
                     headers: { 'Content-Type': 'application/json' },
 
-                    body: JSON.stringify({ id, baseNum })
+                    body: JSON.stringify({
+    id,
+    baseNum,
+    effectiveFrom: document.getElementById('payrollMonth').value
+})
 
                 });
 
