@@ -400,15 +400,11 @@
 
                 <div class="flex items-center gap-3">
 
-                    <select id="payrollMonth" onchange="alert('Switched payroll cycle to ' + this.value)" class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer">
-
-                        <option>September 2026 Cycle</option>
-
-                        <option>August 2026 Cycle</option>
-
-                        <option>July 2026 Cycle</option>
-
-                    </select>
+                    <input
+    type="month"
+    id="payrollMonth"
+    class="bg-gray-50 border border-[#EAEAEA] text-xs font-bold rounded-xl px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#FFD134] cursor-pointer"
+>
 
                     <button onclick="runBatchPayroll()" class="px-5 py-2.5 rounded-xl bg-[#FFD134] text-[#222222] font-bold text-sm shadow-md shadow-[#FFD134]/20 hover:bg-[#fbc512] transform hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer w-fit">
 
@@ -1040,9 +1036,18 @@
 
         window.onload = function() {
 
-            fetchPayrollData();
+    const monthInput = document.getElementById('payrollMonth');
 
-        };
+    const now = new Date();
+
+    monthInput.value =
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    monthInput.addEventListener('change', fetchPayrollData);
+
+    fetchPayrollData();
+
+};
 
 
 
@@ -1050,7 +1055,15 @@
 
             try {
 
-                const response = await fetch('/api/payroll');
+                const selectedMonth = document.getElementById('payrollMonth').value;
+
+if (!selectedMonth) return;
+
+const [year, month] = selectedMonth.split('-');
+
+const response = await fetch(
+    `/api/payroll?year=${year}&month=${month}`
+);
 
                 const data = await response.json();
 
