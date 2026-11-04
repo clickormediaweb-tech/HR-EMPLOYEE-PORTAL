@@ -109,11 +109,14 @@ function calculateMonthlyLeave(payrollRec, allLeaves, year, month) {
     const pad = value => String(value).padStart(2, "0");
 
     function monthRange(y, m) {
-        return {
-            start: `${y}-${pad(m)}-01`,
-            end: `${y}-${pad(m)}-${new Date(Date.UTC(y, m, 0)).getUTCDate()}`
-        };
-    }
+    const start = new Date(Date.UTC(y, m - 1, 7));
+    const end = new Date(Date.UTC(y, m, 6));
+
+    return {
+        start: start.toISOString().slice(0, 10),
+        end: end.toISOString().slice(0, 10)
+    };
+}
 
     function countWorkingDays(start, end) {
         if (!start || !end || start > end) return 0;
@@ -240,9 +243,11 @@ function calculateMonthlyAbsences(
     const todayDate =
         `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-    const monthStart = `${year}-${pad(month)}-01`;
-    const monthEnd =
-        `${year}-${pad(month)}-${new Date(year, month, 0).getDate()}`;
+    const periodStart = new Date(Date.UTC(year, month - 1, 7));
+const periodEnd = new Date(Date.UTC(year, month, 6));
+
+const monthStart = periodStart.toISOString().slice(0, 10);
+const monthEnd = periodEnd.toISOString().slice(0, 10);
 
     const shiftEnd = String(
         settings?.shiftEndTime || "06:00 PM"
@@ -2010,10 +2015,16 @@ const record = db.payroll.find(payroll =>
     baseNum: 0,
     leaveLogs: []
 };
-        // Use the current calendar month and shared HR leave calculation.
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1;
+        // Use the current 7th–6th payroll period.
+const currentDate = new Date();
+
+const payrollDate = new Date(currentDate);
+if (currentDate.getDate() < 7) {
+    payrollDate.setMonth(payrollDate.getMonth() - 1);
+}
+
+const year = payrollDate.getFullYear();
+const month = payrollDate.getMonth() + 1;
 
         const allLeaves = Array.isArray(db.leaves)
             ? db.leaves
@@ -2101,12 +2112,21 @@ const currentMinutes =
 const shiftHasEndedToday =
     currentMinutes >= getTimeInMinutes(shiftEndTime);
 
-for (let day = 1; day <= currentDate.getDate(); day++) {
+const periodStart = new Date(year, month - 1, 7);
+const periodEnd = new Date(currentDate);
+
+periodStart.setHours(0, 0, 0, 0);
+periodEnd.setHours(0, 0, 0, 0);
+
+for (
+    let date = new Date(periodStart);
+    date <= periodEnd;
+    date.setDate(date.getDate() + 1)
+) {
     const dateString =
-        `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-    const weekday = new Date(year, month - 1, day).getDay();
-
+    const weekday = date.getDay();
     if (
         weekday === 0 ||
         holidayDates.has(dateString) ||
@@ -2116,7 +2136,7 @@ for (let day = 1; day <= currentDate.getDate(); day++) {
     }
 
     if (
-        day === currentDate.getDate() &&
+        date.getTime() === periodEnd.getTime() &&
         !shiftHasEndedToday
     ) {
         continue;
@@ -2552,8 +2572,14 @@ app.get('/api/employee/payroll', async (req, res) => {
        const payrollRecord = userPayroll;
 
 const now = new Date();
-const year = now.getFullYear();
-const month = now.getMonth() + 1;
+
+const payrollDate = new Date(now);
+if (now.getDate() < 7) {
+    payrollDate.setMonth(payrollDate.getMonth() - 1);
+}
+
+const year = payrollDate.getFullYear();
+const month = payrollDate.getMonth() + 1;
 
 const leave = calculateMonthlyLeave(
     payrollRecord,
