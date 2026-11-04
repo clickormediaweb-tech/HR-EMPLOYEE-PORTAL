@@ -342,6 +342,12 @@ window.onload = function() {
             if (data.success && data.employee) {
                 // Yeh line server ke calculated balance ko screen par dikhayegi
                 document.getElementById('leaveBalanceCount').innerText = `${data.employee.leaveBalance} Days`;
+
+                document.getElementById('rolloverBalanceCount').innerText =
+    `${data.employee.rolloverBalance || 0} Days`;
+
+document.getElementById('rolloverYearText').innerText =
+    `Carried forward from ${new Date().getFullYear() - 1}`;
             }
         })
         .catch(err => console.error("Error fetching stats:", err));
