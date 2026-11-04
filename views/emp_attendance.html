@@ -322,9 +322,9 @@
             <div class="min-w-0">
                 <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
                 <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Employee</p>
-                <span class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">
-                    ID: #COM-2026-042
-                </span>
+                <span id="modalEmpId" class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">
+    ID: -
+</span>
             </div>
         </div>
 
@@ -480,6 +480,8 @@ document.getElementById('modalEmpAvatar').src = avatarUrl;
             // Populate employee profile modal
             document.getElementById('modalEmpName').innerText = emp.name || '-';
             document.getElementById('modalEmpRole').innerText = emp.designation || 'Employee';
+            document.getElementById('modalEmpId').innerText =
+    'ID: ' + (emp.employeeId || '-');
             document.getElementById('modalEmpEmail').innerText = emp.email || '-';
             document.getElementById('modalEmpDept').innerText = emp.dept || '-';
             document.getElementById('modalEmpPhoneDisplay').innerText = emp.phone || '-';
