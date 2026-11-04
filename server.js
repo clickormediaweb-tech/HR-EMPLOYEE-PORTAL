@@ -2615,11 +2615,13 @@ app.get('/api/current-user', async (req, res) => {
         return res.json({
             success: true,
             user: {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                department: user.department || user.dept || ''
-            }
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    department: user.department || user.dept || '',
+    employeeId: user.employeeId || '',
+    joiningDate: user.joiningDate || ''
+}
         });
     } catch (err) {
         console.error('Current-user error:', err);
