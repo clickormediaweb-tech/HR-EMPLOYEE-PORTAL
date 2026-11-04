@@ -2026,6 +2026,18 @@ const record = db.payroll.find(payroll =>
             month
         );
 
+        // Calculate unused paid leaves carried forward from the previous year.
+const previousYear = year - 1;
+
+const previousYearLeave = calculateMonthlyLeave(
+    record,
+    allLeaves,
+    previousYear,
+    12
+);
+
+const rolloverBalance = previousYearLeave.balance;
+
         const baseSalary = Number(record.baseNum) || 0;
         const perDaySalary = baseSalary / 30;
 
@@ -2176,6 +2188,7 @@ avatar: dbUser.avatar || '',
 
                 // Values come from the shared leave calculation.
                 leaveBalance: leave.balance,
+                rolloverBalance: rolloverBalance,
                 earnedLeaves: leave.earned,
                 leavesUsedThisMonth: leave.used,
                 paidLeavesUsed: leave.paidUsed,
