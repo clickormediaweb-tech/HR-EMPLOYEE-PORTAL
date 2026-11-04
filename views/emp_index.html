@@ -361,7 +361,7 @@
     <div class="min-w-0">
         <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
         <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Software Engineer</p>
-        <span class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: #COM-2026-042</span>
+        <span id="modalEmpId" class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: -</span>
     </div>
 </div>
 
@@ -413,7 +413,10 @@
     <p id="phoneMessage" class="mt-1 text-[10px] text-gray-500"></p>
 </div>
 
-                <div><span class="text-gray-400 block">Joining Date</span><span class="font-bold text-gray-800">January 15, 2025</span></div>
+                <div>
+    <span class="text-gray-400 block">Joining Date</span>
+    <span id="modalEmpJoiningDate" class="font-bold text-gray-800">-</span>
+</div>
             </div>
             <div class="flex justify-end pt-2"><button onclick="closeModal('profileModal')" class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl cursor-pointer">Close</button></div>
         </div>
@@ -451,6 +454,11 @@ document.getElementById('modalEmpAvatar').src = avatarUrl;
                 document.getElementById('empDropdownEmail').innerText = emp.email;
                 document.getElementById('modalEmpEmail').innerText = emp.email;
                 document.getElementById('modalEmpDept').innerText = emp.dept;
+                document.getElementById('modalEmpId').innerText =
+    'ID: ' + (emp.employeeId || '-');
+
+document.getElementById('modalEmpJoiningDate').innerText =
+    emp.joiningDate || '-';
                 document.getElementById('modalEmpPhoneDisplay').innerText = emp.phone || '-';
                 document.getElementById('modalEmpPhone').value = emp.phone || '';
                
