@@ -113,10 +113,12 @@
         
         <!-- 2. TOP HEADER -->
         <header class="bg-white/80 backdrop-blur-md border-b border-[#EAEAEA] h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
-            <div class="text-right">
-    <h4 id="empProfileName" class="text-sm font-bold text-[#222222]">Employee User</h4>
-    <p id="headerDesignation" class="text-xs text-gray-500">Software Engineer</p>
+            <div class="flex items-center gap-3">
+    <h3 class="text-base font-bold text-[#222222]">
+        Welcome back, <span id="empHeaderName" class="text-blue-600">Employee</span>!
+    </h3>
 </div>
+            
 
             <!-- Right Actions & User Profile -->
             <div class="flex items-center gap-5">
@@ -155,14 +157,16 @@
     <h4 id="empProfileName" class="text-sm font-bold text-[#222222]">Employee User</h4>
     <p id="headerDesignation" class="text-xs text-gray-500">Software Engineer</p>
 </div>
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        
+                        <img id="empHeaderAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
                     </div>
 
                     <!-- Profile Dropdown Panel -->
                     <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] p-3.5 z-50 space-y-1 text-xs">
                         <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
-                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                           <img id="empDropdownAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            
                             <div>
                                 <p id="empDropdownName" class="font-black text-[#222222] text-sm">Employee User</p>
 <p id="empDropdownEmail" class="text-[11px] text-gray-400 truncate">employee@clickormedia.co.in</p>                            </div>
@@ -425,6 +429,9 @@ let loggedInEmail = '';
             const user = data.user;
             loggedInName = user.name || '';
             loggedInEmail = user.email || '';
+            document.getElementById('empHeaderName').innerText = loggedInName;
+document.getElementById('headerDesignation').innerText =
+    user.designation || user.department || 'Employee';
 
             document.querySelectorAll('#empProfileName, #empDropdownName').forEach(el => {
                 el.innerText = loggedInName;
@@ -461,6 +468,13 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
         if (data.success && data.employee) {
             const emp = data.employee;
 
+            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
+const avatarUrl = emp.avatar || defaultAvatar;
+
+document.getElementById('empHeaderAvatar').src = avatarUrl;
+document.getElementById('empDropdownAvatar').src = avatarUrl;
+document.getElementById('modalEmpAvatar').src = avatarUrl;
+
             
 
             // Populate employee profile modal
@@ -472,9 +486,7 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
             document.getElementById('modalEmpPhone').value = emp.phone || '';
             document.getElementById('modalEmpJoiningDate').innerText = emp.joiningDate || '-';
 
-            // Load saved profile photo
-            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
-            document.getElementById('modalEmpAvatar').src = emp.avatar || defaultAvatar;
+            
 
             // Update dropdown email
             document.getElementById('empDropdownEmail').innerText = emp.email || '';
@@ -850,6 +862,145 @@ if (shiftIsInProgress && (!hasCheckIn || !hasCheckOut)) {
             if(notifDropdown) notifDropdown.classList.add('hidden');
             if(profileDropdown) profileDropdown.classList.toggle('hidden');
         }
+
+    // Show phone number edit mode
+function editEmployeePhone() {
+    const currentPhone = document.getElementById('modalEmpPhoneDisplay').innerText;
+
+    document.getElementById('modalEmpPhone').value =
+        currentPhone === '-' ? '' : currentPhone;
+
+    document.getElementById('modalEmpPhoneDisplay').classList.add('hidden');
+    document.getElementById('editPhoneBtn').classList.add('hidden');
+    document.getElementById('phoneEditSection').classList.remove('hidden');
+
+    document.getElementById('phoneMessage').innerText = '';
+}
+
+// Cancel phone number editing
+function cancelEmployeePhoneEdit() {
+    document.getElementById('phoneEditSection').classList.add('hidden');
+    document.getElementById('modalEmpPhoneDisplay').classList.remove('hidden');
+    document.getElementById('editPhoneBtn').classList.remove('hidden');
+
+    document.getElementById('phoneMessage').innerText = '';
+}
+
+// Save updated phone number
+async function saveEmployeePhone() {
+    const phoneInput = document.getElementById('modalEmpPhone');
+    const saveButton = document.getElementById('savePhoneBtn');
+    const message = document.getElementById('phoneMessage');
+
+    const phone = phoneInput.value.trim();
+
+    if (!phone) {
+        message.innerText = 'Please enter your phone number.';
+        message.className = 'mt-1 text-[10px] text-red-600';
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.innerText = 'Saving...';
+
+    try {
+        const response = await fetch('/api/employee/update-phone', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phone: phone })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to save phone number.');
+        }
+
+        document.getElementById('modalEmpPhoneDisplay').innerText = data.phone;
+
+        document.getElementById('phoneEditSection').classList.add('hidden');
+        document.getElementById('modalEmpPhoneDisplay').classList.remove('hidden');
+        document.getElementById('editPhoneBtn').classList.remove('hidden');
+
+        message.innerText = 'Changes saved successfully!';
+        message.className = 'mt-1 text-[10px] text-emerald-600';
+
+    } catch (error) {
+        console.error('Phone update error:', error);
+
+        message.innerText = error.message;
+        message.className = 'mt-1 text-[10px] text-red-600';
+
+    } finally {
+        saveButton.disabled = false;
+        saveButton.innerText = 'Save';
+    }
+}
+
+// Upload employee profile photo
+async function uploadEmployeePhoto() {
+    const input = document.getElementById('profilePhotoInput');
+    const message = document.getElementById('photoUploadMessage');
+    const file = input.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+        message.innerText = 'Please select a JPG, PNG or WEBP image.';
+        message.className = 'text-[10px] text-red-600';
+        input.value = '';
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        message.innerText = 'Image size must be 5 MB or less.';
+        message.className = 'text-[10px] text-red-600';
+        input.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    message.innerText = 'Uploading...';
+    message.className = 'text-[10px] text-gray-500';
+
+    try {
+        const response = await fetch('/api/employee/upload-photo', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Photo upload failed.');
+        }
+
+        const photoUrl = data.avatar + '?t=' + Date.now();
+
+        document.getElementById('empHeaderAvatar').src = photoUrl;
+        document.getElementById('empDropdownAvatar').src = photoUrl;
+        document.getElementById('modalEmpAvatar').src = photoUrl;
+
+        message.innerText = 'Profile photo updated successfully!';
+        message.className = 'text-[10px] text-emerald-600';
+
+        input.value = '';
+
+    } catch (error) {
+        console.error('Photo upload error:', error);
+
+        message.innerText = error.message;
+        message.className = 'text-[10px] text-red-600';
+    }
+}
 
     function openProfileModal(event) {
     event.stopPropagation();
