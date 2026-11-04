@@ -2637,7 +2637,14 @@ app.get('/employee/settings', (req, res) => {
 app.put('/api/employees/edit/:id', async (req, res) => {
     try {
         const empId = req.params.id;
-        const { name, email, designation, department } = req.body;
+        const {
+    name,
+    email,
+    designation,
+    department,
+    employeeId,
+    joiningDate
+} = req.body;
         const db = await readDb();
 
         let oldEmployeeName = "";
@@ -2650,6 +2657,8 @@ app.put('/api/employees/edit/:id', async (req, res) => {
                 user.email = email || user.email;
                 user.designation = designation || user.designation;
                 user.department = department || user.department;
+                user.employeeId = employeeId;
+                user.joiningDate = joiningDate;
             }
         }
 
