@@ -394,6 +394,19 @@
 let loggedInEmail = '';
 
       window.onload = function() {
+              const today = new Date();
+    const monthSelector = document.getElementById('monthSelector');
+    const monthNames = [
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
+    ];
+
+    monthSelector.value = today.getMonth();
+
+    Array.from(monthSelector.options).forEach((option, index) => {
+        option.textContent = `${monthNames[index]} ${today.getFullYear()}`;
+    });
     fetch('/api/current-user', { credentials: 'same-origin' })
         .then(res => {
             if (!res.ok) {
@@ -473,7 +486,7 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); 
-            let year = 2026;
+            let year = new Date().getFullYear();
             let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             
             document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
