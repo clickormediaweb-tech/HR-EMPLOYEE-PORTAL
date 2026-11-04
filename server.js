@@ -2620,6 +2620,7 @@ app.get('/api/current-user', async (req, res) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    designation: user.designation || '',
     department: user.department || user.dept || '',
     employeeId: user.employeeId || '',
     joiningDate: user.joiningDate || ''
