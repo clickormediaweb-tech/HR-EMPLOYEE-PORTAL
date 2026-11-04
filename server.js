@@ -2168,9 +2168,11 @@ const attendancePercentage = workingDaysElapsed > 0
 email: dbUser.email,
 phone: dbUser.phone || '',
 dept: dbUser.department || dbUser.dept ||
-    record.dept || "Software Engineering",
-designation: dbUser.designation || "Employee",
-                avatar: dbUser.avatar || '',
+    record.dept || '',
+designation: dbUser.designation || '',
+employeeId: dbUser.employeeId || '',
+joiningDate: dbUser.joiningDate || '',
+avatar: dbUser.avatar || '',
 
                 // Values come from the shared leave calculation.
                 leaveBalance: leave.balance,
