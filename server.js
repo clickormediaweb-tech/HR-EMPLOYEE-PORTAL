@@ -1506,8 +1506,7 @@ const filteredPayroll = db.payroll
         initializeSalaryHistory(rec);
 
         const monthlyPayment = rec.monthlyStatus?.[monthKey];
-
-        const paymentStatus = monthlyPayment?.status || rec.status || 'PENDING';
+        const paymentStatus = monthlyPayment?.status || 'PENDING';
 
         return {
             ...rec,
