@@ -212,7 +212,7 @@
                 </div>
                 <div class="bg-white p-6 rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group">
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Attendance Rate</p>
-                    <h3 class="text-3xl font-black text-indigo-600 mt-1 group-hover:scale-105 transition-transform origin-left">96.5%</h3>
+                    <h3 id="attendanceRate" class="text-3xl font-black text-indigo-600 mt-1 group-hover:scale-105 transition-transform origin-left">0%</h3>
                     <p class="text-[11px] text-gray-400 mt-1">Exceeds company benchmark</p>
                 </div>
             </div>
@@ -390,6 +390,9 @@
     <!-- Script for Dynamic Filtering, Working Days Calculation & Backend Synchronization -->
 <script>
         let allEmployeeLogs = [];
+        let allEmployeeLeaves = [];
+        let allEmployeeHolidays = [];
+        let employeeShiftEndTime = '06:00 PM';
       let loggedInName = '';
 let loggedInEmail = '';
 
@@ -458,10 +461,7 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
         if (data.success && data.employee) {
             const emp = data.employee;
 
-            // Update Leaves Taken count
-            const leavesArr = emp.recentLeaves || [];
-            document.getElementById('leavesTakenCount').innerText =
-                `${leavesArr.length} Day${leavesArr.length !== 1 ? 's' : ''}`;
+            
 
             // Populate employee profile modal
             document.getElementById('modalEmpName').innerText = emp.name || '-';
@@ -482,7 +482,47 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
     })
     .catch(err => console.error('Error fetching stats:', err));
 
+fetch('/api/employee/leaves', { credentials: 'same-origin' })
+    .then(res => {
+        if (!res.ok) throw new Error('Unable to load leave records.');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            allEmployeeLeaves = data.myLeaves || [];
+            filterTable();
+        }
+    })
+    .catch(err => console.error('Error fetching employee leaves:', err));
+          
+          fetch('/api/holidays', { credentials: 'same-origin' })
+    .then(res => {
+        if (!res.ok) throw new Error('Unable to load holidays.');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            allEmployeeHolidays = data.holidays || [];
+            filterTable();
+        }
+    })
+    .catch(err => console.error('Error fetching holidays:', err));
+
+          fetch('/api/settings', { credentials: 'same-origin' })
+    .then(res => {
+        if (!res.ok) throw new Error('Unable to load settings.');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success && data.settings && data.settings.shiftEndTime) {
+            employeeShiftEndTime = data.settings.shiftEndTime;
+            filterTable();
+        }
+    })
+    .catch(err => console.error('Error fetching employee settings:', err));
+
 };
+    
       function filterTable() {
             let statusFilter = document.getElementById('statusFilter').value;
             let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); 
@@ -576,6 +616,173 @@ const presentDays = filteredLogs.filter(log => {
 }).length;
 
 document.getElementById('presentCount').innerText = `${presentDays} Days`;
+
+          // --- MONTH-WISE LEAVE AND ATTENDANCE STATISTICS ---
+
+const monthStart = new Date(year, selectedMonthIndex, 1);
+const monthEnd = new Date(year, selectedMonthIndex + 1, 0);
+const today = new Date();
+
+const isCurrentMonth =
+    today.getFullYear() === year &&
+    today.getMonth() === selectedMonthIndex;
+
+const isFutureMonth =
+    new Date(year, selectedMonthIndex, 1) >
+    new Date(today.getFullYear(), today.getMonth(), 1);
+
+let lastEligibleDay = monthEnd.getDate();
+
+if (isFutureMonth) {
+    lastEligibleDay = 0;
+} else if (isCurrentMonth) {
+    const shiftTime = String(employeeShiftEndTime || '06:00 PM')
+        .trim()
+        .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+    let shiftEndMinutes = 18 * 60;
+
+    if (shiftTime) {
+        let hours = Number(shiftTime[1]) % 12;
+        if (shiftTime[3].toUpperCase() === 'PM') hours += 12;
+
+        shiftEndMinutes = hours * 60 + Number(shiftTime[2]);
+    }
+
+    const currentMinutes = today.getHours() * 60 + today.getMinutes();
+
+    lastEligibleDay = today.getDate() -
+        (currentMinutes < shiftEndMinutes ? 1 : 0);
+}
+
+const holidayDates = new Set(
+    (allEmployeeHolidays || []).map(holiday =>
+        String(holiday.date || '').slice(0, 10)
+    )
+);
+
+const approvedLeaves = (allEmployeeLeaves || []).filter(leave =>
+    String(leave.status || '').toUpperCase() === 'APPROVED'
+);
+
+const approvedFullDayLeaveDates = new Set();
+
+approvedLeaves.forEach(leave => {
+    const start = new Date(String(leave.startDate).slice(0, 10) + 'T00:00:00');
+    const end = new Date(String(leave.endDate || leave.startDate).slice(0, 10) + 'T00:00:00');
+
+    const isHalfDay =
+        String(leave.duration || '').toLowerCase().includes('half') ||
+        String(leave.dayType || '').toLowerCase().includes('half') ||
+        String(leave.type || '').toLowerCase().includes('half');
+
+    if (isHalfDay || isNaN(start.getTime()) || isNaN(end.getTime())) return;
+
+    for (
+        let date = new Date(start);
+        date <= end;
+        date.setDate(date.getDate() + 1)
+    ) {
+        if (
+            date.getFullYear() === year &&
+            date.getMonth() === selectedMonthIndex
+        ) {
+            approvedFullDayLeaveDates.add(
+                `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+            );
+        }
+    }
+});
+
+const eligibleDates = new Set();
+
+for (let day = 1; day <= lastEligibleDay; day++) {
+    const date = new Date(year, selectedMonthIndex, day);
+    const dateKey =
+        `${year}-${String(selectedMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    if (
+        date.getDay() !== 0 &&
+        !holidayDates.has(dateKey) &&
+        !approvedFullDayLeaveDates.has(dateKey)
+    ) {
+        eligibleDates.add(dateKey);
+    }
+}
+
+const actualPresentDates = new Set();
+
+allEmployeeLogs.forEach(log => {
+    if (!log || !log.date) return;
+
+    const logDate = String(log.date).slice(0, 10);
+    const status = String(log.status || '').toLowerCase();
+
+    const hasCheckIn = log.checkInTime &&
+        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
+
+    const hasCheckOut = log.checkOutTime &&
+        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
+
+    if (
+        logDate.startsWith(`${year}-${String(selectedMonthIndex + 1).padStart(2, '0')}-`) &&
+        eligibleDates.has(logDate) &&
+        hasCheckIn &&
+        hasCheckOut &&
+        (status === 'on time' || status === 'late')
+    ) {
+        actualPresentDates.add(logDate);
+    }
+});
+
+const monthlyAttendanceRate = eligibleDates.size
+    ? Math.min(100, Math.round((actualPresentDates.size / eligibleDates.size) * 100))
+    : 0;
+
+document.getElementById('attendanceRate').innerText =
+    `${monthlyAttendanceRate}%`;
+
+// Calculate approved leaves for the selected month, including half-days.
+let monthlyLeavesTaken = 0;
+
+approvedLeaves.forEach(leave => {
+    const start = new Date(String(leave.startDate).slice(0, 10) + 'T00:00:00');
+    const end = new Date(String(leave.endDate || leave.startDate).slice(0, 10) + 'T00:00:00');
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+
+    const overlapStart = new Date(Math.max(start.getTime(), monthStart.getTime()));
+    const overlapEnd = new Date(Math.min(end.getTime(), monthEnd.getTime()));
+
+    if (overlapStart > overlapEnd) return;
+
+    let workingLeaveDays = 0;
+
+    for (
+        let date = new Date(overlapStart);
+        date <= overlapEnd;
+        date.setDate(date.getDate() + 1)
+    ) {
+        if (date.getDay() !== 0) workingLeaveDays++;
+    }
+
+    const isHalfDay =
+        String(leave.duration || '').toLowerCase().includes('half') ||
+        String(leave.dayType || '').toLowerCase().includes('half') ||
+        String(leave.type || '').toLowerCase().includes('half');
+
+    monthlyLeavesTaken += isHalfDay
+        ? (workingLeaveDays > 0 ? 0.5 : 0)
+        : workingLeaveDays;
+});
+
+const leaveDisplay = Number.isInteger(monthlyLeavesTaken)
+    ? monthlyLeavesTaken
+    : monthlyLeavesTaken.toFixed(1);
+
+document.getElementById('leavesTakenCount').innerText =
+    `${leaveDisplay} Days`;
+          
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
                 return;
