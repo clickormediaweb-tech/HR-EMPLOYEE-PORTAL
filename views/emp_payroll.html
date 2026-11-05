@@ -308,7 +308,7 @@
 
 </div>
 
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
+                        <img id="payrollHeaderAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 shadow-md">
 
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:translate-y-0.5 transition-transform"></i>
 
@@ -322,7 +322,7 @@
 
                         <div class="px-3 py-3 border-b border-gray-100 mb-1.5 flex items-center gap-3">
 
-                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
+                            <img id="payrollDropdownAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100">
 
                             <div>
 
@@ -339,6 +339,11 @@
                             <span>My Dashboard</span>
 
                         </a>
+
+                        <button onclick="openProfileModal(event)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors cursor-pointer text-left">
+    <i class="fa-solid fa-user w-4 text-center text-gray-400"></i>
+    <span>View Profile</span>
+</button>
 
                         <a href="/employee/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors">
 
@@ -567,6 +572,99 @@
         </main>
 
     </div>
+
+
+
+    
+<!-- EMPLOYEE PROFILE MODAL -->
+<div id="employeeProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] w-full max-w-lg p-6 space-y-5 text-xs">
+
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+            <h3 class="text-sm font-bold text-[#222222]">Employee Profile Details</h3>
+            <button onclick="closeModal('employeeProfileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
+            <div class="flex flex-col items-center gap-1 shrink-0">
+                <div class="relative">
+                    <img id="profileModalAvatar"
+                         src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
+                         class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-200">
+
+                    <label for="payrollProfilePhotoInput"
+                           class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer border-2 border-white">
+                        <i class="fa-solid fa-pencil text-xs"></i>
+                    </label>
+
+                    <input type="file" id="payrollProfilePhotoInput"
+                           accept="image/jpeg,image/png,image/webp"
+                           class="hidden"
+                           onchange="uploadEmployeePhoto()">
+                </div>
+                <p id="profilePhotoMessage" class="text-[10px] text-gray-500 text-center"></p>
+            </div>
+
+            <div class="min-w-0">
+                <h4 id="profileModalName" class="font-black text-[#222222] text-sm">Loading...</h4>
+                <p id="profileModalDesignation" class="text-blue-600 font-bold text-[11px]">-</p>
+                <span id="profileModalEmployeeId" class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: -</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <span class="text-gray-400 block">Email</span>
+                <span id="profileModalEmail" class="font-bold text-gray-800">-</span>
+            </div>
+
+            <div>
+                <span class="text-gray-400 block">Department</span>
+                <span id="profileModalDept" class="font-bold text-gray-800">-</span>
+            </div>
+
+            <div>
+                <span class="text-gray-400 block mb-1">Phone</span>
+                <div class="flex items-center gap-2">
+                    <span id="profileModalPhoneDisplay" class="font-bold text-gray-800">-</span>
+                    <button type="button" id="profileEditPhoneBtn"
+                            onclick="editEmployeePhone()"
+                            class="text-blue-600 font-bold hover:underline">Edit</button>
+                </div>
+
+                <div id="profilePhoneEditSection" class="hidden mt-2">
+                    <input type="tel" id="profileModalPhone"
+                           placeholder="Enter phone number"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 font-bold text-gray-800 outline-none focus:border-blue-500">
+
+                    <div class="flex gap-2 mt-2">
+                        <button type="button" id="profileSavePhoneBtn"
+                                onclick="saveEmployeePhone()"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">Save</button>
+
+                        <button type="button"
+                                onclick="cancelEmployeePhoneEdit()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold">Cancel</button>
+                    </div>
+                </div>
+                <p id="profilePhoneMessage" class="mt-1 text-[10px] text-gray-500"></p>
+            </div>
+
+            <div>
+                <span class="text-gray-400 block">Joining Date</span>
+                <span id="profileModalJoiningDate" class="font-bold text-gray-800">-</span>
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+            <button onclick="closeModal('employeeProfileModal')"
+                    class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl">Close</button>
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -806,6 +904,33 @@ window.onload = function() {
             }
 
             const user = data.user;
+            // Load employee profile details
+fetch('/api/employee/stats', { credentials: 'same-origin' })
+    .then(res => res.json())
+    .then(profileData => {
+        if (profileData.success && profileData.employee) {
+            const emp = profileData.employee;
+
+            document.getElementById('profileModalName').innerText = emp.name || '-';
+            document.getElementById('profileModalDesignation').innerText = emp.designation || '-';
+            document.getElementById('profileModalEmployeeId').innerText = 'ID: ' + (emp.employeeId || '-');
+            document.getElementById('profileModalEmail').innerText = emp.email || '-';
+            document.getElementById('profileModalDept').innerText = emp.dept || '-';
+            document.getElementById('profileModalPhoneDisplay').innerText = emp.phone || '-';
+            document.getElementById('profileModalPhone').value = emp.phone || '';
+            document.getElementById('profileModalJoiningDate').innerText = emp.joiningDate || '-';
+
+            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
+            const avatarUrl = emp.avatar || defaultAvatar;
+
+            document.getElementById('payrollHeaderAvatar').src = avatarUrl;
+            document.getElementById('payrollDropdownAvatar').src = avatarUrl;
+            document.getElementById('profileModalAvatar').src = avatarUrl;
+        }
+    })
+    .catch(err => console.error('Error loading profile details:', err));
+
+            
             loggedInUser = user.name || '';
             loggedInEmail = user.email || '';
 
@@ -933,6 +1058,158 @@ calculatedNetPayout = Math.max(
             if (notifDropdown && !notifDropdown.classList.contains('hidden')) notifDropdown.classList.add('hidden');
             if (profileDropdown && !profileDropdown.classList.contains('hidden')) profileDropdown.classList.add('hidden');
         }
+
+        
+// Edit employee phone number
+function editEmployeePhone() {
+    const currentPhone =
+        document.getElementById('profileModalPhoneDisplay').innerText;
+
+    document.getElementById('profileModalPhone').value =
+        currentPhone === '-' ? '' : currentPhone;
+
+    document.getElementById('profileModalPhoneDisplay').classList.add('hidden');
+    document.getElementById('profileEditPhoneBtn').classList.add('hidden');
+    document.getElementById('profilePhoneEditSection').classList.remove('hidden');
+    document.getElementById('profilePhoneMessage').innerText = '';
+}
+
+// Cancel phone number editing
+function cancelEmployeePhoneEdit() {
+    document.getElementById('profilePhoneEditSection').classList.add('hidden');
+    document.getElementById('profileModalPhoneDisplay').classList.remove('hidden');
+    document.getElementById('profileEditPhoneBtn').classList.remove('hidden');
+    document.getElementById('profilePhoneMessage').innerText = '';
+}
+
+// Save updated phone number
+async function saveEmployeePhone() {
+    const phoneInput = document.getElementById('profileModalPhone');
+    const saveButton = document.getElementById('profileSavePhoneBtn');
+    const message = document.getElementById('profilePhoneMessage');
+
+    const phone = phoneInput.value.trim();
+
+    if (!phone) {
+        message.innerText = 'Please enter your phone number.';
+        message.className = 'mt-1 text-[10px] text-red-600';
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.innerText = 'Saving...';
+
+    try {
+        const response = await fetch('/api/employee/update-phone', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phone: phone })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to save phone number.');
+        }
+
+        document.getElementById('profileModalPhoneDisplay').innerText = data.phone;
+
+        document.getElementById('profilePhoneEditSection').classList.add('hidden');
+        document.getElementById('profileModalPhoneDisplay').classList.remove('hidden');
+        document.getElementById('profileEditPhoneBtn').classList.remove('hidden');
+
+        message.innerText = 'Changes saved successfully!';
+        message.className = 'mt-1 text-[10px] text-emerald-600';
+
+    } catch (error) {
+        console.error('Phone update error:', error);
+
+        message.innerText = error.message;
+        message.className = 'mt-1 text-[10px] text-red-600';
+
+    } finally {
+        saveButton.disabled = false;
+        saveButton.innerText = 'Save';
+    }
+}
+
+// Upload employee profile photo
+async function uploadEmployeePhoto() {
+    const input = document.getElementById('payrollProfilePhotoInput');
+    const message = document.getElementById('profilePhotoMessage');
+    const file = input.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+        message.innerText = 'Please select a JPG, PNG or WEBP image.';
+        message.className = 'text-[10px] text-red-600';
+        input.value = '';
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        message.innerText = 'Image size must be 5 MB or less.';
+        message.className = 'text-[10px] text-red-600';
+        input.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    message.innerText = 'Uploading...';
+    message.className = 'text-[10px] text-gray-500';
+
+    try {
+        const response = await fetch('/api/employee/upload-photo', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Photo upload failed.');
+        }
+
+        const photoUrl = data.avatar + '?t=' + Date.now();
+
+        document.getElementById('payrollHeaderAvatar').src = photoUrl;
+        document.getElementById('payrollDropdownAvatar').src = photoUrl;
+        document.getElementById('profileModalAvatar').src = photoUrl;
+
+        message.innerText = 'Profile photo updated successfully!';
+        message.className = 'text-[10px] text-emerald-600';
+
+        input.value = '';
+
+    } catch (error) {
+        console.error('Photo upload error:', error);
+
+        message.innerText = error.message;
+        message.className = 'text-[10px] text-red-600';
+    }
+}
+
+// Open employee profile popup
+function openProfileModal(event) {
+    event.stopPropagation();
+    document.getElementById('profileDropdown').classList.add('hidden');
+    document.getElementById('employeeProfileModal').classList.remove('hidden');
+}
+
+// Close popup
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
 
         function logoutUser() {
             if (confirm("Are you sure you want to log out of the Employee Portal?")) {
