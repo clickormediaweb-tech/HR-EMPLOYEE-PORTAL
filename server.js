@@ -2551,47 +2551,115 @@ app.get('/api/employee/punch-status', async (req, res) => {
     }
 });
 // Employee Specific Payroll API Route
+// Employee Specific Payroll API Route
 app.get('/api/employee/payroll', async (req, res) => {
     try {
-        const db = await readDb();
-        if (!db.payroll) db.payroll = [];
-
-        let currentUserName = req.query.name || (req.session.user ? req.session.user.name : "Pranchal Rajpal");
-       
-        let userPayroll = db.payroll.find(p => p.name && p.name.toLowerCase() === currentUserName.toLowerCase());
-       
-        if (!userPayroll) {
-            userPayroll = db.payroll.find(p => p.name && p.name.toLowerCase().includes("pranchal")) || db.payroll[1] || db.payroll[0];
+        // Require the logged-in employee's session
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({
+                success: false,
+                payroll: null,
+                message: 'Please log in again.'
+            });
         }
 
-       const payrollRecord = userPayroll;
+        const db = await readDb();
 
-const now = new Date();
-const year = now.getFullYear();
-const month = now.getMonth() + 1;
+        const payrollRecords = Array.isArray(db.payroll)
+            ? db.payroll
+            : [];
 
-const leave = calculateMonthlyLeave(
-    payrollRecord,
-    db.leaves || [],
-    year,
-    month
-);
+        // Identify employee using their logged-in email
+        const employeeEmail = req.session.user.email
+            .trim()
+            .toLowerCase();
 
-const payrollObj = {
-    ...payrollRecord,
-    earnedLeaves: leave.earned,
-    leavesUsedThisMonth: leave.used,
-    paidLeavesUsed: leave.paidUsed,
-    unpaidLeaves: leave.unpaid,
-    unpaidHalfDays: leave.unpaidHalfDays,
-    calculatedLeaveBalance: leave.balance,
-    extraLeaves: leave.unpaid
-};  
+        const payrollRecord = payrollRecords.find(record =>
+            record.email &&
+            record.email.trim().toLowerCase() === employeeEmail
+        );
 
-res.json({ success: true, payroll: payrollObj });
+        if (!payrollRecord) {
+            return res.status(404).json({
+                success: false,
+                payroll: null,
+                message: 'Payroll record not found.'
+            });
+        }
+
+        // Use the same month as the HR payroll page
+        const now = new Date();
+        const year = Number(req.query.year) || now.getFullYear();
+        const month = Number(req.query.month) || (now.getMonth() + 1);
+
+        if (
+            !Number.isInteger(year) ||
+            year < 2000 ||
+            year > 2100 ||
+            !Number.isInteger(month) ||
+            month < 1 ||
+            month > 12
+        ) {
+            return res.status(400).json({
+                success: false,
+                payroll: null,
+                message: 'Invalid payroll month.'
+            });
+        }
+
+        const monthKey = getPayrollMonthKey(year, month);
+
+        // Read the exact monthly payment status saved by HR
+        const monthlyPayment =
+            payrollRecord.monthlyStatus?.[monthKey];
+
+        const paymentStatus =
+            monthlyPayment?.status || 'PENDING';
+
+        // Preserve the existing monthly leave calculation
+        const leave = calculateMonthlyLeave(
+            payrollRecord,
+            db.leaves || [],
+            year,
+            month
+        );
+
+        const payrollObj = {
+            ...payrollRecord,
+
+            // Salary applicable to the selected month
+            baseNum: getSalaryForMonth(payrollRecord, monthKey),
+
+            // Monthly payment status from HR payroll
+            status: paymentStatus,
+            statusUpdatedAt: monthlyPayment?.updatedAt || null,
+            statusUpdatedBy: monthlyPayment?.updatedBy || null,
+
+            // Selected payroll month
+            payrollMonth: monthKey,
+
+            // Existing leave calculations
+            earnedLeaves: leave.earned,
+            leavesUsedThisMonth: leave.used,
+            paidLeavesUsed: leave.paidUsed,
+            unpaidLeaves: leave.unpaid,
+            unpaidHalfDays: leave.unpaidHalfDays,
+            calculatedLeaveBalance: leave.balance,
+            extraLeaves: leave.unpaid
+        };
+
+        return res.json({
+            success: true,
+            payroll: payrollObj
+        });
+
     } catch (err) {
         console.error('Error fetching employee payroll:', err);
-        res.status(500).json({ success: false, payroll: null });
+
+        return res.status(500).json({
+            success: false,
+            payroll: null
+        });
     }
 });
 
