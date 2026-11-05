@@ -545,7 +545,7 @@
 
                                     <th class="py-4 px-6 w-1/6 text-center">Status</th>
 
-                                    <th class="py-4 px-6 w-1/4 text-right">Action</th>
+                                    <th class="py-4 px-6 w-1/4 text-center">Payslips</th>
 
                                 </tr>
 
@@ -1018,11 +1018,18 @@ calculatedNetPayout = Math.max(
             : 'bg-amber-50 text-amber-700 border-amber-200'
     }">${record.status || 'PENDING'}</span>
 </td>
-                                <td class="py-4 px-6 text-right whitespace-nowrap">
-                                    <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
-                                        <i class="fa-solid fa-file-lines"></i> View & Download PDF
-                                    </button>
-                                </td>
+                                <td class="py-4 px-6 text-center whitespace-nowrap">
+    <button
+        onclick="openPayslipModal('${new Date(record.payrollMonth + '-01T00:00:00').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}')"
+        ${currentPaymentStatus !== 'PAID' ? 'disabled' : ''}
+        class="px-3.5 py-2 font-bold rounded-xl transition-all inline-flex items-center gap-1.5 ${
+            currentPaymentStatus === 'PAID'
+                ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 cursor-pointer'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+        }">
+        <i class="fa-solid fa-file-lines"></i> View & Download PDF
+    </button>
+</td>
                             </tr>
                         `;
                     }
