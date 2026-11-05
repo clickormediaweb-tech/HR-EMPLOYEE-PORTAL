@@ -913,6 +913,7 @@ fetch('/api/employee/stats', { credentials: 'same-origin' })
 
             document.getElementById('profileModalName').innerText = emp.name || '-';
             document.getElementById('profileModalDesignation').innerText = emp.designation || '-';
+            document.getElementById('headerDesignation').innerText = emp.designation || '-';
             document.getElementById('profileModalEmployeeId').innerText = 'ID: ' + (emp.employeeId || '-');
             document.getElementById('profileModalEmail').innerText = emp.email || '-';
             document.getElementById('profileModalDept').innerText = emp.dept || '-';
