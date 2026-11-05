@@ -1245,8 +1245,7 @@ statusElement.className = currentPaymentStatus === 'PAID'
             document.getElementById('modalEmpName').innerText = loggedInUser;
             document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
             document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
-            document.getElementById('modalDeductionDisplay').innerText = `-₹${calculatedDeductions.toLocaleString('en-IN')}`;
-            document.getElementById('modalTotalDeductionDisplay').innerText = `-₹${calculatedDeductions.toLocaleString('en-IN')}`;
+        
             document.getElementById('modalNetPayout').innerText = `₹${calculatedNetPayout.toLocaleString('en-IN')}`;
 
             document.getElementById('payslipModal').classList.remove('hidden');
