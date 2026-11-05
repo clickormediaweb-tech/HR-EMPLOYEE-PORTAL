@@ -764,7 +764,7 @@
 
                         <p class="text-gray-400 font-bold uppercase">Payment Status</p>
 
-                        <p class="font-bold text-emerald-600">PAID</p>
+                        <p class="font-bold" id="modalPaymentStatus">PENDING</p>
 
                     </div>
 
@@ -888,6 +888,7 @@ let loggedInEmail = '';
 let currentBaseSalary = 16000;
 let calculatedDeductions = 0;
 let calculatedNetPayout = 16000;
+let currentPaymentStatus = 'PENDING';
 let totalExpenses = 0;
 
 window.onload = function() {
@@ -973,6 +974,7 @@ fetch('/api/employee/payroll', { credentials: 'same-origin' })
                 .then(data => {
                     if (data.success && data.payroll) {
                         let record = data.payroll;
+                        currentPaymentStatus = (record.status || 'PENDING').toUpperCase();
                         currentBaseSalary = record.baseNum || 16000;
                         document.getElementById('baseCtcDisplay').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
                         
@@ -1005,11 +1007,17 @@ calculatedNetPayout = Math.max(
                         let tableBody = document.getElementById('payslipTableBody');
                         tableBody.innerHTML = `
                             <tr class="hover:bg-blue-50/30 transition-colors">
-                                <td class="py-4 px-6 font-bold whitespace-nowrap">October 2026</td>
+                                <td class="py-4 px-6 font-bold whitespace-nowrap">${new Date(record.payrollMonth + '-01T00:00:00').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</td>
                                 <td class="py-4 px-6 text-gray-600 whitespace-nowrap">₹${currentBaseSalary.toLocaleString('en-IN')}</td>
                                 <td class="py-4 px-6 text-rose-600 whitespace-nowrap">-₹${calculatedDeductions.toLocaleString('en-IN')}</td>
                                 <td class="py-4 px-6 font-black text-emerald-600 text-sm whitespace-nowrap">₹${calculatedNetPayout.toLocaleString('en-IN')}</td>
-                                <td class="py-4 px-6 text-center whitespace-nowrap"><span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">${record.status || 'PENDING'}</span></td>
+                                <td class="py-4 px-6 text-center whitespace-nowrap">
+    <span class="px-3 py-1 font-bold rounded-lg border text-[10px] ${
+        (record.status || 'PENDING').toUpperCase() === 'PAID'
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-amber-50 text-amber-700 border-amber-200'
+    }">${record.status || 'PENDING'}</span>
+</td>
                                 <td class="py-4 px-6 text-right whitespace-nowrap">
                                     <button onclick="openPayslipModal('October 2026')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5">
                                         <i class="fa-solid fa-file-lines"></i> View & Download PDF
@@ -1222,6 +1230,11 @@ function closeModal(modalId) {
 
         function openPayslipModal(monthYear) {
             document.getElementById('payslipMonthDisplay').innerText = `Month: ${monthYear}`;
+            const statusElement = document.getElementById('modalPaymentStatus');
+statusElement.innerText = currentPaymentStatus;
+statusElement.className = currentPaymentStatus === 'PAID'
+    ? 'font-bold text-emerald-600'
+    : 'font-bold text-amber-600';
             document.getElementById('modalEmpName').innerText = loggedInUser;
             document.getElementById('modalBasicSalary').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
             document.getElementById('modalTotalEarnings').innerText = `₹${currentBaseSalary.toLocaleString('en-IN')}`;
@@ -1244,7 +1257,7 @@ function closeModal(modalId) {
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Official Salary Payslip - October 2026</title>
+                    <title>Official Salary Payslip - ${document.getElementById('payslipMonthDisplay').innerText.replace('Month: ', '')}</title>
                     <style>
                         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; background: #fff; }
                         .payslip-container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
@@ -1278,7 +1291,7 @@ function closeModal(modalId) {
                                 <p class="company-address">1st Floor, Opp. Care Hospital, Bhatti Rd, Punjab, 151001</p>
                             </div>
                             <div class="meta-info">
-                                <p>Month: <span>October 2026</span></p>
+                                <p>Month: <span>${document.getElementById('payslipMonthDisplay').innerText.replace('Month: ', '')}</span></p>
                                 <p style="color: #64748b; font-size: 11px;">Status: Official Document</p>
                             </div>
                         </div>
@@ -1301,7 +1314,7 @@ function closeModal(modalId) {
                                 </div>
                                 <div class="grid-cell">
                                     <span class="label">Payment Status</span>
-                                    <span class="value" style="color: #059669;">PAID</span>
+                                    <span class="value" style="color: ${currentPaymentStatus === 'PAID' ? '#059669' : '#d97706'};">${currentPaymentStatus}</span>
                                 </div>
                             </div>
                         </div>
