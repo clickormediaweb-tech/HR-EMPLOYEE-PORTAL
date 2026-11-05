@@ -322,146 +322,140 @@
         </main>
     </div>
 
-    <!-- Employee View Profile Modal -->
-<div id="profileModal"
-    class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    
+<!-- POPUP MODAL FOR VIEW PROFILE -->
+<div id="profileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
 
-    <div class="bg-white w-full max-w-3xl rounded-[30px] shadow-2xl p-8 relative">
+    <div class="bg-white rounded-3xl shadow-2xl border border-[#EAEAEA] w-full max-w-lg p-6 space-y-5 text-xs">
 
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-gray-100 pb-5 mb-7">
-            <h3 class="text-xl font-bold text-gray-900">
-                Employee Profile Details
-            </h3>
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+            <h3 class="text-sm font-bold text-[#222222]">Employee Profile Details</h3>
 
-            <button onclick="closeModal('profileModal')"
-                class="w-12 h-12 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                <i class="fa-solid fa-xmark text-lg"></i>
+            <button onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <!-- Employee Main Information -->
-        <div class="bg-gray-50 rounded-3xl p-6 flex items-center gap-6 mb-7">
+        <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
 
-            <div class="relative shrink-0">
+            <div class="flex flex-col items-center gap-1 shrink-0">
+                <div class="relative">
 
-                <img id="modalEmpAvatar"
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
-                    class="w-28 h-28 rounded-full object-cover border-4 border-blue-200 shadow-sm">
+                    <img
+                        id="modalEmpAvatar"
+                        src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces"
+                        class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-200"
+                    >
 
-                <label for="profilePhotoInput"
-                    class="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
-                    <i class="fa-solid fa-pen text-sm"></i>
-                </label>
+                    <label
+                        for="profilePhotoInput"
+                        title="Change profile photo"
+                        class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer border-2 border-white shadow-md hover:bg-blue-700 transition"
+                    >
+                        <i class="fa-solid fa-pencil text-xs"></i>
+                    </label>
 
-                <input type="file"
-                    id="profilePhotoInput"
-                    accept="image/jpeg,image/png,image/webp"
-                    class="hidden"
-                    onchange="uploadEmployeePhoto()">
+                    <input
+                        type="file"
+                        id="profilePhotoInput"
+                        accept="image/jpeg,image/png,image/webp"
+                        class="hidden"
+                        onchange="uploadEmployeePhoto()"
+                    >
 
+                </div>
+
+                <p id="photoUploadMessage" class="text-[10px] text-gray-500 text-center"></p>
             </div>
 
             <div class="min-w-0">
-                <h2 id="modalEmpName"
-                    class="text-xl font-bold text-gray-900">
-                    Loading...
-                </h2>
+                <h4 id="modalEmpName" class="font-black text-[#222222] text-sm">Employee User</h4>
 
-                <p id="modalEmpRole"
-                    class="text-sm font-bold text-blue-600 mt-1">
-                    Loading...
-                </p>
+                <p class="text-blue-600 font-bold text-[11px]" id="modalEmpRole">Software Engineer</p>
 
-                <span id="modalEmpId"
-                    class="inline-block mt-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
-                    ID: -
-                </span>
-
-                <p id="photoUploadMessage" class="text-xs mt-2"></p>
+                <span id="modalEmpId" class="inline-block mt-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ID: -</span>
             </div>
+
         </div>
 
-        <!-- Employee Details Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5 text-sm mb-8">
+        <div class="grid grid-cols-2 gap-3">
 
             <div>
-                <p class="text-gray-400 mb-1">Email</p>
-                <p id="modalEmpEmail"
-                    class="font-bold text-gray-800 break-all">
-                    -
-                </p>
+                <span class="text-gray-400 block">Email</span>
+                <span class="font-bold text-gray-800" id="modalEmpEmail">employee@clickormedia.co.in</span>
             </div>
 
             <div>
-                <p class="text-gray-400 mb-1">Department</p>
-                <p id="modalEmpDept"
-                    class="font-bold text-gray-800">
-                    -
-                </p>
+                <span class="text-gray-400 block">Department</span>
+                <span class="font-bold text-gray-800" id="modalEmpDept">Software Engineering</span>
             </div>
 
             <div>
-                <p class="text-gray-400 mb-1">Phone</p>
+                <span class="text-gray-400 block mb-1">Phone</span>
 
                 <div class="flex items-center gap-2">
-                    <span id="modalEmpPhoneDisplay"
-                        class="font-bold text-gray-800">
-                        -
-                    </span>
+                    <span id="modalEmpPhoneDisplay" class="font-bold text-gray-800">-</span>
 
-                    <button id="editPhoneBtn"
+                    <button
+                        type="button"
+                        id="editPhoneBtn"
                         onclick="editEmployeePhone()"
-                        class="text-blue-600 font-bold hover:text-blue-800">
+                        class="text-blue-600 font-bold hover:underline"
+                    >
                         Edit
                     </button>
                 </div>
 
-                <div id="phoneEditSection" class="hidden mt-3">
+                <div id="phoneEditSection" class="hidden mt-2">
 
-                    <input type="tel"
+                    <input
+                        type="tel"
                         id="modalEmpPhone"
                         placeholder="Enter phone number"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 font-bold text-gray-800 outline-none focus:border-blue-500"
+                    >
 
                     <div class="flex gap-2 mt-2">
-                        <button id="savePhoneBtn"
+
+                        <button
+                            type="button"
+                            id="savePhoneBtn"
                             onclick="saveEmployeePhone()"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700"
+                        >
                             Save
                         </button>
 
-                        <button onclick="cancelEmployeePhoneEdit()"
-                            class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">
+                        <button
+                            type="button"
+                            onclick="cancelEmployeePhoneEdit()"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200"
+                        >
                             Cancel
                         </button>
-                    </div>
 
-                    <p id="phoneMessage" class="mt-2 text-xs"></p>
+                    </div>
                 </div>
+
+                <p id="phoneMessage" class="mt-1 text-[10px] text-gray-500"></p>
             </div>
 
             <div>
-                <p class="text-gray-400 mb-1">Joining Date</p>
-                <p id="modalEmpJoiningDate"
-                    class="font-bold text-gray-800">
-                    -
-                </p>
+                <span class="text-gray-400 block">Joining Date</span>
+                <span id="modalEmpJoiningDate" class="font-bold text-gray-800">-</span>
             </div>
 
         </div>
 
-        <!-- Footer -->
-        <div class="flex justify-end">
-            <button onclick="closeModal('profileModal')"
-                class="px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-2xl transition-colors">
+        <div class="flex justify-end pt-2">
+            <button onclick="closeModal('profileModal')" class="px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl cursor-pointer">
                 Close
             </button>
         </div>
 
     </div>
 </div>
-<!-- End Employee View Profile Modal -->
+
 
 <!-- Script for Data Isolation & Password Management -->
     <script>
