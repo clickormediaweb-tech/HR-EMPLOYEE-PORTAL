@@ -782,12 +782,11 @@ function filterTable() {
     );
 
     const eligibleRows = attendanceRows.filter(row => {
-        if (row.status === 'IN PROGRESS') return false;
-        if (row.status === 'LEAVE') return false;
-        if (holidayDates.has(row.dateKey)) return false;
+    if (row.status === 'IN PROGRESS') return false;
+    if (row.status === 'LEAVE') return false;
 
-        return true;
-    });
+    return true;
+});
 
     const eligiblePresentDays = eligibleRows.filter(row =>
         row.status === 'PRESENT' || row.status === 'LATE'
