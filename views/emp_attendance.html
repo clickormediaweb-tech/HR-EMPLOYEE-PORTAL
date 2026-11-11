@@ -711,8 +711,6 @@ function filterTable() {
         const originalStatus = String(log.status || '').toLowerCase();
 
         let status = 'ABSENT';
-
-        let status = 'ABSENT';
 let holidayName = '';
 
 // First check whether HR has marked this date as a holiday.
@@ -879,7 +877,7 @@ else {
         `;
         return;
     }
-
+    filteredRows.forEach(row => {
     let statusBadge = '';
 
 if (row.status === 'HOLIDAY') {
@@ -933,8 +931,9 @@ if (row.status === 'HOLIDAY') {
                 </td>
                 <td class="py-4 px-6 text-center">${statusBadge}</td>
             </tr>
-        `;
+                `;
     });
+});
 }
 
     function toggleNotificationDropdown(event) {
