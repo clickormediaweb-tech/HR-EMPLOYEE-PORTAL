@@ -236,6 +236,7 @@
     <option value="LATE">Late In</option>
     <option value="ABSENT">Absent</option>
     <option value="LEAVE">Leave</option>
+    <option value="HOLIDAY">Holiday</option>
     <option value="IN PROGRESS">In Progress</option>
 </select>
                         <!-- Dynamic Month Selector (All 12 Months Added) -->
@@ -711,27 +712,41 @@ function filterTable() {
 
         let status = 'ABSENT';
 
-        // Approved leave takes priority over attendance records.
-        if (isApprovedLeave(dateKey)) {
-            status = 'LEAVE';
-        }
+        let status = 'ABSENT';
+let holidayName = '';
 
-        // During today's shift, show IN PROGRESS.
-        else if (isCurrentMonth && day === today.getDate() && !shiftIsOver) {
-            status = 'IN PROGRESS';
-        }
+// First check whether HR has marked this date as a holiday.
+const holiday = (allEmployeeHolidays || []).find(h =>
+    String(h.date || '').slice(0, 10) === dateKey
+);
 
-        // After shift end, both punches are required.
-        else if (hasCheckIn && hasCheckOut) {
-            status = originalStatus === 'late'
-                ? 'LATE'
-                : 'PRESENT';
-        }
+// Company holiday takes priority.
+if (holiday) {
+    status = 'HOLIDAY';
+    holidayName = holiday.name || 'Company Holiday';
+}
 
-        // Missing either punch means ABSENT after shift end.
-        else {
-            status = 'ABSENT';
-        }
+// Otherwise check approved employee leave.
+else if (isApprovedLeave(dateKey)) {
+    status = 'LEAVE';
+}
+
+// During today's shift, show IN PROGRESS.
+else if (isCurrentMonth && day === today.getDate() && !shiftIsOver) {
+    status = 'IN PROGRESS';
+}
+
+// After shift end, both punches are required.
+else if (hasCheckIn && hasCheckOut) {
+    status = originalStatus === 'late'
+        ? 'LATE'
+        : 'PRESENT';
+}
+
+// Missing either punch means ABSENT.
+else {
+    status = 'ABSENT';
+}
 
         const displayDate = date.toLocaleDateString('en-IN', {
             day: '2-digit',
@@ -740,14 +755,15 @@ function filterTable() {
         });
 
         attendanceRows.push({
-            dateKey,
-            displayDate,
-            checkIn: hasCheckIn ? checkIn : '--:--',
-            checkOut: hasCheckOut ? checkOut : '--:--',
-            checkInLoc: log.checkInLoc || 'Office Headquarters',
-            status,
-            log
-        });
+    dateKey,
+    displayDate,
+    checkIn: hasCheckIn ? checkIn : '--:--',
+    checkOut: hasCheckOut ? checkOut : '--:--',
+    checkInLoc: log.checkInLoc || 'Office Headquarters',
+    status,
+    holidayName,
+    log
+});
     }
 
     // Apply status filter after generating all dates.
@@ -864,45 +880,53 @@ function filterTable() {
         return;
     }
 
-    filteredRows.forEach(row => {
-        let statusBadge = '';
+    let statusBadge = '';
 
-        if (row.status === 'PRESENT') {
-            statusBadge = `
-                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">
-                    PRESENT
-                </span>`;
-        } else if (row.status === 'LATE') {
-            statusBadge = `
-                <span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">
-                    LATE IN
-                </span>`;
-        } else if (row.status === 'ABSENT') {
-            statusBadge = `
-                <span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">
-                    ABSENT
-                </span>`;
-        } else if (row.status === 'LEAVE') {
-            statusBadge = `
-                <span class="px-3 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-200 text-[10px]">
-                    LEAVE
-                </span>`;
-        } else {
-            statusBadge = `
-                <span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 text-[10px]">
-                    IN PROGRESS
-                </span>`;
-        }
+if (row.status === 'HOLIDAY') {
+    statusBadge = `
+        <span class="px-3 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-200 text-[10px]">
+            ${row.holidayName}
+        </span>`;
 
+} else if (row.status === 'PRESENT') {
+    statusBadge = `
+        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">
+            PRESENT
+        </span>`;
+
+} else if (row.status === 'LATE') {
+    statusBadge = `
+        <span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">
+            LATE IN
+        </span>`;
+
+} else if (row.status === 'ABSENT') {
+    statusBadge = `
+        <span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">
+            ABSENT
+        </span>`;
+
+} else if (row.status === 'LEAVE') {
+    statusBadge = `
+        <span class="px-3 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-200 text-[10px]">
+            LEAVE
+        </span>`;
+
+} else {
+    statusBadge = `
+        <span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 text-[10px]">
+            IN PROGRESS
+        </span>`;
+}
         tbody.innerHTML += `
             <tr class="hover:bg-blue-50/30 transition-colors">
                 <td class="py-4 px-6 font-bold">${row.displayDate}</td>
                 <td class="py-4 px-6 text-gray-600">${row.checkIn}</td>
                 <td class="py-4 px-6 text-gray-600">${row.checkOut}</td>
                 <td class="py-4 px-6 font-bold text-blue-600">
-                    ${row.status === 'LEAVE' || row.status === 'ABSENT'
-                        ? '--'
-                        : calculateDuration(row.checkIn, row.checkOut)}
+                    ${row.status === 'LEAVE' || row.status === 'ABSENT' || row.status === 'HOLIDAY'
+    ? '--'
+    : calculateDuration(row.checkIn, row.checkOut)}
                 </td>
                 <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">
                     ${row.checkInLoc}
