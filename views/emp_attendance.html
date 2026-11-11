@@ -231,11 +231,13 @@
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
                         <!-- Filter Status Dropdown -->
                         <select id="statusFilter" onchange="filterTable()" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none cursor-pointer">
-                            <option value="ALL">All Statuses</option>
-                            <option value="ON TIME">On Time</option>
-                            <option value="LATE">Late In</option>
-                            <option value="ABSENT">Absent</option>
-                        </select>
+    <option value="ALL">All Statuses</option>
+    <option value="PRESENT">Present</option>
+    <option value="LATE">Late In</option>
+    <option value="ABSENT">Absent</option>
+    <option value="LEAVE">Leave</option>
+    <option value="IN PROGRESS">In Progress</option>
+</select>
                         <!-- Dynamic Month Selector (All 12 Months Added) -->
                         <select id="monthSelector" onchange="filterTable()" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none cursor-pointer">
                             <option value="0">January 2026</option>
@@ -537,119 +539,56 @@ fetch('/api/employee/leaves', { credentials: 'same-origin' })
 
 };
     
-      function filterTable() {
-            let statusFilter = document.getElementById('statusFilter').value;
-            let selectedMonthIndex = parseInt(document.getElementById('monthSelector').value); 
-            let year = new Date().getFullYear();
-            let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            
-            document.getElementById('selectedMonthLabel').innerText = `Current Month (${monthNames[selectedMonthIndex]})`;
+      
+function filterTable() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const selectedMonthIndex = parseInt(document.getElementById('monthSelector').value);
 
-            // --- Working Days Calculation (Total Days in Month - Sundays Only) ---
-            let totalDaysInMonth = new Date(year, selectedMonthIndex + 1, 0).getDate();
-            let sundayCount = 0;
-            for (let day = 1; day <= totalDaysInMonth; day++) {
-                let dateObj = new Date(year, selectedMonthIndex, day);
-                if (dateObj.getDay() === 0) {
-                    sundayCount++;
-                }
-            }
-            let totalWorkingDays = totalDaysInMonth - sundayCount;
-            document.getElementById('workingDaysCount').innerText = `${totalWorkingDays} Days`;
+    const today = new Date();
+    const year = today.getFullYear();
 
-            let tbody = document.getElementById('attendanceTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = "";
+    const monthNames = [
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
+    ];
 
-            // Filter logs matching the logged-in user and selected month securely
-            let filteredLogs = allEmployeeLogs.filter(log => {
-                if (!log || !log.date) return false;
-                
-                let logName = (log.name || "").trim().toLowerCase();
-                let logEmail = (log.email || "").trim().toLowerCase();
-                let curName = (loggedInName || "").trim().toLowerCase();
-                let curEmail = (loggedInEmail || "").trim().toLowerCase();
+    const monthStart = new Date(year, selectedMonthIndex, 1);
+    const monthEnd = new Date(year, selectedMonthIndex + 1, 0);
 
-                let matchesUser = curEmail && logEmail === curEmail;
-                
-                let logDate = new Date(log.date);
-                if (isNaN(logDate.getTime()) && typeof log.date === 'string') {
-                    let parts = log.date.split(/[-/]/);
-                    if (parts.length === 3) {
-                        logDate = new Date(parts[0], parts[1] - 1, parts[2]);
-                    }
-                }
+    const isCurrentMonth =
+        today.getFullYear() === year &&
+        today.getMonth() === selectedMonthIndex;
 
-                let matchesMonth = !isNaN(logDate.getTime()) && 
-                                   logDate.getMonth() === selectedMonthIndex && 
-                                   logDate.getFullYear() === year;
+    const isFutureMonth = monthStart > new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+    );
 
-                let matchesStatus = statusFilter === 'ALL' || (log.status && log.status.toUpperCase().includes(statusFilter.toUpperCase()));
+    document.getElementById('selectedMonthLabel').innerText =
+        `Current Month (${monthNames[selectedMonthIndex]})`;
 
-                return matchesUser && matchesMonth && matchesStatus;
-            });
+    // Total working days in the complete month, excluding Sundays.
+    let totalWorkingDays = 0;
 
-            // Remove duplicate attendance entries for the same date
-const attendanceByDate = new Map();
+    for (let day = 1; day <= monthEnd.getDate(); day++) {
+        const date = new Date(year, selectedMonthIndex, day);
 
-filteredLogs.forEach(log => {
-    const existing = attendanceByDate.get(log.date);
-
-    const hasCheckIn = log.checkInTime &&
-        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
-
-    const hasCheckOut = log.checkOutTime &&
-        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
-
-    const isComplete = hasCheckIn && hasCheckOut;
-
-    const existingHasCheckIn = existing?.checkInTime &&
-        !['--:--', 'pending'].includes(String(existing.checkInTime).trim().toLowerCase());
-
-    const existingHasCheckOut = existing?.checkOutTime &&
-        !['--:--', 'pending'].includes(String(existing.checkOutTime).trim().toLowerCase());
-
-    const existingIsComplete = existingHasCheckIn && existingHasCheckOut;
-
-    if (!existing || (isComplete && !existingIsComplete)) {
-        attendanceByDate.set(log.date, log);
+        if (date.getDay() !== 0) {
+            totalWorkingDays++;
+        }
     }
-});
 
-filteredLogs = [...attendanceByDate.values()];
-            
-const presentDays = filteredLogs.filter(log => {
-    const status = String(log.status || '').toLowerCase();
-    const hasCheckIn = log.checkInTime &&
-        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
-    const hasCheckOut = log.checkOutTime &&
-        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
+    document.getElementById('workingDaysCount').innerText =
+        `${totalWorkingDays} Days`;
 
-    return hasCheckIn && hasCheckOut &&
-        (status === 'on time' || status === 'late');
-}).length;
+    const tbody = document.getElementById('attendanceTableBody');
+    if (!tbody) return;
 
-document.getElementById('presentCount').innerText = `${presentDays} Days`;
+    tbody.innerHTML = '';
 
-          // --- MONTH-WISE LEAVE AND ATTENDANCE STATISTICS ---
-
-const monthStart = new Date(year, selectedMonthIndex, 1);
-const monthEnd = new Date(year, selectedMonthIndex + 1, 0);
-const today = new Date();
-
-const isCurrentMonth =
-    today.getFullYear() === year &&
-    today.getMonth() === selectedMonthIndex;
-
-const isFutureMonth =
-    new Date(year, selectedMonthIndex, 1) >
-    new Date(today.getFullYear(), today.getMonth(), 1);
-
-let lastEligibleDay = monthEnd.getDate();
-
-if (isFutureMonth) {
-    lastEligibleDay = 0;
-} else if (isCurrentMonth) {
+    // Parse HR-configured shift end time.
     const shiftTime = String(employeeShiftEndTime || '06:00 PM')
         .trim()
         .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
@@ -658,198 +597,324 @@ if (isFutureMonth) {
 
     if (shiftTime) {
         let hours = Number(shiftTime[1]) % 12;
-        if (shiftTime[3].toUpperCase() === 'PM') hours += 12;
+
+        if (shiftTime[3].toUpperCase() === 'PM') {
+            hours += 12;
+        }
 
         shiftEndMinutes = hours * 60 + Number(shiftTime[2]);
     }
 
     const currentMinutes = today.getHours() * 60 + today.getMinutes();
+    const shiftIsOver = currentMinutes >= shiftEndMinutes;
 
-    lastEligibleDay = today.getDate() -
-        (currentMinutes < shiftEndMinutes ? 1 : 0);
-}
+    // Get the last date that should appear.
+    // Current month: today.
+    // Previous month: last day of that month.
+    // Future month: no dates.
+    const lastDisplayDay = isFutureMonth
+        ? 0
+        : isCurrentMonth
+            ? today.getDate()
+            : monthEnd.getDate();
 
-const holidayDates = new Set(
-    (allEmployeeHolidays || []).map(holiday =>
-        String(holiday.date || '').slice(0, 10)
-    )
-);
+    // Collect the employee's attendance records by date.
+    const attendanceByDate = new Map();
 
-const approvedLeaves = (allEmployeeLeaves || []).filter(leave =>
-    String(leave.status || '').toUpperCase() === 'APPROVED'
-);
+    const employeeLogs = allEmployeeLogs.filter(log => {
+        if (!log || !log.date) return false;
 
-const approvedFullDayLeaveDates = new Set();
+        const logEmail = String(log.email || '').trim().toLowerCase();
+        const currentEmail = String(loggedInEmail || '').trim().toLowerCase();
 
-approvedLeaves.forEach(leave => {
-    const start = new Date(String(leave.startDate).slice(0, 10) + 'T00:00:00');
-    const end = new Date(String(leave.endDate || leave.startDate).slice(0, 10) + 'T00:00:00');
+        return currentEmail && logEmail === currentEmail;
+    });
 
-    const isHalfDay =
-        String(leave.duration || '').toLowerCase().includes('half') ||
-        String(leave.dayType || '').toLowerCase().includes('half') ||
-        String(leave.type || '').toLowerCase().includes('half');
+    employeeLogs.forEach(log => {
+        const dateKey = String(log.date).slice(0, 10);
 
-    if (isHalfDay || isNaN(start.getTime()) || isNaN(end.getTime())) return;
+        const existing = attendanceByDate.get(dateKey);
 
-    for (
-        let date = new Date(start);
-        date <= end;
-        date.setDate(date.getDate() + 1)
-    ) {
-        if (
-            date.getFullYear() === year &&
-            date.getMonth() === selectedMonthIndex
-        ) {
-            approvedFullDayLeaveDates.add(
-                `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const hasCheckIn = log.checkInTime &&
+            !['--:--', 'pending'].includes(
+                String(log.checkInTime).trim().toLowerCase()
             );
+
+        const hasCheckOut = log.checkOutTime &&
+            !['--:--', 'pending'].includes(
+                String(log.checkOutTime).trim().toLowerCase()
+            );
+
+        const isComplete = hasCheckIn && hasCheckOut;
+
+        const existingComplete = existing &&
+            existing.checkInTime &&
+            existing.checkOutTime &&
+            !['--:--', 'pending'].includes(
+                String(existing.checkInTime).trim().toLowerCase()
+            ) &&
+            !['--:--', 'pending'].includes(
+                String(existing.checkOutTime).trim().toLowerCase()
+            );
+
+        // Prefer a complete record if duplicate records exist.
+        if (!existing || (isComplete && !existingComplete)) {
+            attendanceByDate.set(dateKey, log);
         }
-    }
-});
+    });
 
-const eligibleDates = new Set();
+    // Only approved leave records are considered.
+    const approvedLeaves = (allEmployeeLeaves || []).filter(leave =>
+        String(leave.status || '').toUpperCase() === 'APPROVED'
+    );
 
-for (let day = 1; day <= lastEligibleDay; day++) {
-    const date = new Date(year, selectedMonthIndex, day);
-    const dateKey =
-        `${year}-${String(selectedMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    // Check whether an approved leave covers a particular date.
+    function isApprovedLeave(dateKey) {
+        return approvedLeaves.some(leave => {
+            const startDate = String(leave.startDate || '').slice(0, 10);
+            const endDate = String(
+                leave.endDate || leave.startDate || ''
+            ).slice(0, 10);
 
-    if (
-        date.getDay() !== 0 &&
-        !holidayDates.has(dateKey) &&
-        !approvedFullDayLeaveDates.has(dateKey)
-    ) {
-        eligibleDates.add(dateKey);
-    }
-}
-
-const actualPresentDates = new Set();
-
-allEmployeeLogs.forEach(log => {
-    if (!log || !log.date) return;
-
-    const logDate = String(log.date).slice(0, 10);
-    const status = String(log.status || '').toLowerCase();
-
-    const hasCheckIn = log.checkInTime &&
-        !['--:--', 'pending'].includes(String(log.checkInTime).trim().toLowerCase());
-
-    const hasCheckOut = log.checkOutTime &&
-        !['--:--', 'pending'].includes(String(log.checkOutTime).trim().toLowerCase());
-
-    if (
-        logDate.startsWith(`${year}-${String(selectedMonthIndex + 1).padStart(2, '0')}-`) &&
-        eligibleDates.has(logDate) &&
-        hasCheckIn &&
-        hasCheckOut &&
-        (status === 'on time' || status === 'late')
-    ) {
-        actualPresentDates.add(logDate);
-    }
-});
-
-const monthlyAttendanceRate = eligibleDates.size
-    ? Math.min(100, Math.round((actualPresentDates.size / eligibleDates.size) * 100))
-    : 0;
-
-document.getElementById('attendanceRate').innerText =
-    `${monthlyAttendanceRate}%`;
-
-// Calculate approved leaves for the selected month, including half-days.
-let monthlyLeavesTaken = 0;
-
-approvedLeaves.forEach(leave => {
-    const start = new Date(String(leave.startDate).slice(0, 10) + 'T00:00:00');
-    const end = new Date(String(leave.endDate || leave.startDate).slice(0, 10) + 'T00:00:00');
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
-
-    const overlapStart = new Date(Math.max(start.getTime(), monthStart.getTime()));
-    const overlapEnd = new Date(Math.min(end.getTime(), monthEnd.getTime()));
-
-    if (overlapStart > overlapEnd) return;
-
-    let workingLeaveDays = 0;
-
-    for (
-        let date = new Date(overlapStart);
-        date <= overlapEnd;
-        date.setDate(date.getDate() + 1)
-    ) {
-        if (date.getDay() !== 0) workingLeaveDays++;
+            return dateKey >= startDate && dateKey <= endDate;
+        });
     }
 
-    const isHalfDay =
-        String(leave.duration || '').toLowerCase().includes('half') ||
-        String(leave.dayType || '').toLowerCase().includes('half') ||
-        String(leave.type || '').toLowerCase().includes('half');
+    // Generate attendance rows for every date except Sundays.
+    const attendanceRows = [];
 
-    monthlyLeavesTaken += isHalfDay
-        ? (workingLeaveDays > 0 ? 0.5 : 0)
-        : workingLeaveDays;
-});
+    for (let day = 1; day <= lastDisplayDay; day++) {
+        const date = new Date(year, selectedMonthIndex, day);
 
-const leaveDisplay = Number.isInteger(monthlyLeavesTaken)
-    ? monthlyLeavesTaken
-    : monthlyLeavesTaken.toFixed(1);
+        // Sundays should not appear.
+        if (date.getDay() === 0) continue;
 
-document.getElementById('leavesTakenCount').innerText =
-    `${leaveDisplay} Days`;
-          
-            if (filteredLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400 text-xs">No attendance logs found for ${monthNames[selectedMonthIndex]} 2026.</td></tr>`;
-                return;
+        const dateKey =
+            `${year}-${String(selectedMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        const log = attendanceByDate.get(dateKey) || {};
+
+        const checkIn = log.checkInTime || '--:--';
+        const checkOut = log.checkOutTime || '--:--';
+
+        const hasCheckIn = checkIn &&
+            !['--:--', 'pending'].includes(
+                String(checkIn).trim().toLowerCase()
+            );
+
+        const hasCheckOut = checkOut &&
+            !['--:--', 'pending'].includes(
+                String(checkOut).trim().toLowerCase()
+            );
+
+        const originalStatus = String(log.status || '').toLowerCase();
+
+        let status = 'ABSENT';
+
+        // Approved leave takes priority over attendance records.
+        if (isApprovedLeave(dateKey)) {
+            status = 'LEAVE';
+        }
+
+        // During today's shift, show IN PROGRESS.
+        else if (isCurrentMonth && day === today.getDate() && !shiftIsOver) {
+            status = 'IN PROGRESS';
+        }
+
+        // After shift end, both punches are required.
+        else if (hasCheckIn && hasCheckOut) {
+            status = originalStatus === 'late'
+                ? 'LATE'
+                : 'PRESENT';
+        }
+
+        // Missing either punch means ABSENT after shift end.
+        else {
+            status = 'ABSENT';
+        }
+
+        const displayDate = date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+
+        attendanceRows.push({
+            dateKey,
+            displayDate,
+            checkIn: hasCheckIn ? checkIn : '--:--',
+            checkOut: hasCheckOut ? checkOut : '--:--',
+            checkInLoc: log.checkInLoc || 'Office Headquarters',
+            status,
+            log
+        });
+    }
+
+    // Apply status filter after generating all dates.
+    const filteredRows = attendanceRows.filter(row => {
+        if (statusFilter === 'ALL') return true;
+
+        if (statusFilter === 'PRESENT') {
+            return row.status === 'PRESENT';
+        }
+
+        if (statusFilter === 'LATE') {
+            return row.status === 'LATE';
+        }
+
+        return row.status === statusFilter;
+    });
+
+    // Present count is based on complete attendance records.
+    const presentDays = attendanceRows.filter(row =>
+        row.status === 'PRESENT' || row.status === 'LATE'
+    ).length;
+
+    document.getElementById('presentCount').innerText =
+        `${presentDays} Days`;
+
+    // Attendance rate: completed working days only.
+    // Sundays, holidays and approved leaves are excluded.
+    const holidayDates = new Set(
+        (allEmployeeHolidays || []).map(holiday =>
+            String(holiday.date || '').slice(0, 10)
+        )
+    );
+
+    const eligibleRows = attendanceRows.filter(row => {
+        if (row.status === 'IN PROGRESS') return false;
+        if (row.status === 'LEAVE') return false;
+        if (holidayDates.has(row.dateKey)) return false;
+
+        return true;
+    });
+
+    const eligiblePresentDays = eligibleRows.filter(row =>
+        row.status === 'PRESENT' || row.status === 'LATE'
+    ).length;
+
+    const attendanceRate = eligibleRows.length
+        ? Math.round((eligiblePresentDays / eligibleRows.length) * 100)
+        : 0;
+
+    document.getElementById('attendanceRate').innerText =
+        `${attendanceRate}%`;
+
+    // Calculate approved leave days for the selected month.
+    let monthlyLeavesTaken = 0;
+
+    approvedLeaves.forEach(leave => {
+        const start = new Date(
+            String(leave.startDate || '').slice(0, 10) + 'T00:00:00'
+        );
+
+        const end = new Date(
+            String(leave.endDate || leave.startDate || '').slice(0, 10) + 'T00:00:00'
+        );
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+
+        const overlapStart = new Date(
+            Math.max(start.getTime(), monthStart.getTime())
+        );
+
+        const overlapEnd = new Date(
+            Math.min(end.getTime(), monthEnd.getTime())
+        );
+
+        if (overlapStart > overlapEnd) return;
+
+        let workingLeaveDays = 0;
+
+        for (
+            let date = new Date(overlapStart);
+            date <= overlapEnd;
+            date.setDate(date.getDate() + 1)
+        ) {
+            if (date.getDay() !== 0) {
+                workingLeaveDays++;
             }
+        }
 
-            filteredLogs.forEach(log => {
-              let currentStatus = (log.status || 'Absent').toLowerCase();
+        const isHalfDay =
+            String(leave.duration || '').toLowerCase().includes('half') ||
+            String(leave.dayType || '').toLowerCase().includes('half') ||
+            String(leave.type || '').toLowerCase().includes('half');
 
-const hasCheckIn =
-    log.checkInTime &&
-    !['--:--', 'pending'].includes(log.checkInTime.trim().toLowerCase());
+        monthlyLeavesTaken += isHalfDay
+            ? (workingLeaveDays > 0 ? 0.5 : 0)
+            : workingLeaveDays;
+    });
 
-const hasCheckOut =
-    log.checkOutTime &&
-    !['--:--', 'pending'].includes(log.checkOutTime.trim().toLowerCase());
+    const leaveDisplay = Number.isInteger(monthlyLeavesTaken)
+        ? monthlyLeavesTaken
+        : monthlyLeavesTaken.toFixed(1);
 
-let statusBadge = '';
+    document.getElementById('leavesTakenCount').innerText =
+        `${leaveDisplay} Days`;
 
-const today = new Date();
-const logDate = String(log.date).slice(0, 10);
+    // Display rows.
+    if (filteredRows.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-8 text-center text-gray-400 text-xs">
+                    No attendance records found for ${monthNames[selectedMonthIndex]} ${year}.
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-const isToday =
-    logDate === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    filteredRows.forEach(row => {
+        let statusBadge = '';
 
-const shiftEndMinutes = 18 * 60;
-const currentMinutes = today.getHours() * 60 + today.getMinutes();
+        if (row.status === 'PRESENT') {
+            statusBadge = `
+                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">
+                    PRESENT
+                </span>`;
+        } else if (row.status === 'LATE') {
+            statusBadge = `
+                <span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">
+                    LATE IN
+                </span>`;
+        } else if (row.status === 'ABSENT') {
+            statusBadge = `
+                <span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">
+                    ABSENT
+                </span>`;
+        } else if (row.status === 'LEAVE') {
+            statusBadge = `
+                <span class="px-3 py-1 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-200 text-[10px]">
+                    LEAVE
+                </span>`;
+        } else {
+            statusBadge = `
+                <span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 text-[10px]">
+                    IN PROGRESS
+                </span>`;
+        }
 
-const shiftIsInProgress = isToday && currentMinutes < shiftEndMinutes;
-
-if (shiftIsInProgress && (!hasCheckIn || !hasCheckOut)) {
-    statusBadge = `<span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 text-[10px]">IN PROGRESS</span>`;
-} else if (!hasCheckIn || !hasCheckOut || currentStatus === 'absent') {
-    statusBadge = `<span class="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg border border-red-200 text-[10px]">ABSENT</span>`;
-} else if (currentStatus === 'late') {
-    statusBadge = `<span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200 text-[10px]">LATE IN</span>`;
-} else if (currentStatus === 'on time') {
-    statusBadge = `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[10px]">PRESENT</span>`;
-} else {
-    statusBadge = `<span class="px-3 py-1 bg-gray-50 text-gray-700 font-bold rounded-lg border border-gray-200 text-[10px]">${currentStatus.toUpperCase()}</span>`;
+        tbody.innerHTML += `
+            <tr class="hover:bg-blue-50/30 transition-colors">
+                <td class="py-4 px-6 font-bold">${row.displayDate}</td>
+                <td class="py-4 px-6 text-gray-600">${row.checkIn}</td>
+                <td class="py-4 px-6 text-gray-600">${row.checkOut}</td>
+                <td class="py-4 px-6 font-bold text-blue-600">
+                    ${row.status === 'LEAVE' || row.status === 'ABSENT'
+                        ? '--'
+                        : calculateDuration(row.checkIn, row.checkOut)}
+                </td>
+                <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">
+                    ${row.checkInLoc}
+                </td>
+                <td class="py-4 px-6 text-center">${statusBadge}</td>
+            </tr>
+        `;
+    });
 }
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="py-4 px-6 font-bold">${log.date}</td>
-                        <td class="py-4 px-6 text-gray-600">${log.checkInTime || '--:--'}</td>
-                        <td class="py-4 px-6 text-gray-600">${log.checkOutTime || '--:--'}</td>
-                        <td class="py-4 px-6 font-bold text-blue-600">${calculateDuration(log.checkInTime, log.checkOutTime)}</td>
-                        <td class="py-4 px-6 text-gray-500 truncate max-w-[180px]">${log.checkInLoc || 'Office Headquarters'}</td>
-                        <td class="py-4 px-6 text-center">${statusBadge}</td>
-                    </tr>
-                `;
-            });
-        }  function toggleNotificationDropdown(event) {
+    function toggleNotificationDropdown(event) {
             event.stopPropagation();
             let notifDropdown = document.getElementById('notificationDropdown');
             let profileDropdown = document.getElementById('profileDropdown');
