@@ -2120,12 +2120,11 @@ for (let day = 1; day <= currentDate.getDate(); day++) {
     const weekday = new Date(year, month - 1, day).getDay();
 
     if (
-        weekday === 0 ||
-        holidayDates.has(dateString) ||
-        approvedLeaveDates.has(dateString)
-    ) {
-        continue;
-    }
+    weekday === 0 ||
+    holidayDates.has(dateString)
+) {
+    continue;
+}
 
     if (
         day === currentDate.getDate() &&
@@ -2165,7 +2164,10 @@ const presentDays = new Set(
             );
         })
         .map(log => String(log.date).slice(0, 10))
-        .filter(date => eligibleWorkingDates.has(date))
+        .filter(date =>
+    eligibleWorkingDates.has(date) &&
+    !approvedLeaveDates.has(date)
+)
 ).size;
 
 const workingDaysElapsed = eligibleWorkingDates.size;
